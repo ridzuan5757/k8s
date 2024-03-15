@@ -67,6 +67,7 @@ By default, a `pod` is only accessible by its internal IP address within the
 ```bash
 kubectl expose deployment hello-node --type=LoadBalancer --port=8080
 ```
+    
     - The `--type=LoadBalancer` flag indicates that we want to expose our
       service outside of the cluster.
 
@@ -78,6 +79,7 @@ kubectl expose deployment hello-node --type=LoadBalancer --port=8080
     ```bash
     kubectl get services
     ```
+      
       On cloud providers that support load balancers, an external IP address
       would be provisioned to access the service. On `minikube`, the
       `LoadBalancer` type makes the service accessible through the `minikube
