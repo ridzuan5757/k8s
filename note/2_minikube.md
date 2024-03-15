@@ -68,27 +68,24 @@ By default, a `pod` is only accessible by its internal IP address within the
 kubectl expose deployment hello-node --type=LoadBalancer --port=8080
 ```
     
-    - The `--type=LoadBalancer` flag indicates that we want to expose our
-      service outside of the cluster.
+- The `--type=LoadBalancer` flag indicates that we want to expose our service 
+outside of the cluster. The application code inside the test image only listens
+on TCP port 8080. If we used `kubectl expose` to different port, clients could 
+not connect to other port.
 
-      The application code inside the test image only listens on TCP port 8080.
-      If we used `kubectl expose` to different port, clients could not connect
-      to other port.
+- To view the created service:
+```bash
+kubectl get services
+```
 
-    - To view the created service:
-    ```bash
-    kubectl get services
-    ```
-      
-      On cloud providers that support load balancers, an external IP address
-      would be provisioned to access the service. On `minikube`, the
-      `LoadBalancer` type makes the service accessible through the `minikube
-      service` command.
+On cloud providers that support load balancers, an external IP address would be 
+provisioned to access the service. On `minikube`, the `LoadBalancer` type makes 
+the service accessible through the `minikube service` command.
 
-    - Access the application:
-    ```bash
-    minikube service hello-node
-    ```
+- Access the application:
+```bash
+minikube service hello-node
+```
 
 
 
