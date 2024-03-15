@@ -87,5 +87,13 @@ the service accessible through the `minikube service` command.
 minikube service hello-node
 ```
 
+# Cleaning up
+```bash
+kubectl delete service hello-node
+kubectl delete deployment hello-node
+minikube stop
+minikube delete
+```
+
 
 
