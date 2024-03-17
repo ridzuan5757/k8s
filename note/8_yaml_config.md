@@ -33,3 +33,56 @@ create deployment` instead of creating a YAML file and using `kubectl apply -f`.
 
 However, because we have now updated it with `kubectl apply`, the annotation is
 now here and we would not get the warning again.
+
+# Service
+
+Aside from deploying web service, k8s also capable to deploy API services.
+
+## Creating a deployment configuration.
+
+To write deployment from scratch:
+- Create a new YAML configuration file.
+- Add the `apiVersion` and `kind` fields.
+    - The `apiVersion` is `apps/v1`.
+    - The `kind` is `Deployment`.
+- Add a `metadata/name` field. This should be the deployment name.
+- Add a `metadata/labels/app` field and set it to be the same as the deployment
+  name. This will be used to select the pods that this deployment manages.
+- Add a `spec/replicas` field and set it to `1`. We can always cale up to more
+  pods later.
+- Add a `spec/selector/matchLabels/app` field and set it to the deployment name.
+  This should be matching with the label that we set of Step 4.
+- Add a `spec/template/metadata/labels/app` field and set it to the deployment
+  name. Again, this should match the label that we set in step 4. Labels are
+  important because they are how k8s knows which pods belong to which
+  deployments.
+- Add a `spec/template/spec/containers` field. This contains a list of
+  containers that will be deployed.
+    - Note: A hyphen is how we denote a list item in YAML.
+    - Set the `name` of the container.
+    - Set the `image` name. This tells the k8s where to download the Docker
+      image from.
+
+Take a look at the pods that is currently running. We should able to see pods
+for the web service and a pod for the api service. However, we might notice that
+the api pod is not in a `ready` state. In fact, it should be stuck in
+`CrashLoopBackOff` status.
+
+## Trashing Pods
+
+One of the most common problem we will run into when working with k8s is pods
+that keep crashing and restarting. This is called `thrashing` and it is usually
+caused by one of a few things:
+- The application recently had a bug introduced in the latest image version.
+- The application is misconfigured and cannot restart properly.
+- A dependency of the application is misconfigured and the application cannot
+  start properly.
+- The application is trying to use too much memory and being killed by k8s.
+
+#### `CrashLoopBackoff`
+
+When a pod's status is `CrashLoopBackoff`, that means the container is crashing
+(the program is exiting with error code `1`). Because k8s is all about building
+self-healing systems, it will automatically restart the container. However, each
+time it tries to restart the container, if it crashes again, it will wait longer
+and longer in between restarts. That is the reason it is called a `backoff`.
