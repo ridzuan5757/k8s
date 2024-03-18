@@ -44,10 +44,78 @@ that it will work with our web app.
 
 ## Rules
 
-We will declare that:
+`spec/rules` section is where we define the routing rules for our ingress. We 
+will declare that:
 - Any traffic to the `synchat.internal` domain name should be routed to the
   `web-service`.
 - Any traffic to `synchatapi.internal` domain name should be routed to the
   `api-service`.
 
+```yaml
+spec:
+  rules:
+    - host: synchat.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-service
+                port:
+                  number: 80
+    - host: synchatapi.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 80
+```
 
+This says that any traffic to the `synchat.internal` domain should be routed to
+the `web-service` and any traffic to `synchatapi.internal` should be routed to
+`api-service`.
+
+# DNS
+Now that we have configured the ingress to route the domains:
+- `synchat.internal` to the `web-service`
+- `synchatapi.internal` to the `api-service`
+
+We need to configure our local machine to resolve those domains to the ingress
+load balancer. We would not be setting up global DNS so that anyone on the
+internet can access our app. We will just be configuring our local machine to
+resolve those domains to the ingress load balancer.
+
+There is a file called `/etc/hosts` on our local machine that is used to resolve
+domain names to IP addresses. We can add entries to that file to resolve our
+domains to the ingress load balancer.
+
+```conf
+127.0.0.1   synchat.internal
+127.0.0.1   synchatapi.internal
+```
+
+#### WSL DNS configuration
+
+For WSL users, we also need to add the entries above to the Windows host file
+located in:
+
+```bash
+C:\Windows\System32\drivers\etc\hosts
+```
+
+The WSL oath to this file is:
+
+```bash
+/mnt/c/Windows/System32/drivers/etc/hosts
+```
+
+To verify that it is working:
+
+```bash
+ping synchat.internal
+```
