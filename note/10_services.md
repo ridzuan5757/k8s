@@ -61,3 +61,59 @@ kubectl port-forward service/web-service 8080:80
 Now the service should be accessible via `http://localhost:8080` and it is
 better this time around because now our requests are being load-balanced across
 3 pods.
+
+# Service Types
+
+To view the YAML file that describe `web-service`:
+
+```bash
+kubectl get svc web-service -o yaml
+```
+
+We should see a section that looks like this:
+
+```yaml
+spec:
+    clusterIP: 10.96.213.234
+    ...
+    type: ClusterIP
+```
+
+We did not specify a service type however `ClusterIP` type is being assigned
+here since it is the default service type. The `ClusterIP` is the IP address
+that the service is bound to on the internal k8s network. Similarly as pods
+having their own internal virtual IP address, the service also have their own
+internal virtual IP address.
+
+There are also other type of services:
+- `NodePort`: Exposes the services on each node's IP at a static port.
+- `LoadBalancer`: Creates an external load balancer in the current cloud
+  environment (if supported, such as AWS, GCP, Azure) and assins a fixed,
+  external IP to the service.
+- `ExternalName`: Maps the service to the contents of the `externalName` field 
+  (for example, to the hostname `api.foo.bar.example`). The mapping configures 
+  our cluster's DNS server to return a `CNAME` record with that external 
+  hostname value. No proxying of any kind is set uo.
+
+The interesting thing about service types is that they typically build on top of
+each other. 
+
+#### `NodePort` 
+This service is just a `ClusterIP` service with the added functionality of 
+exposing the service on each node's IP at a static port (it still has an 
+internal cluster IP).
+
+#### `LoadBalancer`
+This service is just a `NodePort` service with the added functionality of
+creating an external load balancer in the current cloud environment (it still
+has an internal cluster IP and node port).
+
+#### `ExternalName`
+This service functions as DNS-level redirect. We can use it to redirect traffic
+from one service to another.
+
+To identify which service that should be used, there are lot of things that need
+to be considered. If we are working in a microservices environment where many
+services are only meant to be accessed within the cluster, then `ClusterIP` is
+going to be it. `NodePort` and `LoadBalancer` are used when we want to expose
+the service to the outside world. `ExternalName` is primarily for DNS redirect.
