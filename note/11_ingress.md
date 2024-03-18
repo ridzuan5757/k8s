@@ -119,3 +119,25 @@ To verify that it is working:
 ```bash
 ping synchat.internal
 ```
+
+# Tunnel
+
+In production, once we have an ingress configured and have pointed our domain
+name to it(and perhaps its load balancer), we can access our application from
+anywhere in the world. The trouble is, we are using Minikube and the cluster is
+running on our local machine, and not only that, it is running in an isolated
+virtual machine. Minikube however, capable to forward the ingress to our local
+machine.
+
+To open a tunnel to our cluster:
+
+```bash
+minikube tunnel -c
+```
+
+The tunnel should expose the ingress controller's load balancer to our local
+machine on `localhost:80`, which we mapped to the `synchat.internal` and
+`synchatapi.internal`.
+
+While the tunnel is open, both `http://synchat.internal` and
+`http://synchatapi.internal` is accessible via browser and will return 200.
