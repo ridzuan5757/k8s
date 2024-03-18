@@ -117,3 +117,15 @@ to be considered. If we are working in a microservices environment where many
 services are only meant to be accessed within the cluster, then `ClusterIP` is
 going to be it. `NodePort` and `LoadBalancer` are used when we want to expose
 the service to the outside world. `ExternalName` is primarily for DNS redirect.
+
+## Ingress Service
+`NodePort` and `LoadBalancer` services are used to expose services to the
+outside world. However, in most cloud-based k8s environment, we will actually
+use `Ingress` object to expose our services. The ingress object not only exposes
+our service to the outside world, but also allows us to do thing like:
+- Host multiple services on the same IP address
+- Host multiple services on the same port (path-based routing)
+- Terminate SSL
+- Integrate directly with external DNS and load balancers
+
+
