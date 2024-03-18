@@ -141,3 +141,25 @@ machine on `localhost:80`, which we mapped to the `synchat.internal` and
 
 While the tunnel is open, both `http://synchat.internal` and
 `http://synchatapi.internal` is accessible via browser and will return 200.
+
+# Ingress Types
+
+On top of all of our resources, we have the following information:
+
+```yaml
+apiVersion: v1
+```
+
+This is the API version of the resource, and because those resources are core to
+k8s, they are in the standard `v1` API group. However, ingress is not a core k8s
+resource, it is an extension of sorts, this is why the configuration for
+`apiVersion` is different:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+```
+
+We can think of the `networking.k8s.io` aPI grouo as a core extension. It is not
+third-party, but it is not part of the core k8s API either.
+
+
