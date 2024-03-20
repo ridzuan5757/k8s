@@ -223,4 +223,21 @@ template:
 
 
 ```
+# Containers in pods
 
+After all of the 3 crawlers has been deployed, when we run `kubectl get pods`,
+we should see something like this:
+
+```bash
+synergychat-api-6c7944b5c4-rp2k4      1/1     Running   0          160m
+synergychat-crawler-cd4947995-ftqg4   3/3     Running   0          151m
+synergychat-web-846d86c444-2m6x7      1/1     Running   0          21h
+synergychat-web-846d86c444-gxztt      1/1     Running   0          21h
+synergychat-web-846d86c444-s88rz      1/1     Running   0          21h
+```
+
+It is important to remember that while it is common for a pod to run just a
+single container, multiple containers can run in a single pod. This is useful
+when we have containers that need to share resources. In other words, we can
+scale up the instance of an application either at the contaioner level or at the
+pod level.
