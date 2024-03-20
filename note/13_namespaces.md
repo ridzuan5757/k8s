@@ -59,3 +59,47 @@ storage-provisioner                1/1     Running   1 (4d ago)   4d
 
 The `kube-system` namespace is where all the core k8s components live, it is
 created automatically when we install k8s.
+
+## Making a new namespace
+
+To create a namespace:
+
+```bash
+kubectl create ns <namespace>
+```
+
+Verify that is has been created:
+
+```bash
+kubectl get ns
+```
+
+To move the resources to the namespace, add:
+
+```yaml
+metadata:
+    namespace: <namespace>
+```
+
+section to each of the resources that need to be moved and apply them.
+Interestingly, we should see that the resources are "created" instead of
+"updated". that is because they are now in a new namespace, and the unique
+identifier of a resource in l8s is the combination of its name and its
+namespace.
+
+Make sure that the resources are now redeployed in the new namespace:
+
+```bash
+kubectl -n <namespace> get pods
+kubectl -n <namespace> get svc
+kubectl -n <namespace> get configmaps
+```
+
+Then go delete the old resource in the `default` namespace:
+
+```bash
+kubectl delete deployment <deployment-name>
+kubectl delete service <service-name>
+kubectl delete configmap <configmap-name>
+```
+
