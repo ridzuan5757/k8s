@@ -241,3 +241,38 @@ single container, multiple containers can run in a single pod. This is useful
 when we have containers that need to share resources. In other words, we can
 scale up the instance of an application either at the contaioner level or at the
 pod level.
+
+# Persistence
+
+All the volumes we have worked with so far have been ephemeral, meaning when the
+associated pod is deleted the volume is deleted as well. This is fine for some
+use cases, but for most CRUD applications we want to eprsist data even if the
+pod is deleted.
+
+If we think about it, it is not even just when pods are explicitly deleted with
+`kubectl` that we need to worry about data loss. Pods can be deleted for
+several reasons:
+- The node they are running could fail.
+- A new version of the image was published.
+- A new node was added to the cluster and the pod was rescheduled.
+
+## Persistent Volumes
+
+Instead of simply adding a volume to a deployment, a persistent volume is a
+cluster-level resource that is created separately from the pod and then attached
+to the pod. It is similar to a `ConfigMap` in a way. Persistence volume can be
+created statically or dynamically.
+- Static persistent volume are created manually by the cluster admin.
+- Dynamic persistent volume are created automatically when pod requests a volume
+  that does not exist yet.
+
+Generally speaking, and especially in the cloud-native world, we want to use
+dynamic persistent volume. It is less work and more flexible.
+
+## Persistent Volume Claims
+
+A persistent volume claim is a request for a persistent volume. When using
+dynamic provisioning, a persistent volume claims will automatically creates a
+persistent volume if one does not exist that matches the claim. The persistent
+volume claim is then attached to a pod, just like a volume would be.
+
