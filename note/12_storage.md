@@ -23,3 +23,204 @@ As it turns out, there are lot of different types of volumes in 8s. Some are
 even ephemeral as well, just like a container's standard filesystem. the primary
 reason for using an ephemeral volume is to share data between containers in a
 pod.
+
+### Containers scaling
+
+Consider a service that is continuously doing crawling job and exposes the
+information that it finds via a JSON API. The data is then made available via
+slash commands in other applicatioons. Assumes that the crawler is pretty slow
+by default. Each instance only crawls 1 JSON object every 30 seconds.
+
+We can speed it up by increasing the number of concurrent crawlers. The trouble
+with scaling up beyond one instance is that each crawler currently stores its
+data in memory. We need all pods to share the same data so they can each add
+their findings to the same database.
+
+We can try update the crawler deployment to use a **volume** that will be shared
+across all containers in the crawler pod and scale up the number of containers
+in the pod.
+
+In the crawler deployment file, add `volumes` section to `spec/template/spec`:
+
+```yaml
+spec:
+    template:
+        spec:
+            volumes:
+                - name: cache-volume
+                  emptyDir{}
+```
+
+Add a new `volumeMounts` section to the container entry. This will mount the
+volume we just created at the `/cache` path.
+
+```yaml
+spec:
+    template:
+        spec:
+            containers:
+                - name: synergychat-crawler-1
+                  image: bootdotdev/synergychat-crawler:latest
+                  envFrom:
+                    - configMapRef:
+                        name: synergychat-crawler-configmap
+                  volumeMounts:
+                    - name: cache-volume
+                      mountPath: /cache
+```
+
+Duplicate the crawler containers, says 3 and update each of their individual
+name.
+
+```yaml
+spec:
+    template:
+        spec:
+            containers:
+                - name: synergychat-crawler-1
+                  image: bootdotdev/synergychat-crawler:latest
+                  envFrom:
+                    - configMapRef:
+                        name: synergychat-crawler-configmap
+                  volumeMounts:
+                    - name: cache-volume
+                      mountPath: /cache
+                - name: synergychat-crawler-2
+                  image: bootdotdev/synergychat-crawler:latest
+                  envFrom:
+                    - configMapRef:
+                        name: synergychat-crawler-configmap
+                  volumeMounts:
+                    - name: cache-volume
+                      mountPath: /cache
+                - name: synergychat-crawler-3
+                  image: bootdotdev/synergychat-crawler:latest
+                  envFrom:
+                    - configMapRef:
+                        name: synergychat-crawler-configmap
+                  volumeMounts:
+                    - name: cache-volume
+                      mountPath: /cache
+```
+
+Now all the containers in the pod will share the same volume at `/cache`. It's
+just empty directory, but the crawler will use it to store its data.
+
+Add a `CRAWLER_DB_PATH` environment variable to the crawler's `ConfigMap`. Set
+it to `cache/db`. The crawler will use a directory called `db` inside the volume
+to store its data.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synergychat-crawler-configmap
+data:
+  CRAWLER_PORT: "8080"
+  CRAWLER_KEYWORDS: love,hat,joy,sadness,anger,disgust,fear,surprise
+  CRAWLER_DB_PATH: /cache/db
+```
+
+Apply the new `ConfigMap` and `Deployment` and use `kubectl get pod` to see the
+status of the new pod.
+
+```bash
+kubectl apply -f crawler-configmap.yaml
+kubectl apply -f crawler-deployment.yaml
+```
+
+We should notice that there is a proble with the pod. only 1 out of the 3
+containers is in `ready` state. Use the `logs` command to get the logs for all 3
+containers:
+
+```bash
+kubectl logs <crawler-pod-name> --all-containers
+```
+
+We should see something like:
+
+```bash
+listen tcp :8080: bind: address already in use
+```
+
+Because pods share the same network namespace, they cannot all bind to the same
+port. We can remedy this by binding each container to a different port. `8080`
+is the only one that will be exposed via the service. We will be using `8081`
+and `8082` for the second and third crawler containers respectively.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: synergychat-crawler-configmap
+data:
+  CRAWLER_PORT: "8080"
+  CRAWLER_KEYWORDS: love,hat,joy,sadness,anger,disgust,fear,surprise
+  CRAWLER_DB_PATH: /cache/db
+  CRAWLER_PORT_2: "8081"
+  CRAWLER_PORT_3: "8082"
+```
+
+Change the second and third containers to map `CRAWLER_PORT_2 -> CRAWLER_PORT`.
+`CRAWLER_PORT_3 -> CRAWLER_PORT` respectively. Since we have to use `env`
+instead of `envFrom` this time, we also have to continue exposing the
+`CRAWLER_KEYWORDS` and `CRAWLER_DB_PATH`
+
+```yaml
+template:
+    spec:
+      containers:
+        - name: synergychat-crawler-1
+          image: bootdotdev/synergychat-crawler:latest
+          envFrom:
+            - configMapRef:
+                name: synergychat-crawler-configmap
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /cache
+        - name: synergychat-crawler-2
+          image: bootdotdev/synergychat-crawler:latest
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /cache
+          env:
+            - name: CRAWLER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-crawler-configmap
+                  key: CRAWLER_PORT_2
+            - name: CRAWLER_KEYWORDS
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-crawler-configmap
+                  key: CRAWLER_KEYWORDS
+            - name: CRAWLER_DB_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-crawler-configmap
+                  key: CRAWLER_DB_PATH
+        - name: synergychat-crawler-3
+          image: bootdotdev/synergychat-crawler:latest
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /cache
+          env:
+            - name: CRAWLER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-crawler-configmap
+                  key: CRAWLER_PORT_3
+            - name: CRAWLER_KEYWORDS
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-crawler-configmap
+                  key: CRAWLER_KEYWORDS
+            - name: CRAWLER_DB_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-crawler-configmap
+                  key: CRAWLER_DB_PATH
+
+
+```
+
