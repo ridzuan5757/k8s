@@ -309,3 +309,23 @@ kubectl get pv
 We whould see that a new persistent volume was created automatically. Similarly,
 deleting the persistent volume claim will delete the persistent volume created
 as well.
+
+# Databases
+
+k8s is not always the best way to handle database. While it is possible to
+deploy databses such as PosgreSQL on k8s, but it would require a lot of extra
+work to get it to work well. For example, we would need to manually build all
+the configurations to:
+- Create a persistent volume.
+- Handle Postgres version updates.
+- Set resource limits.
+- Set up automated backups.
+
+That being said, when we need an SQL database, typically a mnanaged service such
+as Cloud SQL or RDS would be a much more simpler implementation.
+
+It is doable when the deployment was not exactly mission-critical. For example,
+Grafana and Prometheus on k8s, and they both have out-of-the-box support for
+in-cluster databases. We do not have to care much about the backups and
+automatic upgrades for our telemetry data, and we knew the data set was small
+and static, so it is a good fit.
