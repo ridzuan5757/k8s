@@ -276,3 +276,36 @@ dynamic provisioning, a persistent volume claims will automatically creates a
 persistent volume if one does not exist that matches the claim. The persistent
 volume claim is then attached to a pod, just like a volume would be.
 
+#### Implementation
+
+Create a new file called `api-pvc.yaml` and add the following:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: synergy-chat-api
+spec:
+    accessMode:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 1Gi
+```
+
+This creates a new persistent volume claim called `synergy-chat-api` with a few
+properties that can be read from and written to bey multiple pods ad the same
+time. It also requests 1GB of storage.
+
+After applying the persistent volume claim, we can check the persistent volume
+and the persistent volume created based on the claim using the following
+command:
+
+```bash
+kubectl get pvc
+kubectl get pv
+```
+
+We whould see that a new persistent volume was created automatically. Similarly,
+deleting the persistent volume claim will delete the persistent volume created
+as well.
