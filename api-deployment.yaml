@@ -3,7 +3,8 @@ kind: Deployment
 metadata:
   name: synergychat-api
   labels:
-    app: synergychat-api
+      app:
+        synergychat-api
 spec:
   replicas: 1
   selector:
@@ -17,8 +18,10 @@ spec:
       containers:
         - name: synergychat-api
           image: bootdotdev/synergychat-api:latest
-          envFrom:
-            - configMapRef:
-                name: synergychat-api-configmap
-            - configMapRef:
-                name: synergychat-crawler-configmap
+          env:
+            - name: API_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: synergychat-api-configmap
+                  key: API_PORT
+

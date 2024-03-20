@@ -162,4 +162,34 @@ apiVersion: networking.k8s.io/v1
 We can think of the `networking.k8s.io` aPI grouo as a core extension. It is not
 third-party, but it is not part of the core k8s API either.
 
+## Annotations
 
+In the ingress configuration, there is one `annotations` parameter:
+
+```yaml
+annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+```
+
+This is a common pattern in k8s. The core k8s API is intentionally kept small,
+but there are a lot of things that people want to do with k8s that are not part
+of the core API. So, instead of adding a bunch of new fields to the core API,
+k8s allows us to add arbirary annotations to our resources, and then various
+extensions can read those anotations and do things with them.
+
+For example, boot.dev k8s cluster uses an ingress extension specific to GCP. We
+use the following annotations so that our controller knows which static IP
+address to usem which SSL certificate to use, and how to route traffic to our
+ingress:
+
+```yaml
+annotations:
+    kubernetes.io/ingress.global-static-ip-name: static-ip-name
+    networking.gke.io/managed-certificates: cert-name
+    kubernetes.io/ingress.class: gce
+```
+
+In most production deployments, we will be using annotations specific to the
+cloud provider that we are using. Each major cloud provider has their own
+products, so we need to use k8s annotations and extensions specific to that
+cloud provider.

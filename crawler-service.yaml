@@ -4,7 +4,7 @@ metadata:
   name: crawler-service
 spec:
   selector:
-    app: synergychat-api
+    app: synergychat-crawler
   ports:
     - protocol: TCP
       port: 80
