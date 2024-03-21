@@ -61,3 +61,33 @@ available to the application, we increase the number of instances of the
 application pods. Pods can be distributed across nodes, so we can scale
 horizontally until we run out of nodes. When working in system like k8s, it is
 better to scale horizontally than vertically.
+
+# Reource Limits
+
+None of our current deployments have any resource limits set. We have very
+little traffic, so it is not currently an issue, but in production environment,
+we would want to set resource limits to ensure that our pods do not consume too
+many resources. We would not want a pod to hog all the CPU and RAM on its node,
+suffocating all of the other pods in the node.
+
+## Setting limits
+
+We can set resource limits in the deployment files.
+
+```yaml
+spec:
+    containers:
+    - name: <container_name>
+      image: <image_name>
+      resources:
+        limits:
+            memory: <max-memory>
+            cpu: <max-cpu>
+```
+
+Memory is measured in bytes, so we can use the suffixes `Ki`, `Mi`, and `Gi` to
+spcify kilobytes, megabytes and gigabytes, respectively. For example `512Mi` is
+512 megabytes. 
+
+CPU is measured in cores, so we can use the suffix `m` to specify milli-cores.
+For example, `500m` is 500 milli-cores, or 0.5 cores.
