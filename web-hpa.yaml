@@ -1,12 +1,12 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: testcpu-hpa
+  name: web-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: synergychat-testcpu 
+    name: synergychat-web
   minReplicas: 1
-  maxReplicas: 1
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 50
