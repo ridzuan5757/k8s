@@ -185,4 +185,42 @@ Resource that get DNS records:
 - Services
 - Pods
 
+# Namespace and Routing Review
 
+Namespaces are used to separate resources into logival groups. They also impact
+how internal DNS works. Say if our production backed services in a namespace,
+let's pretend it is called "backend". Everytime we use `kubectl` to work with
+the backened services, we have to specify the namespace:
+
+```bash
+kubectl -n backend get pods
+```
+
+## Internal Routing
+
+k8s makes it really easy for pods to communicate with each other. It does this
+by automatically creating DNS entries for each services. The format is:
+
+```bash
+<service_name>.<namespace>.svc.cluster.local
+```
+
+In reality, the `.svc.cluster.local` is not needed in most scenarios. If we just
+use `http://<service_name>.<namespace>` for the api to crawler communication, it
+will still work. When working in the same namespace, we can even just use
+`http://<service_name>`. That would not work for us in our scenario just because
+the crawler is in separate namespace.
+
+## Internal is better than external
+
+Unless the service really needs to be made available to the outside world, it is
+better to keep it internal to the cluster. This is because:
+- It is faster, assuming the nodes are close to each other physically.
+- No public DNS is required.
+- Communication is inherently more secure because it runs on an internal
+  network. Usually we do not even need HTTPS.
+
+The architecture of synergychat is a good example of this. We expose a single
+JSON API to the outside world, and if the pod that serves those HTTP requests
+does not have all the info it needs locally, it makes internal HTTP requests to
+other services.
