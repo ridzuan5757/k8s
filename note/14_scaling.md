@@ -91,3 +91,61 @@ spcify kilobytes, megabytes and gigabytes, respectively. For example `512Mi` is
 
 CPU is measured in cores, so we can use the suffix `m` to specify milli-cores.
 For example, `500m` is 500 milli-cores, or 0.5 cores.
+
+# Limit break
+
+We may have noticed that with the `testcpu` application, we never inform the
+application how much CPU to use. That is because generally speaking, application
+do not know how much CPU they should use. They just go as fast as they can when
+they are doing computations.
+
+Memory is different, applications allocate memory based on variety of factors,
+and while an application can have its CPU throttled and just go slower, if an
+application runs out of available memory, it will crash.
+
+# Horizontal Pod Autoscaling HPA
+
+A horizontal pod autoscaler can automatically scale the number of pods in a
+deployment based on observed CPU utilization or other custom metrics. It is very
+common in k8s environment to have a low number of pods in a deployment, and then
+scale up the number of pods automatically as CPU usage increases. To implement
+HPA:
+
+First, delete the `replicase: x` parameter in the deployment file. This will
+allow the new autoscaler to have full control over the number of pods. Create a
+new YAML file for HPA.
+
+```yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+    name: testcpu-hpa
+spec:
+    scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: synergychat-testcpu
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 50
+```
+
+This HPA will monitor the CPU usage of the pods in the `testcpu` deployment. Its
+goal is to scale up or down the number of pods in the deployment so that the
+average CPU usage of all pods is around 50%. As CPU usage increases, it will add
+more pods. As CPU usage decreases, it will remove pods.
+
+After applying the hpa, monitor the number of pods as they scale up:
+
+```bash
+kubectl apply -f testcpu-hpa.yaml
+kubectl get pods
+kubectl top pods
+```
+
+An hpa is just another resource, so we can use the following command to see the
+current state of the autoscaler.
+
+```bash
+kubectl get hpa
+```
