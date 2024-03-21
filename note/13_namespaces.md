@@ -184,3 +184,5 @@ In summary, a pod in `test` namespace can successfully resolve either `data.prod
 Resource that get DNS records:
 - Services
 - Pods
+
+

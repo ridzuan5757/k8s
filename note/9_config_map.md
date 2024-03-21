@@ -87,3 +87,15 @@ However, they are not cryptographically secure. `ConfigMap` are not encrypted,
 and they can be accessed by anyone with access to the cluster. If we need to
 store sensitive information, we should use k8s Secrets or a third-party
 solution.
+
+# Note
+After creating or modifying `ConfigMap`, pods won't automatically update with
+the new environment variables. Make sure to redeploy or roll out an update to
+the deployment after making changes to the `ConfigMap`.
+
+```bash
+kubectl rollout restart deployment synergychat-api
+```
+
+Doing so ensures that the pods are recreated and the new environment variables
+are injected.
