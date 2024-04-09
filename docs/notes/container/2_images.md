@@ -610,3 +610,52 @@ There are number of solutions for configuring private registries. Here are some
 common use cases and suggested solutions.
 - Cluster running only open source images. No need to hide images.
     - Use public image from the public registries.
+        - No configuration required.
+        - Some cloud providers automatically cache or mirror public images,
+          which improves  availability and reduce time to pull images.
+- Cluster running some proprietary images which should be hidden to those
+  outside the company, but visible to all cluster users.
+    - Use a hosted private registry.
+        Manual configuration may be required on the nodes that need to access to
+        private registry.
+    - Alternatively, run internal private registry behind firewall with open
+      read access.
+        - No k8s configuration required.
+    - Use a hosted container image registry service that controls image access.
+        - It will work better on cluster autoscaling than manual mode
+          configuration.
+    - Or, on a cluster where changing the node configuraiton is inconvenient,
+      use `imagePullSecrets`.
+- Cluster with proprietary images, a few of which require stricter access
+  control.
+    - Ensure `AlwaysPullImage` admission controller is active. Otherwise, all
+      pods potentiall have access to all images.
+    - Move sensitive data into a `Secret` resource, instead of packaging it in
+      the image.
+- Multi-tenant cluster where each tenant needs own private registry.
+    - Ensure `AlwaysPullImage` admission controller is active. Otherwise, all
+      pods of all tenants potentially have access to all images.
+    - Run a private registry with authorization required.
+    - Generate registry credential for each tenant, put into secret, and
+      populate secret to each tenant namespace.
+    - The tenant adds that secret to `imagePullSecrets` of each namespace.
+
+If access to multiple registries is needed, one secret for each registries can
+be created.
+
+## Legacy built-in kubelet credential provider
+
+In older version of k8s, the kubelet had a direct integration with cloud
+provider credentials. This give the ability  to dynamically fetch credentials
+for image registries.
+
+3 built in implementation of the kubelet credential provider integration:
+- ACR 
+- ECR
+- GKE
+
+k8s v1.26 through v1.29 do not include legacy mechanism, so we would need to
+either:
+- Configure a kubelet image credential provider on each node.
+- Specify image pull credentials using `imagePullSecrets` and at least one
+  `Secret`
