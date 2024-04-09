@@ -521,3 +521,92 @@ too.
 If not a container specifies an image `my-registry.io/images/subpath/my-image`
 to be pulled, then the kubelet will try to download them from both
 authentication sources if one of them fails.
+
+### Pre-pulled images
+
+This approach is suitable if we can control node configuration. It will not work
+reliably if the cloud provider manages nodes and replaces them automatically.
+
+By defauly, the kubelet tries to pull each image from the specified registry.
+However, if the `imagePullPolicy` property of the container is set to
+`IfNotPresent` or `Never`, then a local image is used preferentially or
+exclusively, respectively.
+
+If we want to rely on pre-pulled images as a substitute for registry
+authentication, we must ensure all nodes in the cluster have the same pre-pulled
+images.
+
+This can be used to preload certain images for speed or as an alternative to
+authenticating to a private registry.
+
+All pods will have read access to any pre-pulled images.
+
+### Specifying `imagePullSecrets` on pod
+
+This is the recommended approach to run contaienrs based on images in private
+registries.
+
+k8s supports specifying container image registry keys on a pod. 
+`imagePullSecrets` must all be in the same namespace as the pod. The referenced
+secrets must be of type: 
+- `kubernetes.io/dockercfg`
+- `kubernetes.io/dockerconfigjson`
+
+### Creating a secret with Docker config
+
+In order to authenticate a private registry, th efollowing information would be
+needed:
+- username
+- registry password
+- client email address
+- hostname
+
+```bash
+kubectl create secret docker-registry <name> \
+  --docker-server=DOCKER_REGISTRY_SERVER \
+  --docker-username=DOCKER_USER \
+  --docker-password=DOCKER_PASSWORD \
+  --docker-email=DOCKER_EMAIL
+```
+
+If we already have a docker credential file, then rather than using the above
+command, we can just import the credentials file as k8s secrets.
+
+This is particularly useful if we are using multiple private contaienr
+registries as `kubectl create secret docker-registry` creates a secret that only
+works with a single private registry.
+
+Pods can only reference image pull secrets in their own namespace, so this
+process needs to be done one time per namespace.
+
+### Referring to an `imagePullSecrets` on a pod
+
+Now we can create pods which reference that secret by adding an `imagePullSecrets` section to a pod definition. Each item in the `imagePullSecrets` array can only reference a secret in the same namespace.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: foo
+  namespace: awesomeapps
+spec:
+  containers:
+    - name: foo
+      image: janedoe/awesomeapp:v1
+  imagePullSecrets:
+    - name: myregistrykey
+```
+
+This needs to be done for each pod that is using a private registry. However,
+setting of this field can be automated by setting the `imagePullSecrets` in a
+`ServiceAccount` resource.
+
+We can use this in conjuction with a per-node `.docker/config.json`. The
+credentials will be merged.
+
+## Use cases
+
+There are number of solutions for configuring private registries. Here are some
+common use cases and suggested solutions.
+- Cluster running only open source images. No need to hide images.
+    - Use public image from the public registries.
