@@ -41,4 +41,28 @@ exists. If that pod is deleted for any reason, and even if an identical
 replacement is created, the related thing (a volume for example) is also
 destroyed and created new.
 
+## Pod phase
+
+A pod's `status` feld is a `PodStatus` object, which has a `phase` field. The
+phase of a pod is a simple, high-level summary of where the pod is in its
+lifecycle. The phase is not intended to be a comprehensive rollup of
+observations of container or pod state, not is it intended to be a comprehensive
+state machine.
+
+The number and meanings of pod phase values are tightly guarded. Other than what
+is documented here, nothing should be assumed about pods that have a given
+`phase` values.
+
+Possible `phase` values:
+
+|Value|Description|
+|---|---|
+|`Pending`| The pod has been accepted by the k8s cluster, but one or more of the
+containers has not been set up and made ready to run. This includes time a pod
+spends waiting to be scheduled as well as the time spent downloading container
+images over the network.|
+|`Running`|The pod has been bound to a node, and all of the containers have been
+created. At least one container is still running, or is in the process of
+starting or restarting.|
+
 
