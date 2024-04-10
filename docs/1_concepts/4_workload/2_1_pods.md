@@ -53,3 +53,147 @@ We do not need to run muliplt containers to provide replication for reliance and
 capacity.
 
 ## Using pods
+
+The following is an example of a pod which consists of a container running the
+image `nginx:latest`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+```
+
+To create a pod shown above, run the following command:
+
+```bash
+kubectl apply -f https://k8s.io/examples/pods/simple-pod.yaml
+```
+
+Pods are generally not created directly and are created using workload
+resources.
+
+### Worload resources for managing pods
+
+Usually we do not need to create pods directly, even singleton pods. Insteadm we
+create them using workload resources such as Deployment or Jon. If the pods need
+to track state, consider the StatefulState resource.
+
+Each pod is meant to run a single instance of given application. If we want to
+scale the applicaiton horizontally to provide more overall resources by running
+more instances, we should use multiple pods, one for each instance.
+
+In k8s, this is typically referred as replication. Replicated pods are usually
+created and managed as a group by a workload resource and its controller.
+
+Pods natively provide 2 kinds of shared resources for their constituent
+containers:
+- network
+- storage
+
+## Working with pods
+
+Most of the time, we will not creating individual pods directly in k8s, even a
+singleton pods. This is because pods are designed as relatively ephemeral,
+disposable entities. When a pod gets created either directly by ourselves or
+indirectly by the controller, the new pod is scheduled to run on a node in the
+cluster. The pod remains on that node until either:
+- The pod finishes execution
+- The pod object is deleted
+- The pod is evicted for lack of resources
+- The node is failing
+
+> Restartng a container in a pod should not be confused with restarting a pod. A
+> pod is not a process, but an environment for running containers. A pod
+> persists until it is deleted.
+
+The name of a pod must be a valid DNS subdomain value, but this can produce
+unexpected resouts for the pod hostname. For best compatibility, the name should
+follow the more restrictive reuls for a DNS label.
+
+### Pod OS
+
+We should set the `.spec.os.name` field to either `windows` or `linux` to
+indicate the OS on which we want the pod to run. These 2 ae the only operating
+systems supported for now by k8s.
+
+In k8s v1.29, the value set for this field has no effect on scheduling of the
+pods. Setting the `.spec.os.name` helps to identify the pod OS authoritatively
+and is used for validation.
+
+The kubelet refuses to run a pod where we have specified a pod OS, if this is
+not the same as the operating system for the node where that kubelet is running.
+The pod security standards also use this field to avoid enforcing policies that
+are not relevant to the operating system.
+
+### Pods and controllers
+
+We can use workload resources to create and manage multiple pods. A controller
+for the resource handles replication and rollout and automatic healing in case
+of a pod failure. For example if a node fails, a controller notices that pods on
+that node have stopped working and creates replacement pod. The scheduler places
+the replacement pod onto a healthy node.
+
+Here are some examples of workload resurces that manage one or more pods:
+- Deployment
+- StatefulSet
+- DaemonSet
+
+### Pod templates
+
+Controllers for workload resources create pods from a pod template and manage
+these pods on our behalves.
+
+Pod templates are specification for creating pods, and are included in workload
+resources such as Deployments, Jobs and DaemonSets.
+
+Each controller for a workload resource use the `PodTemplate` inside the
+wokrload object to make actual pods. The `PodTemplate` is part of the desired
+state of whatever workload resource used to run the application.
+
+The sample below is a manifest for a simple job with a `template` that starts
+one container. The contaiiner in that pod prints a message then pause.
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    # This is the pod template
+    spec:
+      containers:
+      - name: hello
+        image: busybox:1.28
+        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
+      restartPolicy: OnFailure
+    # The pod template ends here
+```
+
+Modifying the pod template or switching a new pod template has no direct effect
+on the pods that already exist. If we are changing the pod template for a
+workload resource, that resource needs to create replacement pods that use the
+updated emplate.
+
+For example, the StatefulSet controller ensures that the running pods match the
+current pod template for each StatefulSet object. If we edit the StatefulSet to
+change its pod template, the StatefulSet starts to create new pods based on the
+updated template. Eventually, all of the old pods are replaced with new pods and
+the update is complete.
+
+Each workload resource implements its own rules for handling changes to the pod
+template.
+
+On nodes, the kubelet does not directly observe or manage any of the details
+around pod templates and updates; those details are abstracted away That
+abstraction and separation of concerns simplifies system semantics, and makes it
+feasible toe xtend the cluster's behaviour without changing existing code.
+
+
