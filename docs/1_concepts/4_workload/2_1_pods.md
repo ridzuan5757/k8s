@@ -196,4 +196,155 @@ around pod templates and updates; those details are abstracted away That
 abstraction and separation of concerns simplifies system semantics, and makes it
 feasible toe xtend the cluster's behaviour without changing existing code.
 
+## Pod update and replacement
 
+When the pod template for a workload resource is changed, the controller creates
+new pods based on the updated template instead of updating the existing pods.
+
+k8s does not prevent us from managing pods directly. It is possible to update
+some fiels of a running pod in place. However, pod update operations like `patch` 
+and `replace` have some limitations:
+- Most of the metadata about pod is immutable. We cannot change the field value:
+    - `namespace`
+    - `name`
+    - `uid`
+    - `creationTimestamp`
+    - `generation` field is unique. It only accepts updates that increment the
+      field's current value.
+- If the `metadata.deletionTimestamp` is set, no new entry can be added to the
+  `metadata.finalizers` list.
+- Pod updates may not change fields other than:
+    - `spec.containers[*].image`,
+    - `spec.initContainers[*].image`
+    - `spec.activeDeadlineSeconds`
+    - `spec.tolerations` - For this field value, we can only add new entries.
+- When pdating the `spec.ActiveDeadlineSeconds` field, 2 types of updates are
+  allowed:
+    - setting the unassigned field to positive number.
+    - updating the field from positive number to a smaller non-negative number.
+
+## Resource sharing and communication
+
+Pods enable data sharing and communication among their constituent containers.
+
+### Storage in pods
+
+A pod can specify a set of shared storage volumes. All containers in the pod can
+access the shared volumes, allowing those containers to share data. Volumes also
+allow persistent data in a pod to survive in a case one of the containers within
+needs to be restarted.
+
+### Pod networking
+
+EAch pod is assigned a unique IP address for each address family. Every
+container in a pod shares the network namespace, including the IP address and
+network ports. Inside a pod, and only then the containers that belong to the pod
+can communicate with one aother using `localhost`.
+
+When containers in a pod communicate with entities outside the pod, they must
+coordinate how they use the shared network resources such as ports. Within a
+pod, containers share an IP address and port space, and can find each other via
+`localhost`.
+
+The containers in a pod can also communicate with each other using standard
+inter-process communications like SystemV semaphores or POSIX shared memory.
+Containers in different pods have distinct IP addresses and can not communicate
+by OS-level IPC without special configuration. Containers that want to interact
+with a container running in a different pod can use IP networking to
+communicate.
+
+Containers within the pod see the system hostname as being the same as the
+configured `name` for the pod.
+
+## Priveleged mode for containers
+
+> The container runtime must support the concept of a privileged container for
+> this setting to be relevant.
+
+Any container in a pod can run in privileged mode to use operating system
+administrative capabilities that would otherwise be unaccessible. This is
+available for both Windows and Linux.
+
+### Linux privileged containers
+
+A ny container in a pod can enable privileged mode using the `privileged` flag
+on the security context of the container spec. This is useful for containers
+that want to use operating system administrative capabilities such as
+manipulating network stack or accessing hardware devices.
+
+### Window privileged containers
+
+We can create windwos hostprocess pod by setting `windowsOption.hostProcess`
+flag on the security context of the pod spec. All containers in these pods must
+run as Windows HostProcess containers. HostProcess pods run directly on the host
+and can also be used to perform administrative tasks as is done with Linux
+privileged containers.
+
+## Static pods
+
+Static pods are managed directly by the kubeet daemon on a specific node without
+the API server observing them. Whereas most pods are managed by the control
+plane (for example, Deployment), for static pods, the kubelet directly supervises
+each static pod (and restarts it if it fails).
+
+Static pods are always bound to one kubelet on specific node. The main use for
+static pods is to run a self-hosted control plane; in other words, using kubelet
+to supervise the individual control plane components.
+
+The kubelet automatically tries to create a mirror pod on the k8s API server for
+each static pod. This means that the pods running on a node are visible on the
+API server, but cannot be controlled from there.
+
+> The `spec` of static pod cannot refer to other API objects such as
+> ServiceAccount, ConfigMap, Secret etc.
+
+## Pods with multiple containers
+
+Pods are designed to support multiple cooperating processes as contaienrs that
+form a cohesive unit of service. The containers in a pod are automatically
+co-located and co-scheduled on the same physical or virtual machine in the
+cluster.
+
+The containers can share resources and dependencies, communicates with one
+another and coordinate when they are terminated.
+
+Pods in k8s cluster are used in 2 main ways:
+
+### Pods that run a single container
+
+The "one-container-per-pod" model is the most common k8s use case; in this case
+a pod is acting as a wrapper around a single container. k8s manages pods rather
+than managing the containers directly.
+
+### Pods that run multipe containers that need to work together
+
+A pod can encapsulate an application composed of multiple co-located containers
+that are tightly coupled and need to share resources. These co-located
+containers form a single cohesive unit of service.
+
+For example, one container serving data stored in a shared volume to the public
+while a separate sidecar container refreshes or updates those files. The pod
+wraps these containers, storage resources, and an ephemeral network identity
+together as a single unit.
+
+Some pods have init containers as well as app containers. By default, init
+containers run and complete before the app containers are started. Sidecar
+containers is also possible for providing auxiliary services to the main
+appliation pod.
+
+### Feature State
+
+Enabled by default, the `SidecarContainers` feature gate allows us to specify
+`restartPolicy: Always` for init containers. Setting the `always` restart policy
+ensures that the containers where we set it are treated as sidecars that are
+kept running during the entire lifetime of the pod. Containers that we explicily
+define as sidecar containers start up before the main applicationn pod and
+remain running until the pod is shut down.
+
+## Container probes
+
+A probe is a diagnostic performed periodically by the kubelet on a container. To
+perform a diagnostic, the kubelet can invoke different actions:
+- `ExecAction` performed with the help of the container runtime
+- `TCPSocketAction` checked directly bu the kubelet
+- `HTTPGetAction` checked directly by the kubelet
