@@ -55,14 +55,47 @@ is documented here, nothing should be assumed about pods that have a given
 
 Possible `phase` values:
 
-|Value|Description|
-|---|---|
-|`Pending`|The pod has been accepted by the k8s cluster, but one or more of  |
-|         |the containers has not been set up and made ready to run. This    |
-|         |includes time a pod spends waiting to be scheduled as well as the |
-|         |time spent downloading container images over the network.         |
-|`Running`|The pod has been bound to a node, and all of the containers have  |
-|         |been created. At least one container is still running, or is in   |
-|         |the process of starting or restarting.                            |
+### `Pending`
 
+The Pod has been accepted by the Kubernetes cluster, but one or more of the 
+containers has not been set up and made ready to run. This includes time a Pod 
+spends waiting to be scheduled as well as the time spent downloading container 
+images over the network.
 
+### `Running`
+
+The Pod has been bound to a node, and all of the containers have been created. 
+At least one container is still running, or is in the process of starting or 
+restarting.
+
+### `Succeeded`
+
+All containers in the pod have terminated in success, and will not bet
+restarted.
+
+### `Failed`
+
+All containers in the pod have terminated, and at least on container has
+terminated in failure. That is, the container either exited with non-zero status
+or was terminated by the system.
+
+### `Unknown`
+
+For some reason the state of the pod could not be obtained. This phase typically
+occurs due to an error in communicating with the node where the pod should be
+running.
+
+> When a pod is being deleted, it is shown as `Terminating` by some kubectl
+> commands. This `Terminating` status is not one of the pod phases. A pod is
+> granted a term to terminate gracefully, which defaults to 30 seconds. Flag
+> `--force` can be used to terminate a pod by force.
+
+Since k8s v1.27, the kubelet transitions deleted pods, execept for static pods,
+and force-deleted pods without a finalizer, to a terminal phase `Failed` or
+`Succeeded` depending on the exit statuses of the pod cotainers before their
+deletion from the API server.
+
+If a node dies or is diconnected from the rest of the cluster, k8s applies a
+policy for setting the `phase` of all pods on the lost node to failed.
+
+## Container states
