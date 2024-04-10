@@ -57,12 +57,12 @@ Possible `phase` values:
 
 |Value|Description|
 |---|---|
-|`Pending`| The pod has been accepted by the k8s cluster, but one or more of the
-containers has not been set up and made ready to run. This includes time a pod
-spends waiting to be scheduled as well as the time spent downloading container
-images over the network.|
-|`Running`|The pod has been bound to a node, and all of the containers have been
-created. At least one container is still running, or is in the process of
-starting or restarting.|
+|`Pending`|The pod has been accepted by the k8s cluster, but one or more of  |
+|         |the containers has not been set up and made ready to run. This    |
+|         |includes time a pod spends waiting to be scheduled as well as the |
+|         |time spent downloading container images over the network.         |
+|`Running`|The pod has been bound to a node, and all of the containers have  |
+|         |been created. At least one container is still running, or is in   |
+|         |the process of starting or restarting.                            |
 
 
