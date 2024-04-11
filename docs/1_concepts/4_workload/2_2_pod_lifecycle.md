@@ -281,4 +281,95 @@ a pod without "init containers", the kubelet sets the `Initialized` condition to
 
 ## Container probes
 
+A probe is a diagnostic performed periodically by the kubelet on a container. To
+perform a diagnostic, the kubelet either executes code within the container, or
+makes a network request.
+
+### Check mechanisms
+
+There are four different ways to check a container using a probe. Each probe
+must define exactly one of these 4 mechanisms:
+
+###### `exec`
+
+Executes a specified command inside the container. The diagnostic is considered
+successful if the command exits with a status code of `0`.
+
+###### `grpc`
+
+Perform a remote procedure call using gRPC. The target should implement gRPC
+health checks. The diagnostic is considered successful if the `status` of the
+response is `SERVING`.
+
+###### `httpGet`
+
+Perform HTTP `GET` request against the pod's IP address on a specified port and
+path. The diagnostic is considered successul if the response has a status code
+greater than or equal to 200 and less than 400.
+
+###### `tcpSocket`
+
+Perform  TCP check against the pod's IP address on specified port. The
+diagnostic is considered successful if the port is open. If the remote system
+(the container) closes the connection immediately after it opens, this counts as
+healthy.
+
+> Unlike other mechanisms, `exec` probe's implementation involves the creation
+> or forking of multiple processes each time when executed. As a requeslt, in
+> case of the clusters having higher pod densities, lower intervals of
+> `intialDelaySeconds`, `periodSeconds`, configuring any probe with exec
+> mechanism might introduce an overhead on the cpu usage of the node. In such
+> scenarios, consider using the alternative probe mechanism to avoid the
+> overhead.
+
+### Probe outcome
+
+Each probe has one of 3 results:
+- `Success` - The container passed the diagnostic.
+- `Failure` - The container failed the diagnostic.
+- `Unknown` - The diagnostic failed. No action should be taken, and the kubelet
+  will make further checks.
+
+### Type of probe
+
+The kubelet can optionally perform and reach to 3 kinds of probes on running
+containers:
+
+###### `livenessProbe`
+
+Indicates whether the container is running. If the liveness probe fails, the
+kubelet kills the container and the container is subjected to its restart
+policy. If a container does not provide a liveness probe, the default state is
+`Success`.
+
+###### `readinessProbe`
+
+Indicates whether the container is ready to respond to requests. If the
+readiness probe fails, the endpoints controller removes the pod's IP address
+from the endpoints of all services that match the pod.
+
+The default state of readiness before the initial delay is `Failure`. If a
+container does not provide a readiness probe, the default state is `Success`.
+
+###### `startupProbe`
+
+Indicates whether the application within the container is started. All other
+probes are disabled if a startup probe is provided, until it succeeds. If the
+startup probe fails, the kubelet kills the container, and the container is
+subjected to its restart policy. If a container does not provide startup probe,
+the default state is `Success`.
+
+#### When `livenessProbe` should be used.
+
+If the process in the container is able to crash on its own whenever it
+encounters an issue or becomes unhealthy, we do not necessarily need a liveness
+probe. The kubelet will automatically perform the correct action in accordance
+to the pod's restart policy.
+
+If we would like the container to be killed and restarted if a probe fails, then
+specify liveness probe, adn specify a `restartPolicy` of `Always` or
+`OnFailure`.
+
+#### When `readinessProbe` should be used.
+
 
