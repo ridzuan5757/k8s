@@ -427,4 +427,60 @@ request deletion of a pod, the cluster records and tracks the intended grace
 period before the pod is allowed to be forcefully killed. With that forceful
 shutdown tracking in place the kubelet attempts graceful shutdown.
 
+Typically, with this graceful termination of the pod, kubelet makes requests to
+the container runtime to attempt to stop the containers in the pod by first
+sending a `SIGTERM` signal, with a grace period timeout, to the main process in
+each container. The requests to stop the containers are processed by the container 
+runtime asynchronously. There is no guarantee to the order of processing for these
+requests.  
 
+Many container runtimes respect the `STOPSIGNAL` value defined in the container
+image and, if different, send the container image configured `STOPSIGNAL`
+instead of `SIGTERM`. Once the grace period has expired, the `KILL` signal is
+sent to any remaining processes, and the pod is then deleted from the API
+server.
+
+If the kubelet or the contaienr runtime's management service is restarted while
+waiting for processes to terminate, the cluster retries from the start including
+the full original grace period.
+
+An example flow:
+- `kubectl` is used too manually delete specific pod, with default frace period
+  of 30 seconds.
+- The pod in the API server is updated with the time beyond which the pod is
+  considered "dead" along with the grace period. If `kubectl describe` is used
+  to check the pod that is being deleted, that pod will show up as
+  `Terminating`. On the node where the pod is running: as soon as the kubelet
+  sees that a pod has been marked as terminating (a graceful shutdown duration
+  has been set), the kubelet begin the local pod shutdown process.
+    - If one of the pod's container has defined a `preStop` hook and the
+      `terminatingGracePeriodSeconds` in the pod spec is not set to 0, the
+      kubelet runs that hook inside of the container. The default 
+      `terminatingGracePeriodSeconds` is 30 seconds.
+    - If the `preStop` hook is still running after the grace period expires, the
+      kubelet will request a small, one-off grace period extension of 2 seconds.
+    - If the `preStop` hook needs longer to complete than the default grace
+      period allows, `terminatingGracePeriodSeconds` value must be modified to
+      suit this.
+    - The kubelet triggers the container runtime to send a `SIGTERM` signal to
+      process 1 inside each container.
+    - The containers in the pod receive the `SIGTERM` signal at different times
+      and in arbitrary order. If the order of shutdowns matters, consider using
+      a `preStop` hook to synchronize.
+- At the same time as the kubelet is starting graceful shutdown of the pod, the
+  control plane evaluates whther to remove that shutting down pod from
+  `EndpointSlices` and `Endpoints` object, where those objects represent a Service
+  with a configured selector. `ReplicaSets` and other workload resources no
+  longer treat the shutting-down pod as a valid, in-service replica.
+    - Pods that shut down slowly should not continue to serve regular traffic
+      and should start terminating and finish processing open connections. Some
+      applications need to go beyond finishing open connections and need more
+      graceful termination, for example, session draining and completion.
+    - Any endpoints that represent the terminating pods are not immediately
+      removed from `EndpointSlices`, and status indicating terminating state is
+      exposed from the `EndPointsSlices` API and the legacy `Endpoints` API. 
+    - Terminating endpoints always have their `ready` status as `false` (for
+      backward compatibility versions before v1.26), so load balancers will not
+      use it for regular traffic.
+    - IF traffic draining on terminating pod is needed, the actual readiness can
+      be checked as condition `serving`. 
