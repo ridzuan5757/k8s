@@ -413,3 +413,18 @@ the same endpoint as the liveness probe.
 The default for `periodSeconds` is 10s. We whould then set its `failureThreshold` 
 high enough to allow the container to start, without changing the default values
 of the liveness probe. This helps to protect against deadlocks.
+
+## Termination of pods
+
+Because pods represent processes running on nodes in the cluster, it is
+important to allow those processes to gracefully terminate when they are no
+longer needed rather than being abruptly stopped with a `KILL` signal and having
+no change to clean up.
+
+The design aim is for us to be able to request deletion and know when processes
+terminate, but also be able to ensure that deletes eventually complete. When we
+request deletion of a pod, the cluster records and tracks the intended grace
+period before the pod is allowed to be forcefully killed. With that forceful
+shutdown tracking in place the kubelet attempts graceful shutdown.
+
+
