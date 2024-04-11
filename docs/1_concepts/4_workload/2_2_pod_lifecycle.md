@@ -372,4 +372,44 @@ specify liveness probe, adn specify a `restartPolicy` of `Always` or
 
 #### When `readinessProbe` should be used.
 
+If we would like to start sending traffic to a pod only when a probe succeeds,
+specify a readiness probe. In this case, the readiness probe might be the same
+as the liveness probe, but the existence of the readiness probe in the spec
+means that the pod will start without receiving any traffic and only start
+receiving traffic after the probe starts succeeding.
 
+If we want the container to be able to make itself down for maintenance, we can
+specify a rediness probe that checks an endpoint specific to readiness that is
+different from the liveness probe.
+
+If the app has strict dependency on backend services, we can implement both
+liveness and readiness probe. The liveness probe passes when the app itself is
+healthy, but the readiness probe additionally checks that each required backend
+service available. This helps us avoid directing traffic to pods that can only
+respond with error messages.
+
+If the container needs to work on loading large data, configuration files, or
+migration startup, we can use startup probe. However, if we want to dectect the
+difference between an app that has failed and an app that is still processing
+its startup data, a readiness probe might be more suitable.
+
+> If we want to be able to drain requests when the pod is deleted, we do not
+> necessarily need a readiness probe; on deletion, the pod automatically put
+> itself into an unready state regardless of whether the readiness probe exists.
+> The pod remains in the unready state while it waits for the containers in the
+> pod to stop.
+
+#### When `startupProbe` should be used.
+
+Startup probes are useful for pods that have containers that take a long time to
+come into service. Rather than set a long liveness interval, we can configure a
+separate configuration for probing the container as it starts up, allowing a
+time longer than the liveness interval would allow.
+
+If the container usually starts in more than `initialDelaySeconds +
+failureThreshold * periodSeconds`, we should specify a startup probe that checks
+the same endpoint as the liveness probe.
+
+The default for `periodSeconds` is 10s. We whould then set its `failureThreshold` 
+high enough to allow the container to start, without changing the default values
+of the liveness probe. This helps to protect against deadlocks.
