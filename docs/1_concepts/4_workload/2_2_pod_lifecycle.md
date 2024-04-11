@@ -257,3 +257,28 @@ added to the `status.conditions` field of a pod.
 
 The `PodReadyToStartContainers` condition is set to `False` by the kubelet when
 it detects a pod does not have a runtime sandbox with networking configured.
+This occurs in the following scenarios:
+- Early in the lifecycle of the pod, when the kubelet has not yet begun to set
+  up a sandbox for the pod using the container runtime.
+- Later in the lifecycle of the pod, when the pod sandbox has been destroyed due
+  to either:
+  - The node rebooting without the pod getting evicted.
+  - For container runtimes that use virtual machines for isolation, the pod
+    sandbox virtual machine rebooting, which then requires creating a new
+    ssandbox and fresh container network configuration.
+
+The `PodReadyToStartContainers` condition is set to `True` by the kubelet after
+the successful completion of sandbox creation and network configuration for the
+pod by the runtime plugin. The kubelet can start pulling container images and
+create containers after `PodReadyToStartContainers` condition has been set to
+`True`.
+
+For a pod with "init containers", the kubelet sets the `Initiaized` condition to
+`True` after the init containers have successfully completed which happens after
+successful sandbox creation and network configuration by the runtime plugin. For
+a pod without "init containers", the kubelet sets the `Initialized` condition to
+`True` before sandbox creation and network configuration starts.
+
+## Container probes
+
+
