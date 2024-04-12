@@ -177,4 +177,4 @@ rules for resource usage apply:
 
 Quota and limits are applied based on the effective pod request and limit. Pod
 level control groups (cgroups) are based on the effective pod request and limit
-the same as ascheduler.
+the same as scheduler.
