@@ -305,4 +305,74 @@ myapp-pod   1/1       Running   0          9m
 
 ## Detailed behaviour
 
+During pod startup, the kubelet delays running init containers until the
+networking and storage are ready. Then the kubelet runs the pod's init
+containers in the order they appear in the pod's spec.
+
+Each init container must exit successfully before the next container starts. If
+a container fails to start due to the runtime or exits with failure, it is
+retried according to the pod `restartPolicy`. However, if the pod `restartPolicy` 
+is set to `Always`, the init containers use `restartPolicy` of `OnFailure`.
+
+A pod cannot be `Ready` until all init container have succeeded. The ports on an
+init container are not aggregated under a Service. A pod that is initializing is
+in the `Pending` state but should have a condition `initialized` set to false.
+
+If a pod restarts, or is restarted, all init containers must execute again.
+
+Changes to the init container spec are limited to the container image field.
+Altering an init container image field is equivalent to restarting the pod.
+
+Because init containers can be restarted, retried, or re-executed, init
+container code should be indempotent. In particular, code that writes to files
+on `EmptyDirs` should be prepared for the possibility that an output file
+already exists.
+
+Init containers have all of the fields of an app container. However, k8s
+prohibits `readinessProbe` from being used because init containers cannot define
+readiness distinct from completion. This is enforced during validation.
+
+Use `activeDeadlineSeconds` on the pod to prevent init containers from failing
+forever. The active deadline includes init contaienrs. However it is reommended
+to use `activeDeadlineSeconds` pnly if teams deploy their application as a Job,
+because `activeDeadlineSeconds` has an effect even after init container
+finished. The pod which is already running correctly would be killed by 
+`activeDeadlineSeconds` if we set this value.
+
+The name of each app and init container in a pod must be unique, a validation
+error is thrown for any container sharing a name with another.
+
+### Resource sharing within containers
+
+Given the oder of execution of init, sidecar and app containers, the following
+rules for resource usage apply:
+- The highest of any particular resource request or limit defined on all init
+  containers is the effective init request/limit. If any resource has no
+  resource limit specified this is considered as the highest limit.
+- The pod's effective request/limit for a resource is the higher of:
+    - The sum of all app containers request/limit for a resource
+    - The effective init request/limit for a resource
+- Scheduling is done based on effective request/limit, which means init
+  containers can reserve resources for initialization that are not used during
+  the life of the pod.
+- The quality of service QoS tier fo the pod's effective QoS tier is the QoS
+  tier for init containers and app cotnainers alike.
+
+Quota and limits are applied based on the effective pod request and limit. Pod
+level control groups (cgroups) are based on the effective pod request and limit,
+the same as the scheduler.
+
+### Pod restarts reasons 
+
+A pod can restart, causing re-execution of init contaienrs, for the following
+reasons:
+- The pod infrastructure container is restarted. This is uncommon and would have
+  to be done by someone with root access to nodes.
+- All containers in a pod are terminated while `restartPolicy` is set to `Always`, 
+  forcing a restart, and the limit container completion record has been lost due
+  to garbage collection.
+
+The pod will not be restarted when the init container is changed, or the init
+container completion record has been lost due to garbage collection. This
+applies to k8s v1.20 and later.
 
