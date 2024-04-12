@@ -523,4 +523,30 @@ An example flow:
 > hooks to control the termination order without sidecar containers, we can no
 > remove them and allow the kubelet to manage sidecar termination automatically.
 
+### Forced pod termination
+
+> Forced deletions can be potentially disruptive for some workloads and their
+> pods.
+
+By default, all deletes are graceful within 30 seconds. The `kubectl delete`
+command supports the `--grace-priod=<seconds>` option which allows us to
+override the default and specify our own value.
+
+Setting the grace period to `0` forcible and immediately deletes the pod from
+the API server. If the pod was still running on a node, that forcible deletion
+triggers the kubelet to begin immediate cleanup.
+
+> Additional flag `--force` must be specified along with `--grace-period=0` in
+> order to perform force deletions.
+
+When a force deltion is performed, the API server does not wait for confirmtatin
+from the kubelet that the pod has been terminated on the node it was running on.
+It removes the pod in the APO immediately so that a new pod can be created with
+the same name. On the node pods that are set to terminate immediately will still
+be given a small grace period before being force killed.
+
+> Immediate deletion does not wait for confirmation that the running resource
+> has been terminated. The resource may continue to run on the cluster
+> indefinitely.
+
 
