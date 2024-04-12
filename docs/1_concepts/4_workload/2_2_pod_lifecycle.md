@@ -482,5 +482,45 @@ An example flow:
     - Terminating endpoints always have their `ready` status as `false` (for
       backward compatibility versions before v1.26), so load balancers will not
       use it for regular traffic.
-    - IF traffic draining on terminating pod is needed, the actual readiness can
+    - If traffic draining on terminating pod is needed, the actual readiness can
       be checked as condition `serving`. 
+        - When the grace period expires, the kubelet triggers forcible shutdown.
+          The container runtime sends `SIGKILL` to any processes still running in
+          any container in the pod. The kubelet also cleans up a hidden `pause`
+          container if that container runtime uses one.
+        - The kubelet transitions the pod into a terminal phasse (`Failed` or
+          `Succeeded` depending on the state of its containers). This step is
+          guaranteed since version v1.27.
+        - The kubelet triggers forcible removal of pod obect from the API
+          server, by setting grace period to 0 (immediate deletion).
+        - The API server deletes the pod's API object, which is then no longer
+          visible from any client.
+        
+
+> If we do not have the `EndpointSliceTerminatingCondition` feature gate enabled
+> in the cluster (the gate is on by default from k8s v1.22 and locked to default
+> in v1.26), then the k8s control plane removes a pod from any relevant
+> EndpointSlices as soon as the pod;s termination grace period begins. The
+> behaviour above is described when the feature gate 
+> `EndpointSliceTerminatingCondition` is enabled.
+
+> Beginning kwith k8s v1.29, if the pod includes one or more sidecar contaienrs
+> (init cotnainer with an `Always` restart policy), the kubelet will delay
+> sinding the `SIGTERM` sgnal to these sidecar containers until the last main
+> container has fully terminated. The sidecar controllers will be terminated in
+> the reverse order they are defined in the pod spec. This ensures that sidecar
+> containers continue serving the other containers in the pod until they are no
+> longer needed.
+>
+> Note that slow termination of a main container will also delay the termination
+> of the sidecar containers. If the grace period expires before the termination
+> process is complete, the pod may enter emergency termination. In this case,
+> all remaining containers in the pod will be terminated simultaneously with a
+> short grace period.
+>
+> Similarly, if a pod has a `preStop` hook that exceeds the termination grace
+> period, emergency termination may occur. In general, if we have used `preStop`
+> hooks to control the termination order without sidecar containers, we can no
+> remove them and allow the kubelet to manage sidecar termination automatically.
+
+
