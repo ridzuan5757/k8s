@@ -549,4 +549,26 @@ be given a small grace period before being force killed.
 > has been terminated. The resource may continue to run on the cluster
 > indefinitely.
 
+### Garbage collection of pods
 
+For failed pods, the API objects remain in the cluster;s API until a human or
+controller process explicitly removes them.
+
+The pod garbage collector `PodGC`, which is a controller in the control plane,
+cleans up terminated pods (with phase `Succeeded` or `Failed`), when the number
+of pods exceeds the configured threshold (determined by
+`terminated-pod-gc-threshold` in the kube-controller-manager pod). This avoids a
+resource leak as pods are created and terminated over time.
+
+Additionally, PodGC cleans up any pods which satisfy any of the following
+conditions:
+- Orphan pods bound to a node which no longer exists.
+- Unscheduled terminating pods.
+- Terminating pods bound to a non-ready node tainted with
+  `node.kubernetes.io/out-of-service`, when the `NodeOutOfServiceVolumeDetack`
+  feature gate is enabled.
+
+When the `PodDisruptionConditions` feature gate is enabled, along with cleaning
+up the pod, PodGC will also mark them as failed if they are in a non-terminal
+phase. Also, PodGC adds a pod disruption condition when cleaning up an orphan
+pod.
