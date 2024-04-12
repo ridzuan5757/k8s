@@ -157,4 +157,24 @@ These containers can interact directly with the main application containers,
 sharing the same network namespace, filesystem, and environment variables. They
 work closely together to provide additional functionality.
 
-## 
+## Resource sharing within containers
+
+Given the order of execution for init, sidecar and app containers, the following
+rules for resource usage apply:
+- The highest of any particular resource request or limit defined on all init
+  containers is the effective init request/limit. If any resource has no
+  resource limit specified this is considered as the highest limit.
+- The pod's effective request/limit for a resource is the sum of pod overhead
+  and the higher of:
+    - The sum of all non-init containers (app and sidecar containers)
+      request/limit for a resource.
+    - The effective init request/limit for a resource.
+- Scheduling is done based on effective requests/limits, which means init
+  containers can reserve resources for initialization that are not used during
+  the life of the pod.
+- The QoS tier of the pod;s effective QoS tier is the QoS tier for all init,
+  sidecar and app containers alike.
+
+Quota and limits are applied based on the effective pod request and limit. Pod
+level control groups (cgroups) are based on the effective pod request and limit
+the same as ascheduler.
