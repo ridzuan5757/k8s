@@ -35,4 +35,29 @@ The status of the init containers is returned in `.status.initContainerStatuses`
 field as an array of the container statuses similar to the
 `.status.containerStatuses` field.
 
+### Differences from regular containers
+
+Init containers support all the fields and features of app containers,
+including:
+- resource limits
+- volumes
+- security settings
+
+However, the resource requests and limits for an init container are handled
+differently.
+
+Regular init contaienrs (including sidecar containers) do not support these
+field:
+- `lifecycle`
+- `livenessProbe`
+- `readinessProbe`
+- `startupProbe`
+
+Init containers must run to completion before the pod can be ready; sidecar
+containers continue running during a pod's lifetime, and do support some probes.
+
+If we specify multiple init containers for a pod, kubelet runs each init
+container sequentially. Each init container must succeed before the next can
+run. When all of the init containers have run to completion, kubelet initializes
+the application containers for the pod and runs them as usual.
 
