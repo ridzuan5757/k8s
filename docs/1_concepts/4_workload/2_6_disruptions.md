@@ -170,7 +170,45 @@ At some point, the pods terminate, and the cluster looks like this:
 | |`pod-b` available|`pod-c` available|
 | |`pod-d` starting|`pod-y`|
 
+At this point, if an impatient cluster administrator tries to crain `node-2` or
+`node-3`, the drain command will block, because there are only 2 available pods
+for the deployment, and its PDB requires at least 2. After some time passes,
+`pod-d` becomes available. 
 
+The cluster state now looks like this:
+
+|`node-1` drained|`node-2`|`node-3`|
+|---|---|---|
+| |`pod-b` available|`pod-c` available|
+| |`pod-d` available|`pod-y`|
+
+Lets say that now the cluster administrator tries to drain `node-2`. The drain
+command will try to evict the two pods in some oder, say `pod-b` first and then
+`pod-d`. It wil succeed at evicting `pod-b`. But when it tries to evict `pod-d`,
+it will be refused because that would leave only one pod available for the
+deployment.
+
+The deployment creates a replacement for `pod-b` called `pod-e`. Because there
+are not enough resources in the cluster to schedule `pod-e` the drain will again
+block. The cluster may end up in this state:
+
+|`node-1` drained|`node-2`|`node-3`|no node|
+|---|---|---|---|
+| |`pod-b` terminating|`pod-c` available|`pod-e` pending|
+| |`pod-d` available|`pod-y`| |
+
+At this point, the cluster administrator needs to add a node back to the cluster
+to proceed with the upgrade. We can see how k8s varies the rate at which
+disruptions can happens according to:
+- How many replicas an application needs.
+- How long it takes to gracefully shutdown an instance.
+- How long it takes a new instance to start up.
+- The type of controller.
+- The cluster's resource capacity.
+
+
+ 
+ 
  
  
  
