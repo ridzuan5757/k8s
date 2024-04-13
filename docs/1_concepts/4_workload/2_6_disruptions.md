@@ -112,4 +112,68 @@ can proceed.
 When a pod is evicted using the eviction API. it is gracefully terminated,
 honoring the `terminationGracePeriodSeconds` setting in its PodSpec.
 
+## `PodDisruptionBudget` example
+
+Consider a cluster with 3 nodes:
+- `node-1`
+- `node-2`
+- `node-3`
+
+The cluster is running serveral application. One of the has 3 replicas initially
+called:
+- `pod-a`
+- `pod-b`
+- `pod-c`
+
+There s also another unrelated pod without a PDB called `pod-x`. Initially, the
+pods are laid out as follows:
+
+|`node-1`|`node-2`|`node-3`|
+|---|---|---|
+|`pod-a` available|`pod-b` available|`pod-c` available|
+|`pod-x` available| | |
+ 
+All 3 pods are part of a deployment and they are collectively have a PDB which
+requires there be at least 2 of 3 pods to be available at all times.
+
+For example, assume the cluster administrator wants to reboot into a new kernel
+version to fix a bug in the kernel. The cluster administrator first tries to
+drain `node-1` using `kubectl drain` command. That tool tries to evict `pod-a`
+and `pod-x`. This succeeds immediately. Both pods go into the `terminating`
+state at the same time. This puts the cluster in this state:
+
+|`node-1`|`node-2`|`node-3`|
+|---|---|---|
+|`pod-a` terminating|`pod-b` available|`pod-c` available|
+|`pod-x` terminating| | |
+
+The deployment notices that one of the pods is terminating, so it creates a
+replacement called `pod-d`. Since `node-1` is cordoned, it lands on another
+node. Something has also created `pod-y` as a replacement for `pod-x`.
+
+> **Note**: For a `StatefulSet`, `pod-a`, which would be called something like
+> `pod-0`, would need to terminate completely before its replacement, which is
+> also called `pod-0` but has different UID, could be created. Otherwise, the
+> example applies to a `StatefulSet` as well.
+
+Now the cluster is in this state:
+
+|`node-1` draining|`node-2`|`node-3`|
+|---|---|---|
+|`pod-a` terminating|`pod-b` available|`pod-c` available|
+|`pod-x` terminating|`pod-d` starting|`pod-y`|
+
+At some point, the pods terminate, and the cluster looks like this:
+
+|`node-1` drained|`node-2`|`node-3`|
+|---|---|---|
+| |`pod-b` available|`pod-c` available|
+| |`pod-d` starting|`pod-y`|
+
+
+ 
+ 
+ 
+
+
 
