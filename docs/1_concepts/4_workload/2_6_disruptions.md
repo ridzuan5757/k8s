@@ -206,7 +206,84 @@ disruptions can happens according to:
 - The type of controller.
 - The cluster's resource capacity.
 
+## Pod disruption conditions
 
+> In order to use this behaviour, `PodDisruptionConditions` feature gate must be
+> enabled in the cluster.
+
+When enabled, a dedicated pod `DisruptionTarget` condition is added to indicate
+that the pod is about to be deleted due to a disruption. The `reason` field of
+the condition additionally indicates on of the following reasons for the pod
+termination.
+
+###### `PreemptionByScheduler`
+
+Pod is due to be preempted by a scheduler in order to accommodate a new pod with
+a higher priority. Preemption logic in k8s helps a pending pod to find suitable
+node by evicting low priority pods existing on that node.
+
+###### `DeletionByTaintManager`
+
+Pod is due to be deleted by Taint Manager (which is part of the node lifecycle
+controller withing `kube-controller-manager`) due to a `NoExecute` taint that
+the pod does not tolerate.
+
+###### `EvictionByEvictionAPI`
+
+Pod has been marked for eviction using k8s API.
+
+###### `DeletionByPodGC`
+
+Pod that is bound to a no longer existing node, is due to be deleted by pod
+garbage collection.
+
+###### `TerminationByKubelet`
+
+Pod has been terminated by kubelet, because of either node pressure eviction or
+the graceful node shutdown.
+
+> A pod disruption might be interrupted. The control plane might re-attempt to
+> continue the disruption of the same pod, but it is not guaranteed. As a
+> result, the `DisruptionTarget` condition might be added to a pod, but that pod
+> might then not actually be deleted. In such situation, after some time, the
+> pod disruption condition will be cleared.
+
+When the `PodDisruptionConditions` feature gate is enabled, along with cleaning
+up the pods, the PodGC will also mark them as failed if they are in a
+non-terminal phase.
+
+When using a Job or CronJob, we may want to use these pod disruption conditions
+as part of the Job's failure policy.
+
+## Separating cluster owner and application owner roles
+
+Often, it is useful to think of the cluster manager and application owner as
+separate roles with limited knowledge to each other. This separation of
+responsibilities may make sense in these scenarios:
+- When there are many application teams sharing a k8s cluster, and there is
+  natural specialization of roles.
+- When third-party tools or services are used to automate cluster management.
+
+Pod disruption budget support this separation of roles by providing an interface
+between roles. If we do not have such a separation of responsibilities, a pod
+disruption budgets might not be needed.
+
+## How to perform disruptive actions on cluster
+
+If we are the cluster administrator, and we need to perform a disruptive action
+on all the nodes in the cluster, such as a node or system software upgrade,
+there are some options:
+- Accept downtime during the upgrade.
+- Failover to another complete replica cluster.
+    - No downtime, but may be costly both for the duplicated nodes and for human
+      effort to orchestrate the swicthover.
+- Write disruption tolerant applications and use PDBs.
+    - No downtime.
+    - Minimal resource duplication.
+    - Allows more automation of cluster administration.
+    - Writing disruption-tolerant applications is tricky, but the work to
+      tolerate voluntary disruptions largely overlaps with work to support
+      autoscaling and tolerating involuntary disruptions.
  
  
  
