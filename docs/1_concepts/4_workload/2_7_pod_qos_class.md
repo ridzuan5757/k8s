@@ -70,3 +70,36 @@ if none of the containers in the pod have a cpu limit or cpu request. Containers
 in a pod can request other resources (not cpu or memory) and still be classified
 as `BestEffort`.
 
+## Memory QoS with `cgroup v2`
+
+Memory qos uses the memory controller of cgroup v2 to guarantee memory resources
+in k8s. Memory requests and limits of containers in pod are used to set specific
+interfaces `memory.min` and `memory.high` provided by the memory controller.
+
+When `mmeory.min` is set to memory requests, memory resourcecs are reserved and
+never reclaimed by the kernel; this is how memory qos ensures memory
+availability for k8s pods. And if memory imits are set in the container, this
+means that the system needs to limit container memory usage; memory qos uses
+`memory.high` to throttle workload approaching its memory limit, ensuring that
+the system is not overwhelmed by instantaneous memory allocation.
+
+Memory qos relies on qos class to determine which settings to apply; however,
+these are different mechanisms that both provide controls over quality of
+service.
+
+## Some behaviour is independent of QoS class
+
+Certain behaviour is independent of the qos class assigned by k8s. For example:
+- Any container exceeding a resource limit will be killed and restarted by the
+  kubelet without affecting other containers in that pod.
+- If a container exceeds its resource request and the node it runs faces
+  resource pressure, the pod it is in becomes a candidate for eviction. If this
+  occurs, all containers in the pod will be terminated. k8s may create a
+  replacement pod, usually on different node.
+- The resource request of a pod is equal to the sum of the resource requests of
+  its component containers, and the resource limit of a pod is equal to the sum
+  of the resource limits of its component containers.
+= The `kube-scheduler` does not consider qos class when selecting which pods to
+  preempt. Preemption can occur when a cluster does not have enough resources to
+  run all the pods defined.
+
