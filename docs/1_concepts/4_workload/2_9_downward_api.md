@@ -51,6 +51,38 @@ as a `downwardAPI` volume `fieldRef`*:
 |`spec.serviceAccountName`|the name of the pod's service account|
 |`spec.nodeName`|the name of the node where the pod is executing|
 |`status.hostIP`|the primary IP address of the node to which pod is assigned|
-|`status.hostIPs`|the IP addresses is a dual-stack version of `status.hostIP`,the first is always the same as `status.hostIP`. The field is avaialble if `PodHostIps` feature gate is enabled.|
+|`status.hostIPs`|the IP addresses is a dual-stack version of `status.hostIP`,the first is always the same as `status.hostIP`. The field is avaialble if `PodHostIps` feature gate is enabled|
+|`status.podIP`|the pod's primary IP address|
+|`status.podIPs`|the IP addresses is dual-stack version of `status.podIP`, the first is always the same as `status.podIP`|
 
+The following information is available throught a `downwardAPI` volume 
+`fieldRef` **but not as environment variables*:
 
+|Field|Description|
+|---|---|
+|`metadata.labels`|all of the pod's labels, formatted as `label-key="escaped-label-value"` with one label per line|
+|`metadata.annotations`|all of the pod's annotations, formatted as `annotation-key="escaped-annotation-value"` with one annotation per line|
+
+### information available via `resourceFieldRef`
+
+These container-level fields allow us to provide information about requests and
+limists for resources such as CPUI and memory.
+
+```yaml
+resource:
+    limits.cpu
+    requests.cpu
+    limits.memory
+    requests.memory
+    limits.hugepages-*
+    requests.hugepages-*
+    limits.ephemeral-storage
+    requests.ephemeral-storage
+```
+
+### Fallback information on resource limits
+
+If CPU and memory limits are not specified for a container, and we use downward
+API to try to expose that information, then the kubelet defaults to exposing the
+maximum allocatable value for CPU and memory based on the node allocatable
+calculation.
