@@ -51,8 +51,6 @@ as a `downwardAPI` volume `fieldRef`*:
 |`spec.serviceAccountName`|the name of the pod's service account|
 |`spec.nodeName`|the name of the node where the pod is executing|
 |`status.hostIP`|the primary IP address of the node to which pod is assigned|
-|`status.hostIPs`|
-the IP addresses is a dual-stack version of `status.hostIP`,the first is always
-the same as `status.hostIP`. The field is avaialble if `PodHostIps` feature gate
-is enabled.|
+|`status.hostIPs`|the IP addresses is a dual-stack version of `status.hostIP`,the first is always the same as `status.hostIP`. The field is avaialble if `PodHostIps` feature gate is enabled.|
+
 
