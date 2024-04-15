@@ -44,13 +44,16 @@ Additionally, kubeadm informs the user if the certificate is externally managed;
 in this case, the user should take care managing certificate renewal manually /
 using other tools.
 
-> :warning: `kubeadm` cannot manage certificates signed by external CA.
+> [!WARNING]
+> `kubeadm` cannot manage certificates signed by external CA.
 
-> :note: `kubelet.conf` is not included in the list above because kubeadm
+> [!NOTE] 
+> `kubelet.conf` is not included in the list above because kubeadm
 > configures kubelet for automatic certificate renewal with rotatable
 > certificates under `/var/lib/kubelet/pki`.
 
-> :warning: On nodes creaated with `kubeadm init`, prior to kubeadm version
+> [!WARNING]
+> On nodes creaated with `kubeadm init`, prior to kubeadm version
 > 1.17, there is a bug where we manually have to modify contents of
 > kubelet.conf. After `kubeadm init` finishes, we should update `kubelet.conf`
 > to point to the rotated client certificates, by replacing
