@@ -73,5 +73,6 @@ have specific requirements on certificate renewal and perform k8s version
 upgrades regularly (less than 1 year in between each upgrade), kubeadm will take
 care of keeping the cluster up to date and reasonable secure.
 
-> [!NOTE] It is best practice to upgrade the cluster frequently in order to
+> [!NOTE] 
+> It is best practice to upgrade the cluster frequently in order to
 > stay secure.
