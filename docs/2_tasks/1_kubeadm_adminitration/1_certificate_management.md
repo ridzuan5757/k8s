@@ -64,3 +64,14 @@ using other tools.
 > client-key: /var/lib/kubelet/pki/kubelet-client-current.pem
 > ```
 
+## Automatic certificate renewal
+
+kubeadm renews all the certificates during control plane upgrade.
+
+This feature is designed for addressing the simplest use cases; if we do not
+have specific requirements on certificate renewal and perform k8s version
+upgrades regularly (less than 1 year in between each upgrade), kubeadm will take
+care of keeping the cluster up to date and reasonable secure.
+
+> [!NOTE] It is best practice to upgrade the cluster frequently in order to
+> stay secure.
