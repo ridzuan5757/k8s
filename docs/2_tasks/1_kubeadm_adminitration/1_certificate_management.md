@@ -64,3 +64,72 @@ using other tools.
 > client-key: /var/lib/kubelet/pki/kubelet-client-current.pem
 > ```
 
+## Automatic certificate renewal
+
+kubeadm renews all the certificates during control plane upgrade.
+
+This feature is designed for addressing the simplest use cases; if we do not
+have specific requirements on certificate renewal and perform k8s version
+upgrades regularly (less than 1 year in between each upgrade), kubeadm will take
+care of keeping the cluster up to date and reasonable secure.
+
+> [!NOTE] 
+> It is best practice to upgrade the cluster frequently in order to
+> stay secure.
+
+If we have more complex requirements for certificate reneal, we can opt out from
+the default behaviour by passing `--certificate-renewal=false` to `kubeadm
+upgrade apply` or to `kubeadm upgrade node`.
+
+> [!WARNING]
+> Prior to kubeadm version 1.17 there is a bug where the default value for
+> `--certificate-renewal` is `false` for the `kubeadm upgrade node` command. In
+> that case, we should explicitly set `--certificate-renewal=true`.
+
+## Manual certificate renewal
+
+We can renew the certificates manually at any time with the `kubeadm certs renew` command, with the appropriate command line options.
+
+This command performs the renewal using CA (or front-proxy-ca) certificate and
+key stored in `/etc/kubernetes/pki`.
+
+After running the command we should restart the control plane pods. This is
+required since dynamic certificate reload is currently not supported for all
+components and certificates.
+
+Static pods are managed by local kubelet and not by the API server, thus kubectl
+cannot be used to delete and restart them. To restart a static pod we can
+temporarily manifest file from `/etc/kubernetes/manifests/` and wait for 20
+seconds (see the `fileCheckFrequency` value in KubeletConfiguration struct). The
+kubelet will terminate the pod is it is no longer in the manifest directory, WE
+can then move the file back and after another `fileCheckFrequency` period, the
+kubelet will recreate the pod and the certificate renewal for the component can
+complete.
+
+> [!WARNING]
+> If we are running an HA cluster, this command needs to be executed on all the
+> control-plane nodes.
+
+> [!NOTE]
+> `certs renew` uses the existing certificates as the authoritative source for
+> attributes (Common Name, Organization, SAN, etc.) instead of the `kubeadm-config` 
+> ConfigMap. It is strongly recommended to keep them both in sync.
+
+`kubeadm certs renew` can remew any specific certificate or, with the subcommand
+`all` can renewl all of them, as shown below:
+
+```bash
+kubeadm certs renew all
+```
+
+> [!NOTE]
+> Clisters built with kubeadm often copy the `admin.conf` certificate into
+> `$HOME/.kube/config`. On such a system, to update the contents of
+> `$HOME/.kube/admin.confg`, the following command must be executed as well:
+>
+> ```bash
+>   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+>   sudo chown $(id -u):$(id -g) $HOME/.kube/config
+> ```
+
+
