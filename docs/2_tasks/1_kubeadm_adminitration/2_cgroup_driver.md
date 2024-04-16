@@ -76,3 +76,28 @@ must include both steps outlined below.
   cgroupDriver: systemd
   ```
 
+  This field must present under the `kubelet:` section of the ConfigMap.
+
+### Update the cgroup driver on all nodes
+For each node in the cluster:
+- Drain the node using `kubectl drain <node-name> --ignore-daemonsets`.
+- Stop the kubelet using `systemctl stop kubelet`.
+- Stop the container runtime `systemctl stop docker`.
+- Modify the container runtime cgroup driver to `systemd`. For containerd /
+  Docker container runtime:
+    - Copy the default configuration:
+      ```bash
+      sudo mkdri -p /etc/containerd
+      sudo containerd config default | sudo tee /etc/containerd/config.toml
+      ```
+    - Edit the configuration file and set `SystemdCgroup` to `true`.
+- Set `cgroupDriver: systemd` in `var/lib/kubelet/config.yaml`.
+- Start the container runtime `systemctl start docker`.
+- Start the kubelet `systemctl start kubelet`.
+- Uncordon the node using `kubectl uncordon <node-name>`.
+
+Execute these steps on the nodes one at a time to ensure workloads have
+sufficient time to schedule on different nodes. Once the process is complete
+ensure that all nodes and workloads are healthy.
+    
+
