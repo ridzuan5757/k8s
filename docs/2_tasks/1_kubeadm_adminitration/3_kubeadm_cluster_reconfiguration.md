@@ -102,3 +102,80 @@ kubeadm init phase etcd local --config <config-file>
 > Updating a file in `/etc/kubernetes/manifests` will tell the kubelet to
 > restart the static pod for the corresponding component. Try doing these
 > changes one node at a time to leave the cluster without downtime.
+
+### Applying kubelet configuration changes
+
+#### Updating the `KubeletConfiguration`
+
+During cluster creation and upgrade, kubeadm writes its `KubeletConfiguration`
+in a ConfigMap called `kubelet-config` in the `kube-system` namespace.
+
+We can edit the ConfigMap with this command:
+
+```bash
+kubectl edit cm -n kube-system kubelet-config
+```
+
+The configuration is located under the `data.kubelet` key.
+
+#### Reflecting the kubelet changes
+
+To reflect the change on kubeadm nodes, we must do the following:
+- Log in to a kubeadm node.
+- Run `kubeadm upgrade node phase kubelet-config` to download the latest
+  `kubelet-config` ConfigMap contents into the local file
+  `var/lib/kubelet/config.yaml`.
+- Edit the file `/var/lib/kubelet/kubeadm-flags.env` to apply additional
+  configuration with flags.
+- Restart the kubelet service with `systemctl restart kubelet`.
+
+> [!NOTE]
+> Do these changes one node at a time to allow workloads to be rescheduled
+> properly.
+
+> [!NOTE]
+> During `kubeadm upgrade`, kubeadm downloads the `KubeletConfiguration` from
+> the `kubelet-config` ConfigMap  and overwrite the conents of
+> `/var/lib/kubelet/config.yaml`. This means that node local configuration must
+> be applied either by flags in `/var/lib/kubelet/kubeadm-flags.env` or by
+> manually updating the contents of `/var/lib/kubeket/config.yaml` after
+> `kubeadm upgrade`, and then restarting the kubelet.
+
+#### Applying kube-proxy configuration changes
+
+##### Updating the `KubeProxyConfiguration`
+
+During cluster creation and upgrade, kubeadm writes its `KubeProxyConfiguration`
+in a ConfigMap in the `kube-system` called `kube-proxy`.
+
+This ConfigMap is used by the `kube-proxy` DAemonSet in the `kube-system`
+namespace.
+
+To change a particular option in the `KubeProxyConfiguration`, we can edit the
+ConfigMap with this command:
+
+```bash
+kubectl edit cm -n kube-system kube-proxy
+```
+
+The configuration is located under the `data.config.conf` key.
+
+#### Reflecting the kube-proxy configuration changes
+
+Once the `kube-proxy` ConfigMap is updated, we can restart all kube-proxy pods:
+
+```bash
+kubectl get pod -n kube-system | grep kube-proxy
+```
+
+Delete a pod with:
+
+```bash
+kubectl delete pod -n kube-system <pod-name>
+```
+
+> [!NOTE]
+> Because kubeadm deploys kube-proxy as a DaemonSet, node specific configuration
+> is unsupported.
+
+
