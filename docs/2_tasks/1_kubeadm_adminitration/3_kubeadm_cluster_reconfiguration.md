@@ -178,4 +178,90 @@ kubectl delete pod -n kube-system <pod-name>
 > Because kubeadm deploys kube-proxy as a DaemonSet, node specific configuration
 > is unsupported.
 
+### Applying CoreDNS configuration changes
 
+#### Updating the CoreDNS Deployment and Service
+
+kubeadm deploys CoreDNS as a Deployment called `codedns` and with a Service
+`kube-dns`, both in the `kube-system` namespace.
+
+To update any of the CodeDNS settings, we can edit the Deployment and Service
+objects:
+
+```bash
+kubectl edit deployment -n kube-system coredns
+kubectl edit service -n kube-system kube-dns
+```
+
+#### Reflecting the CoreDNS changes
+
+Once the CoreDNS changes are applied, we can delete the CoreDNS pods. To obtain
+the pod names:
+
+```bash
+kubectl get pod -n kube-system | grep coredns
+```
+
+Delete a pod with:
+
+```bash
+kubectl delete pod -n kube-system <pod-name>
+```
+
+New pods with the updated CoreDNS configuration will be created.
+
+> [!NOTE]
+> kubeadm does not allow CoreDNS configuration during cluster creation and
+> upgrade. This means that if we execute `kubeadm ugprade apply`, our changes to
+> the CoreDNS objects will be lost and must be reapplied.
+
+## Perssting the reconfiguration
+
+During the execution of `kubeadm upgrade` on managed node, kubeadm might
+overwrite configuration that was applied after the cluster was created
+(reconfiguration).
+
+### Persisting Node object reconfiguration
+
+kubeadm writes Labels, Taints, CRI socket and other information on the Node
+object for a particular k8s node. To change any of the contents of this Node
+object, we can use:
+
+```bash
+kubect edit no <node-name>
+```
+
+During `kubeadm upgrade` the contents of such Node might get overwritten. If we
+would like to persist our modifications to the Node object after upgrade, we can
+prepare a `kubectl patch` and appli it to the Node object:
+
+```bash
+kubectl patch no <node-name> --patch-file <patch-file>
+```
+
+#### Persisting control plane component reconfiguration
+
+The main source of control plane configuration is the `ClusterConfiguration`
+object stored in the cluster. To extend the static pod manifest configuration,
+patches can be used.
+
+These patch files must remain as files on the control plane nodes to ensure that
+they can be used by the `kubeadm upgrade ... --patches <directory>`. 
+
+If reconfiguration is done to the `ClusterConfiguration` and static pod
+manifests on disk, the set of node specific patches must be updated accordingly.
+
+#### Persisting kubelet reconfiguration
+
+Any changes to the `KubeletConfiguration` stored on
+`/var/lib/kubelet/config.yaml` will be overwritten on `kub3eadm upgrade` by
+downloading the contents of the cluster wide `kubelet-config` ConfigMap. To
+persist kubelet node speficic configuration either the file
+`/var/lib/kubelet/config.yaml` has to be updated manually post-upgrade or the
+file `var/lib/kubelet/kubeadm-flags.env` can include flags.
+
+The kubelet flags override the associated `KubeletConfiguration` options, but
+note that some of the flags are deprecated.
+
+A kubelet restart will be required after changing 
+`/var/lib/kubelet/config.yaml` or `/var/lib/kubelet/kubeadm-flags.env`.
