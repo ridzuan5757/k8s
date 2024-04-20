@@ -486,3 +486,199 @@ deployments "nginx-deployment" revision 2
   No volumes.
 ```
 
+### Rolling Back to a Previous Revision
+
+Now that we have decided to undo the current rollout and rollback to the
+previous revision:
+
+```bash
+kubectl rollout undo deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment rolled back
+```
+
+Alternatively, we can rollback to specific revision by specifying it with
+`--to-revision`:
+
+```bash
+kubectl rollout undo deployment/nginx-deployment --to-revision=2
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment rolled back
+```
+
+The Deployment is now rolled back to a previous stable revision. As we can see,
+a `DeploymentRollback` event for rolling back to revision 2 is generated from
+Deployment Controller. We can check if the rollback is successful and the
+Deployment is running as expected:
+
+```bash
+kubectl get deployment nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   3/3     3            3           30m
+```
+
+Checking the description of the Deployment using `kubectl describe deployment
+nginx-deployment` will output something similar to this:
+
+```bash
+Name:                   nginx-deployment
+Namespace:              default
+CreationTimestamp:      Sun, 02 Sep 2018 18:17:55 -0500
+Labels:                 app=nginx
+Annotations:            deployment.kubernetes.io/revision=4
+                        kubernetes.io/change-cause=kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1
+Selector:               app=nginx
+Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=nginx
+  Containers:
+   nginx:
+    Image:        nginx:1.16.1
+    Port:         80/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   nginx-deployment-c4747d96c (3/3 replicas created)
+Events:
+  Type    Reason              Age   From                   Message
+  ----    ------              ----  ----                   -------
+  Normal  ScalingReplicaSet   12m   deployment-controller  Scaled up replica set nginx-deployment-75675f5897 to 3
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-c4747d96c to 1
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled down replica set nginx-deployment-75675f5897 to 2
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-c4747d96c to 2
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled down replica set nginx-deployment-75675f5897 to 1
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-c4747d96c to 3
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled down replica set nginx-deployment-75675f5897 to 0
+  Normal  ScalingReplicaSet   11m   deployment-controller  Scaled up replica set nginx-deployment-595696685f to 1
+  Normal  DeploymentRollback  15s   deployment-controller  Rolled back deployment "nginx-deployment" to revision 2
+  Normal  ScalingReplicaSet   15s   deployment-controller  Scaled down replica set nginx-deployment-595696685f to 0
+```
+
+## Scaling a Deployment
+
+We can scale a Deployment using the `scale` subcommand:
+
+```bash
+kubectl scale deployment/nginx-deployment --replicas=10
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment scaled
+```
+
+Assuming that horizontal pod autoscaling is enabled in the cluster, we can set
+up an autoscaler for the Deployment and choose the minimum and maximum number of
+Pods we need to run based on the CPU utilization of the existing Pods.
+
+```bash
+kubectl autoscale deployment/nginx-deployment --min=10 --max=15 --cpu-percent=80
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment scaled
+```
+
+### Proportional scaling
+
+RollingUpdate Deployments support running multiple versions of an application at
+the same time. When we or an autoscaller scales a RollingUpdate Deployment that
+is in the middle of a rollout (either in progress or paused), the Deployment
+controller balances the additional replicas in the existing active ReplicaSets
+in order to motigate risk. This is called proportional scaling.
+
+For example, we are running a Deployment with 10 replicas, maxSurge = 3, and
+maxUnavailable = 2.
+- Ensure that the 10 replicas in the Deployment are running.
+  ```bash
+  kubectl get deploy
+  ```
+
+  The output is similar to this:
+  ```bash
+  NAME                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+  nginx-deployment     10        10        10           10          50s
+  ```
+- We update to a new image which happens to be unresolvable form inside the
+  cluster.
+  ```bash
+  kubectl set image deployment/nginx-deployment nginx=nginx:sometag
+  ```
+
+  The output si similar to this:
+  ```bash
+  deployment.apps/nginx-deployment image updated
+  ```
+- The image update starts a new rollout with new ReplicaSet, but it is blocked
+  ue to the `maxUnavailable` requirement that was mentioned above. This can be
+  checked using the `rs` subcommand:
+
+  ```bash
+  kubectl get res
+  ```
+
+  The output is similar to this:
+
+  ```bash
+  NAME                          DESIRED   CURRENT   READY     AGE
+  nginx-deployment-1989198191   5         5         0         9s
+  nginx-deployment-618515232    8         8         8         1m
+  ```
+- Then a new scaling request for the Deployment comes along. The autoscaler
+  increments the Deployment replicas to 15. The Deployment controller needs to
+  deide where to add these 5 new replicas. If we were not using proportional
+  scaling, all 5 of them would be added in the new ReplicaSet.
+
+  With proportional scaling, we spread the additional replicas across all
+  ReplicaSets. Bigger propertions go to the ReplicaSets with the most replicas
+  and lower proportions to go to ReplicaSets with less replicas. Any leftovers
+  are added to the ReplicaSet with most replicas. ReplicaSets with zero replicas
+  are not scaled up.
+
+In the example above, 3 replicas are added to the old ReplicaSet and 2 replicas
+are added to the new ReplicaSet. The rollout process should eventuallly move all
+replicas to the new ReplicaSet, assuming the new replicas become healthy. We can
+confirm this using `kubectl get deploy` which should returns:
+
+```bash
+NAME                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment     15        18        7            8           7m
+```
+
+The rollout status checked using `kubectl get rs` confirms how the replicas were
+added to each ReplicaSet:
+
+```bash
+NAME                          DESIRED   CURRENT   READY     AGE
+nginx-deployment-1989198191   7         7         0         7m
+nginx-deployment-618515232    11        11        11        7m
+```
+
+
+
