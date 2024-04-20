@@ -342,4 +342,25 @@ that case, the Deployment immediately starts killing the 3 `nginx:1.14.2` Pods
 that it had created, and starts creating `nginx:1.16.1` Pods. It does not wait
 for the 5 replicas of `nginx:1.14.2` to be created before changing course.
 
+### Label selector updates
 
+It is generally discouraged to make label selector updates and it is suggested
+to plan the selectors upfront. In any case, if we need to perform a label
+selector update, exercise a great caution and understand the implication that
+came along with this action.
+
+> [!NOTE]
+> In API version `apps/v1`, a Deployment's label selector is immutable after it
+> gets created.
+
+- Selector additions require the Pod template labels in the Deployment spec to
+  be updated with the new label too, otherwise a validation error is returned.
+  This change is a non-overlapping one, meaning that the new selector does not
+  select ReplicaSets and Pods created with the old selector, resulting in
+  orphaning all old ReplicaSets and creating a new ReplicaSet.
+- Selector updates change the existing value in a selector key -- result in the
+  same behaviour as additions.
+- Selector removals removes an existing key from the Deployment selector -- do
+  not require any changes in the Pod template labels. Existing ReplicaSets are
+  not orphaned, and a new ReplicaSet is not created, but note that the removed
+  label still exists in any existing Pods and ReplicaSets.
