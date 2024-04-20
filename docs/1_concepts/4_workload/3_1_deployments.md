@@ -321,3 +321,25 @@ In order to get more details on the updated Deployment:
 > `replicas + maxSurge` until the `terminationGracePeriodSeconds` of the
 > terminating Pods expires.
 
+### Rollover (aka multiple updates in-flight)
+
+Each time a new Deployment is observed by the Deployment controller, a
+ReplicaSet is created to bring up the desired Pods. If the Deployment is
+updated, the existing ReplicaSet that controls Pods whose labels match
+`match.selector` but whose template does not match `.spec.template` are scaled
+down. Eventully, the new ReplicaSet is scaled to `spec.Replicas` and all old
+ReplicaSets is caled to 0.
+
+If we update a Deploymeent while an existing rollout is in progress, the
+Deployment creates a new ReplicaSet as per update and start scaling that up, and
+rolls over the ReplicaSet that is was scaling up previously -- it will add it to
+its list of old ReplicaSets and start scaling it down.
+
+For example, suppose that we create a Deployment to create 5 replicas of
+`nginx:1.14.2`, but then update the Deployment to create 5 replicas of
+`nginx:1.16.1`, when only 3 replicas of `nginx:1.14.2` has been created. In
+that case, the Deployment immediately starts killing the 3 `nginx:1.14.2` Pods
+that it had created, and starts creating `nginx:1.16.1` Pods. It does not wait
+for the 5 replicas of `nginx:1.14.2` to be created before changing course.
+
+
