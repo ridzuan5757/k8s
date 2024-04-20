@@ -364,3 +364,45 @@ came along with this action.
   not require any changes in the Pod template labels. Existing ReplicaSets are
   not orphaned, and a new ReplicaSet is not created, but note that the removed
   label still exists in any existing Pods and ReplicaSets.
+
+## Rolling Back a Deployment
+
+Sometimes, a Deployment rollback might be needed; for example, when the
+Deployment is not stabe, such as crash looping. By default, all of the
+Deployment's rollout history is kept in the system so that we can rollback
+anytime we want.
+
+> [!NOTE]
+> A Deployment's revision is created when a Deployment's rollout is triggered.
+> This means that the new revision is created if and only if the Deployment's Pod
+> template `.spec.template` is changed. For example, if we update the labels or
+> container image of the template. 
+>
+> Other updates, such as scaling the Deployment, do not create a Deployment
+> revision, so that we can facilitate simultaneos manual or auto-scaling. This
+> means that when we roll back to an earlier revision, only the `template` part
+> is being rolled back.
+
+- Suppose that we made a typo while updating the Deployment, by putting the
+  image name as `nginx:1.161` instead of `nginx:1.16.1`:
+
+  ```bash
+  kubectl set image deployment/nginx-deployment nginx=nginx:1.161
+  ```
+
+  The output is similar to this:
+
+  ```bash
+  deployment.apps/nginx-deployment image updated
+  ```
+- This will cause the rollout to get stuck, which can be checked via:
+  
+  ```bash
+  kubectl rollout status deployment/nginx-deployment
+  ```
+
+  The output is similar to this:
+
+  ```bash
+  Waiting for rollout to finish: 1 out of 3 new replicas have been updated...
+  ```
