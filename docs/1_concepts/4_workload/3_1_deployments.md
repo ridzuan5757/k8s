@@ -406,3 +406,83 @@ anytime we want.
   ```bash
   Waiting for rollout to finish: 1 out of 3 new replicas have been updated...
   ```
+- We can also observe the deployment status by checking the ReplicaSet via `kubectl
+  get rs`. The ouput will be similar to this:
+
+  ```bash
+  NAME                          DESIRED   CURRENT   READY   AGE
+  nginx-deployment-1564180365   3         3         3       25s
+  nginx-deployment-2035384211   0         0         0       36s
+  nginx-deployment-3066724191   1         1         0       6s
+  ```
+  Observe that there is one deployment where the ready state is not matching
+  with the desired state.
+- Looking back at the Pods created, we will also see that 1 Pod is created by
+  new ReplicaSet is stuch in an image pull loop. This can be checked using
+  `kubectl get pods`. The output is similar to this:
+
+  ```bash
+  NAME                                READY     STATUS             RESTARTS   AGE
+  nginx-deployment-1564180365-70iae   1/1       Running            0          25s
+  nginx-deployment-1564180365-jbqqo   1/1       Running            0          25s
+  nginx-deployment-1564180365-hysrc   1/1       Running            0          25s
+  nginx-deployment-3066724191-08mng   0/1       ImagePullBackOff   0          6s
+  ```
+
+  > [!NOTE]
+  > The Deployment controller stops the bad rollout automatically, and stops
+  > scaling up the new ReplicaSet. Ths depends on the rolling update parameters
+  > `maxUnavailable` that we specified. k8s by default sets this value to 25%.
+
+  To fix this, we need to rollback to a previous revision of Deployment that is
+  stable.
+
+### Checking Rollout History of a Deployment
+
+We can check the revision of the deployment using the following command:
+
+```bash
+kubectl rollout history deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+deployments "nginx-deployment"
+REVISION    CHANGE-CAUSE
+1           kubectl apply --filename=https://k8s.io/examples/controllers/nginx-deployment.yaml
+2           kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1
+3           kubectl set image deployment/nginx-deployment nginx=nginx:1.161
+```
+
+`CHANGE-CAUSE` is copied from the Deployment annotation
+`kubernetes.io/change-cause` to its revision upon creation. We can specify the
+`CHANGE-CAUSE` message by:
+- Annotating the Deployment with `kubectl annotate deployment/nginx-deployment
+  kubernetes.io/change-cause="image updated to 1.16.1"`
+- Manually editing the manifest of the resource.
+
+To see the details of each revision, run:
+
+```bash
+kubectl rollout history deployment/nginx-deployment --revision=2
+```
+
+The output is similar to this:
+
+```bash
+deployments "nginx-deployment" revision 2
+  Labels:       app=nginx
+          pod-template-hash=1159050644
+  Annotations:  kubernetes.io/change-cause=kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1
+  Containers:
+   nginx:
+    Image:      nginx:1.16.1
+    Port:       80/TCP
+     QoS Tier:
+        cpu:      BestEffort
+        memory:   BestEffort
+    Environment Variables:      <none>
+  No volumes.
+```
+
