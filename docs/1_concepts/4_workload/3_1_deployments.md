@@ -909,4 +909,62 @@ echp $?
 0
 ```
 
+### FAiled Deployment
+
+The Deployment may get stuck tring to deploy its newest ReplicaSet without ever
+completing. This can occur due to some of the following factors:
+- Insufficient quota
+- Readiness probe failures
+- Image pull errors
+- Insufficient permissions
+- Limit ranges
+- Application runtime misconfiguration
+
+One way we can detect this condition is to specify a deadline parameter in the
+Deployment spec `.spec.progresDeadlineSeconds`. This parameter denotes the
+number of seconds the Deployment controller waits before indicating that the
+Deployment has stalled.
+
+The following command sets the spec with `progresDeadlineSeconds` to make the
+controller report lack of progress of a rollout for a Deployment after 10
+minutes:
+
+```bash
+kubectl patch deployment/nginx-deployment \
+    -p '{"spec":{"progressDeadlineSeconds":600}}'
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment patched
+```
+
+Once the deadline has been exceeded, the Deployment controller adds a
+DeploymentCondition with the following attributes to the Deployment's
+`.status.conditions`:
+
+```yaml
+status:
+    conditions:
+        type: Progressing
+        status: "False"
+        reason: ProgressDeadlineExceeded
+```
+
+This condition can also fail early and is then set the status of `"False"` due
+to reasons as `ReplicaSetCreateError`. Alsom the deadline is not taken into
+account anymore once the Deployment rollout completes.
+
+> [!NOTE]
+> k8s takes no action on a stalled Deployment other than to report a status
+> condition with `reason: ProgressDeadlineExceeded`. Higher level orchestrators
+> can take advantage of it and act accordingly, for example, rollback the
+> Deployment to its previous verion.
+>
+> IF we pause a Deployment rollout, k8s does not check progress against the
+> specified deadline. We can safely pause a Deployment rollout in the middle of
+> a rollout and resume without triggering the condition for exceeding the
+> deadline.
+
 
