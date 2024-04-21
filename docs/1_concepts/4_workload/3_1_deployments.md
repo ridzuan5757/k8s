@@ -849,14 +849,64 @@ When the rollout becomes `progressing`, the Deployment controller adds a
 condition with the following attributes to the Deployment's
 `.status.conditions`:
 
-```json
-{
-    type: Progressing,
-    status: "True",
-    reason: NewReplicaSetCreated | 
-    reason: FoundNewReplicaSet | 
-    reason: ReplicaSetUpdated
-}
+```yaml
+status:
+    conditions:
+        type: Progressing,
+        status: "True",
+        reason: NewReplicaSetCreated | FoundNewReplicaSet | ReplicaSetUpdated
 ```
 
 We can monitor the progress for a Deployment by using `kubectl rollout status`.
+
+### Complete Deployment
+
+k8s marks a Deployment as **complete** when it has the following
+characteristics:
+- All of the replicas associated with the Deployment have been updated to the
+  latest version we have specified, meaning any updates we have requested have
+  been completed.
+- All of the replicas associated with the Deployment are available.
+- No old replicas for the Deployment are running.
+
+When the rollout becomes `complete`, the Deployment controller sets a condition
+with the following attributes to the Deployment's `.status.conditions:`
+
+```yaml
+status:
+    conditions:
+        type: Progressing
+        status: "True"
+        reason: NewReplicaSetAvailable
+```
+
+This `Progressing` condition will retain a status value of `"True"` until a new
+rollout is initiated. The condition holds even when availability of replicas
+changes (which does instead affect the `Available` condition).
+
+We can check if a Deployment has completed by usoing `kubectl rollout status`.
+If the rollout completed successfully, `kubectl rollout status` returns a zero
+exit code:
+
+```bash
+kubectl rollout status deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+Waiting for rollout to finish: 2 of 3 updated replicas are available...
+deployment "nginx-deployment" successfully rolled out
+```
+
+and the exit status from `kubectl rollout` is `0` insicating success:
+
+```bash
+echp $?
+```
+
+```bash
+0
+```
+
+
