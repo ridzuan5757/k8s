@@ -829,3 +829,34 @@ nginx-3926361531   3         3         3         28s
 
 > [!NOTE]
 > We cannot rollback a paused Deployment until we resume it.
+
+## Deployment status
+
+A Deployment enters various states during its lifecycle. It can be progressing
+while rolling out a new ReplicaSet, it can be completes, or it can fail to
+progress.
+
+### Progressing Deployment
+
+k8s marks a Deployment as **progressing** when one of the following tasks is
+performed:
+- The Deployment creates a new ReplicaSet.
+- The Deployment is scaling up its newest ReplicaSet.
+- The Deployment is scaling down its older ReplicaSets.
+- New Pods become ready or available (ready for at least `MinReadySeconds`).
+
+When the rollout becomes `progressing`, the Deployment controller adds a
+condition with the following attributes to the Deployment's
+`.status.conditions`:
+
+```json
+{
+    type: Progressing,
+    status: "True",
+    reason: NewReplicaSetCreated | 
+    reason: FoundNewReplicaSet | 
+    reason: ReplicaSetUpdated
+}
+```
+
+We can monitor the progress for a Deployment by using `kubectl rollout status`.
