@@ -680,5 +680,152 @@ nginx-deployment-1989198191   7         7         0         7m
 nginx-deployment-618515232    11        11        11        7m
 ```
 
+## Pausing and Resuming a rollout of a Deployment
 
+When we update a Deployment, or plan to, we can pause rollouts for that
+Deployment before we trigger one or more updates. When we are ready to apply
+those changes, we resume rollouts for the Deployment. This approach allows us to
+apply multiple fixes in between pausing and resuming without triggering
+unecessary rollouts.
 
+For example, with a Deployment that was created, we can obtain the deployment
+details using `kubectl get deploy`. Suppose that the outcome of the subcommand
+is something like this:
+
+```bash
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx     3         3         3            3           1m
+```
+
+We can check the rollout status using `kubectl get rs` subcommand which will
+output something similar to this:
+
+```bash
+NAME               DESIRED   CURRENT   READY     AGE
+nginx-2142116321   3         3         3         1m
+```
+
+We can pause the deployment using the following command:
+
+```bash
+kubectl rollout pause deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment paused
+```
+
+Then we can perform different sutffs, say we want to update the image of the
+Deployment, we can do something like this:
+
+```bash
+kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment image updated
+```
+
+Notice that no new rollout started, which can be verified using the following
+command:
+
+```bash
+kubectl rollout history deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+deployments "nginx"
+REVISION  CHANGE-CAUSE
+1   <none>
+```
+
+We can check the rollout status using `kubectl get rs` to verify that the
+existing ReplicaSet has not changed. The output will be something similar to
+this:
+
+```bash
+NAME               DESIRED   CURRENT   READY     AGE
+nginx-2142116321   3         3         3         2m
+```
+
+We can make as many updates as we wish, for example update the resources that
+will be used:
+
+```bash
+kubectl set resources deployment/nginx-deployment \
+    -c=nginx --limits=cpu=200m,memory=512Mi
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment resource requirements updated
+```
+
+The initial state of the Deployment prior to pausing its rollout will continue
+its function, but new updates to the Deployment will not have any effect as long
+as the Deployment rollout is paused.
+
+Eventually, we will resume the Deployment rollout and obser a new ReplicaSet is
+coming up with all the new updates:
+
+```bash
+kubectl rollout resume deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+kubectl rollout resume deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+deployment.apps/nginx-deployment resumed
+```
+
+Watch the status of the rollout until it is done:
+
+```bash
+kubectl get rs -w
+```
+
+The output is similar to this:
+
+```bash
+NAME               DESIRED   CURRENT   READY     AGE
+nginx-2142116321   2         2         2         2m
+nginx-3926361531   2         2         0         6s
+nginx-3926361531   2         2         1         18s
+nginx-2142116321   1         2         2         2m
+nginx-2142116321   1         2         2         2m
+nginx-3926361531   3         2         1         18s
+nginx-3926361531   3         2         1         18s
+nginx-2142116321   1         1         1         2m
+nginx-3926361531   3         3         1         18s
+nginx-3926361531   3         3         2         19s
+nginx-2142116321   0         1         1         2m
+nginx-2142116321   0         1         1         2m
+nginx-2142116321   0         0         0         2m
+nginx-3926361531   3         3         3         20s
+```
+
+Get the status of the latest rollout using `kubectl get rs`. The output is
+similar to this:
+
+```bash
+NAME               DESIRED   CURRENT   READY     AGE
+
+nginx-2142116321   0         0         0         2m
+nginx-3926361531   3         3         3         28s
+```
+
+> [!NOTE]
+> We cannot rollback a paused Deployment until we resume it.
