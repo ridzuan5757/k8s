@@ -1107,3 +1107,34 @@ of the Deployment is part of the basis for naming those Pods. The name of a
 Deployment must be a valid DNS subdomain value, but this can produce unexpected
 results for the Pod hostnames. For best compatibility, the name should follow
 more restructive rules for a DNS label.
+
+### Pod Template
+
+The `.spec.template` and `.spec.selector` the only required fields of the `.spec`.
+
+The `.spec.template` is a Pod template. It has exactly same schema as a Pod,
+except it is nested and does not have an `apiVersion` or `kind`.
+
+In addition to required fields for a Pod, a Pod tempalte in a Deployment must
+specify appropriate labels and an appropriate restart policy. For labels, make
+sure not to overlap with other controllers.
+
+Only a `.spec.template.spec.restartPolicy` equal to `Always` is allowed, which
+is default if not specified.
+
+### Replicas
+
+`.spec.replicas` is an optional field that specifies the number of desired Pods.
+It is defaults to 1.
+
+Should we manually scale a Deployment, example via `kubectl scale
+deployment/deployment-name --replicas=X`, and then we update that DEployment
+based on a manifest (for example: by running `kubectl apply -f
+deployment.yaml`), then applying that manifest overwrites the manual scaling
+that was previously implemented.
+
+If a HorizontalPodAutoScaler or any similaar API for horizontal scaling is
+managing scaling for a Deployment, do not set `.spec.replicas`.
+
+Instead, allow k8s with cotnrol plane to manage the `.spec.replicas` field
+automatically.
