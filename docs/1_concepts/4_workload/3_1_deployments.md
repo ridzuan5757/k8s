@@ -1072,3 +1072,18 @@ error: deployment "nginx" exceeded its progress deadline
 and the exit status from `kubectl rollout` is 1, indicating an error. Using
 `echo $?` will return `1`.
 
+### Operating on a failed deployment
+
+All actions that apply to a complete Deployment also apply to a failed
+Deployment. We can scale it up/down, rollback to a previous revision, or even
+pause it if we need to apply multiple tweaks in the Deployment Pod template.
+
+## Clean up Policy
+
+We can set `.spec.revisionHistoryLimit` field in a Deployment to specify how
+many old ReplicaSets for this Deployment we want to retain. The rest will be
+garbage-collected in the background. By default, it is 10.
+
+> [!NOTE]
+> Explicitly setting this field to 0, will result in cleaninbg up all the
+> history of the Deployment thus that Deployment will not be able to roll back.
