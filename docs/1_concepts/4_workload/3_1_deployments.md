@@ -1087,3 +1087,23 @@ garbage-collected in the background. By default, it is 10.
 > [!NOTE]
 > Explicitly setting this field to 0, will result in cleaninbg up all the
 > history of the Deployment thus that Deployment will not be able to roll back.
+
+## Canary Deployment
+
+If we want to roll out releases to a subset of users or servers using the
+Deployment, we can create multiple Deployments, one for each release following
+the canary pattern.
+
+## Writing a Deployment Spec
+
+As will all other k8s configs, a Deployments needs the following fields:
+- `.apiVersion`
+- `.kind`
+- `.metadata`
+- `.spec`
+
+When the control plane creates new Pods for the Deployment, the `.metadata.name`
+of the Deployment is part of the basis for naming those Pods. The name of a
+Deployment must be a valid DNS subdomain value, but this can produce unexpected
+results for the Pod hostnames. For best compatibility, the name should follow
+more restructive rules for a DNS label.
