@@ -967,4 +967,108 @@ account anymore once the Deployment rollout completes.
 > a rollout and resume without triggering the condition for exceeding the
 > deadline.
 
+We may experience transient errors with the Deplyoments, either due to a low
+timeout that we have set or due to any other kind of error that can be treated
+as transient. For example, let's suppose we have insufficient quota. If we
+describe the Deployment we will notice the following section:
+
+```bash
+kubectl describe deployment nginx-deployment
+```
+
+The output is similar to this:
+
+```bash
+<...>
+Conditions:
+  Type            Status  Reason
+  ----            ------  ------
+  Available       True    MinimumReplicasAvailable
+  Progressing     True    ReplicaSetUpdated
+  ReplicaFailure  True    FailedCreate
+<...>
+```
+
+If we run `kubectl get deployment nginx-deployment -o yaml`, the Deployment
+status is similar to this:
+
+```bash
+status:
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: 2016-10-04T12:25:39Z
+    lastUpdateTime: 2016-10-04T12:25:39Z
+    message: Replica set "nginx-deployment-4262182780" is progressing.
+    reason: ReplicaSetUpdated
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: 2016-10-04T12:25:42Z
+    lastUpdateTime: 2016-10-04T12:25:42Z
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: 2016-10-04T12:25:39Z
+    lastUpdateTime: 2016-10-04T12:25:39Z
+    message: 'Error creating: pods "nginx-deployment-4262182780-" is forbidden: exceeded quota:
+      object-counts, requested: pods=1, used: pods=3, limited: pods=2'
+    reason: FailedCreate
+    status: "True"
+    type: ReplicaFailure
+  observedGeneration: 3
+  replicas: 2
+  unavailableReplicas: 2
+```
+
+Eventually, once the Deployment progress deadline is exceeded, k8s upadtes the
+status and the reason for the Progressing condition:
+
+```bash
+Conditions:
+  Type            Status  Reason
+  ----            ------  ------
+  Available       True    MinimumReplicasAvailable
+  Progressing     False   ProgressDeadlineExceeded
+  ReplicaFailure  True    FailedCreate
+```
+
+We can address an issue of insufficient quota by scaling down the Deployment,
+by scaling down other controllers we may running, or by increasing quota in the
+namescape. If we satisfy the quota conditions and the Deployment controller then
+completes the Deployment rollout, we will see the Deployment's status update
+with a successful condition (`status: "True"` and `reason:
+NewReplicaSetAvailable`).
+
+```bash
+Conditions:
+  Type          Status  Reason
+  ----          ------  ------
+  Available     True    MinimumReplicasAvailable
+  Progressing   True    NewReplicaSetAvailable
+```
+
+|`type`|`status`|Meaning|
+|---|---|---|
+|`Available`|`"True"`|Deployment has a minimum availability.|
+|`Progressing`|`"True"`|Deployment is either in the middle of a rollout and it is progressing or that it has successfully completed its preogress and the minimum required for new replicas are available.|
+
+Minimum availability is dictated by the parameters specified in the deployment 
+strategy. We can check if a Deployment has failed to progress by using `kubectl
+rollout status`. `kubectl rollout status` returns a non-zero exit code if the
+Deployment has exceeded the progression deadline.
+
+```bash
+kubectl rollout status deployment/nginx-deployment
+```
+
+The output is similar to this:
+
+
+```bash
+Waiting for rollout to finish: 2 out of 3 new replicas have been updated...
+error: deployment "nginx" exceeded its progress deadline
+```
+
+and the exit status from `kubectl rollout` is 1, indicating an error. Using
+`echo $?` will return `1`.
 
