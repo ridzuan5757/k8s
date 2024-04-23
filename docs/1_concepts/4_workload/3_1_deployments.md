@@ -1097,10 +1097,13 @@ the canary pattern.
 ## Writing a Deployment Spec
 
 As will all other k8s configs, a Deployments needs the following fields:
-- `.apiVersion`
-- `.kind`
-- `.metadata`
-- `.spec`
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+```
 
 When the control plane creates new Pods for the Deployment, the `.metadata.name`
 of the Deployment is part of the basis for naming those Pods. The name of a
@@ -1109,6 +1112,15 @@ results for the Pod hostnames. For best compatibility, the name should follow
 more restructive rules for a DNS label.
 
 ### Pod Template
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    template:
+    selector:
+```
 
 The `.spec.template` and `.spec.selector` the only required fields of the `.spec`.
 
@@ -1122,7 +1134,53 @@ sure not to overlap with other controllers.
 Only a `.spec.template.spec.restartPolicy` equal to `Always` is allowed, which
 is default if not specified.
 
-### Replicas
+#### Selector
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+```
+
+`.spec.selector` is a required field that specifies label selector for the Pods
+targeted by this Deployment. `.spec.selector` must match
+`.spec.template.metadata.labels`, or it will be rejected by the API.
+
+In API version `apps/v1`, `.spec.selector` and `metadata.labels` do not default
+to `.spec.template.metadata.labels` if not set. So they must be set explicitly.
+Also note that `.spec.selector` is immutable after creation of the Deployment in
+`apps/v1`.
+
+A Deployment may terminate Pods whose labels match the selector if their
+template is different from `.spec.template` or if the total number of such Pods
+exceeds `.spec.replicas`. It brings up new Pods with `.spec.template` if the
+number of Pods is less than the desired number.
+
+> [!NOTE]
+> We should not create other Pods whose labels match this selector, either
+> directly, by creating another Deployment, or by creating another controller
+> such as a ReplicaSet or ReplicationController. If we do so, the first
+> Deployment thinks that it created these other Pods. k8s does not stop us from
+> implementing this.
+
+#### Replicas
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional>
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+```
 
 `.spec.replicas` is an optional field that specifies the number of desired Pods.
 It is defaults to 1.
@@ -1136,5 +1194,7 @@ that was previously implemented.
 If a HorizontalPodAutoScaler or any similaar API for horizontal scaling is
 managing scaling for a Deployment, do not set `.spec.replicas`.
 
-Instead, allow k8s with cotnrol plane to manage the `.spec.replicas` field
+Instead, allow k8s with control plane to manage the `.spec.replicas` field
 automatically.
+
+
