@@ -1216,4 +1216,22 @@ spec:
 `.spec.strategy.type` can be `Recreate` or `RollingUpdate`. `RollingUpdate` is
 the default value.
 
+##### Recreate Deployment
+
+All existing Pods are killed before the new ones are created when
+`.spec.strategy.type` is `Recreate`.
+
+> [!NOTE]
+> This will onyl guarantee Pod termination previous to creation for upgrades. If
+> we uprade a Deployment, all Pods of the old revision will be terminated
+> immediately. 
+>
+> Successful removel is awaited before any Pod of the new revision is creat4ed.
+> If we manually deletes a Pod, the lifecycle is controlled by the ReplicaSet
+> and the replacement will be created immediately (even if the old Pod is still
+> in a Terminating state).
+>
+> If we need an "at most" guarantee for our Pods, we should consider using a
+> StatefulSet Deployment.
+
 
