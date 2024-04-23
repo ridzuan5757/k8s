@@ -1197,4 +1197,23 @@ managing scaling for a Deployment, do not set `.spec.replicas`.
 Instead, allow k8s with control plane to manage the `.spec.replicas` field
 automatically.
 
+#### Strategy
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas:
+    selector: <identicall>
+    template:
+        metadata:
+            labels: <identical>
+    strategy:
+```
+
+`.spec.strategy` specifies the strategy used to replace old Pods by new ones.
+`.spec.strategy.type` can be `Recreate` or `RollingUpdate`. `RollingUpdate` is
+the default value.
+
 
