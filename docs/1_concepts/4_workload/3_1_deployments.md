@@ -1248,4 +1248,66 @@ All existing Pods are killed before the new ones are created when
 > If we need an "at most" guarantee for our Pods, we should consider using a
 > StatefulSet Deployment.
 
+##### Rolling Update Deployment
 
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional>
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+    strategy:
+        type: RollingUpdate
+```
+
+The Deployment updates Pods in a rolling update fashion when
+`.spec.strategy.type` is `RollingUpdate`. We can specify `maxUnavailable` and
+`maxSurge` to control the rolling update process.
+
+###### Max Unavailable
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional>
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: <optional>
+```
+
+`.spec.strategy.rollingUpdate.maxUnavailable` is an optional field that
+specifies maximum number of Pods that can be unavailable during the update
+process.
+
+The value can be absolute number (for example, 5) for percentage of desired
+pods (for example, 10%). The absolute number is calutated from percentage by
+rounding down. The value cannot be 0 if `.spec.strategy.rollingUpdate.maxSurge`
+is 0. The default value is 25%.
+
+For example, when this value is set to 30%, the old ReplicaSet can be scaled
+down to 70% of desired Pods immediately when the rolling update starts. Once new
+Pods a ready, old ReplicaSet can be scaled down further, followed by scaling up
+the new ReplicaSet, ensuring that the total number of Pods available at all
+times during the update is at least 70% of the desired Pods.
+
+###### Max Surge
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional>
+
+```
