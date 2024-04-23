@@ -1204,7 +1204,7 @@ apiVersion:
 kind:
 metadata:
 spec:
-    replicas:
+    replicas: <optional>
     selector: <identicall>
     template:
         metadata:
@@ -1217,6 +1217,20 @@ spec:
 the default value.
 
 ##### Recreate Deployment
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas:
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+    strategy:
+        type: Recreate
+```
 
 All existing Pods are killed before the new ones are created when
 `.spec.strategy.type` is `Recreate`.
