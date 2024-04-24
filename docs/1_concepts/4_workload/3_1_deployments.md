@@ -1309,5 +1309,124 @@ kind:
 metadata:
 spec:
     replicas: <optional>
-
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxSurge: <optional>
 ```
+
+`.spec.strategy.rollingUpdate.maxSurge` is an optional field that specifies the
+maximum number of Pods that can be created over the desired number of Pods.
+Similar as `MaxUnavailable`, the value could be either absolute number or
+percentage of the desired Pods. The value cannot be 0 if `MaxUnavailable` is 0.
+The absolute number is calculated from the percentage by rounding up. The
+default value is 25%.
+
+For example, when this value is set to 30%, the new ReplicaSet can be scaled up
+immediately when the rolling update starts, such that the total number of old
+and new Pods does not exceed 130% of desired Pods. Once old Pods have been
+killed, the new ReplicaSet can be scaled up further, ensuring that the total
+number of Pods running at any time during the update is at most 130% of desired
+Pods.
+
+Here are the example of the implementation:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-deployment
+    labels:
+        app: nginx
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: nginx
+    template:
+        metadata:
+            labels:
+                app: nginx
+        spec:
+            containers:
+            - name: nginx
+              image: nginx:1.14.2
+              ports:
+              - containerPort: 80
+    strategy:
+        type: RollingUpdate
+            maxSurge: 1
+            maxUnavailable: 1
+```
+
+##### Progress Deadline Seconds
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+        spec:
+    strateggy:
+        type: RollingUpdate | Recreate
+        rollingUpdate:
+            maxSurge: <optional>
+            maxUnavailable: <optional>
+    progressDeadlineSeconds: <optional>
+```
+
+`.spec.progressDeadlineSeconds` is an optional field that specifies the number
+of seconds we want to wait for the Deployment to progress before the system
+reports back that the Deployment has failed progressing - surfaced cas a
+condition with type:
+
+```yaml
+type: Progressing
+status: "False"
+reason: ProgressDeadlineExceeded
+```
+
+in the status of the resource. The Deployment controller will keep retrying the
+Deployment. This defaults to 600. In the future once automatic rollback will be
+implemented, the Deployment controller will roll back a Deployment as soon as it
+observes such a condition.
+
+If specified, this field needs to be greater than `.spec.MinReadySeconds`.
+
+##### MinReadySeconds
+
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+        spec:
+    strategy:
+        type: RollingUpdate | Recreate
+        rollingUpdate:
+            maxSurge: <optional>
+            maxUnavailable: <optional>
+    progressDeadlineSeconds: <optional>
+    minReadySeconds: <optional>
+```
+
+
+`.spec.MinReadySeconds` is an optional field that specifies the minimum number
+of seconds for which a newly created Pod should be ready without any of tis
+container crashing, for it to be considered available. This defaults to 0 (the
+Pod willbe considered available as soon as it is ready).
