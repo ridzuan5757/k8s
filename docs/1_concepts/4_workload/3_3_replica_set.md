@@ -367,3 +367,67 @@ update `controller.kubernetes.io/pod-deletion-cost` once before issuing a scale
 down (setting the annotation to a value proportional to pod utilization level).
 This works if the application itself controls the down scaling; for example, the
 driver pod of a Spark deployment.
+
+### ReplicaSet as a Horizontal Pod Autoscaler Targer
+
+A ReplicaSet can also be a target for Horizontal Pod Autoscalers (HPA). That is,
+a ReplicaSet can be auto-scaled by an HPA. Here is an example HPA targeting the
+ReplicaSEt we created in the previous example.
+
+```yaml
+# hpa.yaml
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+    name: frontend-scaler
+spec:
+    scaleTargetRef:
+        kind: ReplicaSet
+        name: frontend
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+```
+
+Submitting this manifest to a k8s cluster should create the defined HPA that
+autoscales the target ReplicaSet depending on the CPU usage of the replicated
+Pods.
+
+```bash
+kubectl apply -f ./hpa.yaml
+```
+
+Alternatively, we can use `kubectl autoscale` command to accomplish the same
+result.
+
+```bash
+kubectl autoscale rs frontend --max=10 --min=3 --cpu-percent=50
+```
+
+## Alternatives to ReplicaSet
+
+### Deployment (recommended)
+
+Deployment is an object which can own ReplicaSets and update them and their Pods
+via declarative, servver-side rolling updates. While ReplicaSets can be used
+independently, today they are mainly used by Deployments as a machanism to
+orchestrate Pod creation, deletion and updates.
+
+When we use Deployments we do not have to worry about managing the ReplicaSets
+that they create. Deployments own and manage their ReplicaSets. As such, it is
+recommended to use Deployments when we want ReplicaSets.
+
+### Bare Pods
+
+Unlike the case where a user directly created Pods, a ReplicaSet replaces Pods
+that are deleted or terminated for any reason, such as in the case of node
+failure or disruptive node maintenance, such as a kernel upgrade.
+
+For this reason, it is reommended that ReplicaSet is used even if the
+application requires only a single Pod. Think of it similarly to a process
+supervisor, only it supervises multiple Pods across multiple nodes instead of
+individual processes on a single node. A ReplicaSet delegates local container
+restarts to some agent on the node such as Kubelet.
+
+
