@@ -430,4 +430,22 @@ supervisor, only it supervises multiple Pods across multiple nodes instead of
 individual processes on a single node. A ReplicaSet delegates local container
 restarts to some agent on the node such as Kubelet.
 
+### Job
 
+We can use `Job` instead of ReplicaSet for Pods that are expected to terminate
+on their own.
+
+### DaemonSet
+
+`DaemonSet` can be used instead of ReplicaSet for Pods that provide a
+machine-level function, such as machine monitoring and machine logging. These
+Pods have a lifetime that is tied to a machine lifetime: the Pod needs to be
+running on the machine before other Pods start, and are safe to terminate when
+the machine is otherwise ready to be rebooted/shutdown.
+
+### ReplicationController
+
+ReplicaSets are the successor to ReplicationControllers. The two serve the same
+purpose, and behave similarly, except that a ReplicationController does not
+support set-based selector requirements as described in the user guide. As such,
+ReplicaSets are preferred over ReplicationControllers.
