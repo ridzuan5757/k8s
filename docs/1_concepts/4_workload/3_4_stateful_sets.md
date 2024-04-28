@@ -31,4 +31,23 @@ deletion, or scaling, we should deploy the application using a workload object
 that provides a set of stateless replicas. Deplyoment or ReplicaSet may be
 better suited to the stateless needs.
 
+## Limitations
+- The storage for a given Pod must either be provisioned by a
+  `PersistenceVolumeProvisioner` based on the requested storage class, or
+  pre-provisioned by an admin.
+- Deleting and / or scaling a StatefulSet down will not delete the volumes
+  associated with StatefulSet. This is done to ensure data safety, which is
+  generally more valuable than an automatic purge of all related StatefulSet
+  resources.
+- StatefulSets currently require a Headless Service to be responsible for the
+  network identity of the Pods. It is up to our own responsibility for creating
+  this service.
+- StatefulSets do not provide any guarantees on the termination of Pods when
+  StatefulSet is deleted. To achieve ordered and graceful termination of the
+  pods in the StatefulSet, it is possible to scale the StatefulSet down to 0
+  prior to deletion.
+- When using RollingUpdates with the default Pod Management Policy
+  `OrderedReady`, it is possible to get into a broken state that require manual
+  intervention to repair.
+
 
