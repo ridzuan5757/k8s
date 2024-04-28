@@ -273,3 +273,23 @@ that `replicas=1`, web-2 would be terminated first. web-1 would not be
 terminated until web-2 is fully shutdown and deleted. If web-0 were to fail
 after web-2 has been terminated and is compeltely shutdown, but prior to web-1's
 termination, web-1 would not be terminated until web-0 is Running and Ready.
+
+### Pod Management Policies
+
+StatefulSet allows us to relax its ordering guarantees while preserving its
+uniqueness and identity via its `.spec.podManagementPolicy` field.
+
+### OrderedReady Pod Management
+
+`OrderedReady` pod management is the default for StatefulSets. It implements the
+behaviour described above.
+
+### Parallel Pod Management
+
+`Parallel` pod management tells the StatefulSet controller to launch or
+terminate all Pods in parallel, and to not wait for Pods to become Running and
+Ready or completely terminated prior to launching or terminating another Pod.
+This option only affects the behaviour for scaling operations. Updates are not
+affected.
+
+
