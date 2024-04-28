@@ -308,3 +308,15 @@ new Pods that reflect modifications made to a StatefulSet's `.spec.template`.
 
 This update strategy implements automated, rolling updates for the Pods in a
 StatefulSet. This is the default update strategy.
+
+## Rolling Updates
+
+When a StatefulSet's `.spec.updateStrategy.type` is set to `RollingUpdate`, the
+StatefulSet controller will delete and recreate each Pod in the StatefulSet. It
+will proceed in the same order as Pod termination (from the largest ordinal to
+the smallest), updating each Pod one at a time.
+
+The k8s control plane waits until an updated Pod is Running and Ready prior to
+updating its predecessors. If we have set `.spec.minReadySeconds`, the control
+plane additionally waits that amount of time after the Pod turns ready, before
+moving on.
