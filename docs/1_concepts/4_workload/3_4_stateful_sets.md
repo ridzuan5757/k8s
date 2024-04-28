@@ -142,5 +142,16 @@ either:
 - The cluster already contains a PersistentVolume with the correct StorageClass
   and sufficient available storage space.
 
+### Minimum ready seconds
+
+`.spec.minReadySeconds` is an optional field that specifies the minimum number
+of seconds for which a newly created Pod should be running and ready without any
+of its containers crashing, for it to be considered available.
+
+This is used to check progression of a rollout when using a RollingUpdate
+strategy. The field defaults to 0 (the Pod will be considered available as soon
+as it ready).
+
+
 
 
