@@ -344,4 +344,29 @@ propagated to its Pods. In most cases we will not need to use a partition, but
 they are useful if we want to stage and update, roll out a canary, or perform a
 phased roll out.
 
+### Maximum unavailable Pods
+
+We can control the maximum number of Pods that can be unavailable during an
+update by specifying this field:
+
+```yaml
+spec:
+    updateStrategy:
+        rollingUpdate:
+            maxUnavailable:
+```
+
+The value can be an absolute number or a percentage of desired Pods. Absolute
+number is calculated from the percentage value by rounding it up. This field
+cannot be 0. The default setting is 1.
+
+This field applies to all Pods in the range of `0` to `replicas - 1`. If there
+is any unavailable Pod in the range `0` to `replicas - 1`, it will be counted
+towards `maxUnavailable`.
+
+> [!NOTE]
+> The `maxUnavailable` field is in Aplha stage and it is honored only by API
+> servers that are running with the MaxUnavailableStatefulSet feature gate
+> enabled.
+
 
