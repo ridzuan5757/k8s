@@ -220,3 +220,16 @@ name, and how that affects the DNS names for the StatefulSet's Pods.
 
 > [!NOTE]
 > Cluster domain will be set to `cluster.local` unless otherwise configured.
+
+### Stable Storage
+
+For each VolumeClaimTemplate entry defined in a StatefulSet, each Pod receives
+one PersistentVolumeClaim. In the nginx example above, each Pod receives a
+single PersistentVolume with a StorageClass of `my-storage-class` and 1GB of
+provisioned storage. If no StorageClass is specified, then the default
+StorageClass will be used.
+
+When a Pod is rescheduled into a node, its `volumeMounts` mount the
+PersistentVolumes associated with its PersistentVolumeClaims. Note that, the
+PersistentVolumes associated with the Pod's PersistentVolumeClaims are not
+deleted when the Pods, or StatefulSet are deleted. This must be done manually.
