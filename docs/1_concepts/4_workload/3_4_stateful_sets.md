@@ -1,4 +1,4 @@
-# StatefuleSets
+# StatefulSets
 
 StatefulSet is the workload API object used to manage stateful applications.
 This API manages the deployment and scaling of a set of Pods, and provides
@@ -15,3 +15,20 @@ can use StatefulSet as part of the solution. Although individual Pods in a
 StatefulSet a susceptible to failure, the persistent Pod identifiers make it
 easier to match existing volumes to the new Pods that replace any that have
 failed.
+
+## Usage
+
+StatefulSets are valuable for applications that require one or more of the
+following:
+- Stable, unique network identifiers.
+- Stable, persistent storage.
+- Ordered, graceful deployment and scaling.
+- Ordered, automated rolling updates.
+
+In the above, stable is synonymous with persistence across Pods rescheduling. If
+an application does not require any stable identifiers or ordered deployment,
+deletion, or scaling, we should deploy the application using a workload object
+that provides a set of stateless replicas. Deplyoment or ReplicaSet may be
+better suited to the stateless needs.
+
+
