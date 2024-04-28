@@ -126,6 +126,21 @@ In the example above:
 
 The name of a StatefulSet object must be a valid DNS label.
 
+### Pod Selector
+
+We must set the `.spec.selector` field of a StatefulSet to match the labels of
+its `.spec.template.metadata.labels`. Failing to specify a matching Pod Selector
+will result in a validation error during StatefulSet creation.
+
+### Volume Claim Templates
+
+We can set the `.spec.volumeClaimTemplates` field to create a
+PersistentVolumeClaim. this will provide stable storage to the StatefulSet if
+either:
+- The StorageClass specified for the volume claim is set up to use dynamic
+  provisioning, or
+- The cluster already contains a PersistentVolume with the correct StorageClass
+  and sufficient available storage space.
 
 
 
