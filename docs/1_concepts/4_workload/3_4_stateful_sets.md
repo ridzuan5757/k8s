@@ -248,4 +248,28 @@ the Pod. this label allows us to route traffic to a particular pod index, filter
 logs/metrics using the pod index label, and more. The feature gate
 `PodIndexLabel` must be enabled for this feature. It is enabled by default.
 
+## Deployment and Scaling Guarantees
 
+- For a StatefulSet with N replicas, when Pods are being deployed, they are
+  created subsequently, in order from 0 to N-1.
+- When Pods are being deleted, they are terminated in reverse order, from N-1 to
+  0.
+- Before a scaling operation is applied to a Pod, all of its predecessors must
+  be Running and Ready.
+- Before a Pod is terminated, all of its successors must be completely shutdown.
+
+The StatefulSet should not specify a `pod.Spec.TerminationGracePeriodSeconds` of
+0. This practice is unsafe and strongly discouraged.
+
+When the nginx example above is created, three Pods will be deployed in the
+order, web-0, web-1, and web-2. web-1 will not be deployed before web-0 is
+Running and Ready, and web-2 will not be deployed until web-1 is Running and
+Ready. If web-0 should fail, after web-1 is Running and Ready, but before web-2
+is launched, web-2 will not be launched until web-0 is successfully relaunced
+and becomes Running and Ready.
+
+If a user were to scale the deployed example by patching the StatefulSet such
+that `replicas=1`, web-2 would be terminated first. web-1 would not be
+terminated until web-2 is fully shutdown and deleted. If web-0 were to fail
+after web-2 has been terminated and is compeltely shutdown, but prior to web-1's
+termination, web-1 would not be terminated until web-0 is Running and Ready.
