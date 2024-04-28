@@ -320,3 +320,28 @@ The k8s control plane waits until an updated Pod is Running and Ready prior to
 updating its predecessors. If we have set `.spec.minReadySeconds`, the control
 plane additionally waits that amount of time after the Pod turns ready, before
 moving on.
+
+### Partitioned rolling updates
+
+The `RollingUpdate` update strategy can be partitinoned, by specifying:
+
+```yaml
+spec:
+    updateStrategy:
+        rollingUpdate:
+            partition:
+```
+
+If a partition is specified, all Pods with an ordinal that is greater than or
+equal to the partition will be updated when the StatefulSet's `.spec.template`
+is updated. All pods with an ordinal that is less than partition will not be
+updated, and, even if they are deleted, they will be recreated at the previous
+version.
+
+If a StatefulSet's `.spec.updateStrategy.rollingUpdate.partition` is greater
+than its `.spec.replicas`, updates to its `.spec.template` will not be
+propagated to its Pods. In most cases we will not need to use a partition, but
+they are useful if we want to stage and update, roll out a canary, or perform a
+phased roll out.
+
+
