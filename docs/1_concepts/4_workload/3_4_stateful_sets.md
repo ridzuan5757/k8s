@@ -292,4 +292,19 @@ Ready or completely terminated prior to launching or terminating another Pod.
 This option only affects the behaviour for scaling operations. Updates are not
 affected.
 
+## Update strategies
 
+A StatefulSet's `.spec.updateStrategy.type` allow us to configure and disable
+automated rolling update for containers, labels, resource request/limits, and
+annotations for the Pods in a StatefulSet. There are 2 possible values:
+
+### `OnDelete`
+
+The StatefulSet controller will not automatically update the Pods in a
+StatefulSet. Users must manually delete Pods to cause the controller to create
+new Pods that reflect modifications made to a StatefulSet's `.spec.template`.
+
+### `RollingUpdate`
+
+This update strategy implements automated, rolling updates for the Pods in a
+StatefulSet. This is the default update strategy.
