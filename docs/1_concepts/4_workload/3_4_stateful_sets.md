@@ -369,4 +369,22 @@ towards `maxUnavailable`.
 > servers that are running with the MaxUnavailableStatefulSet feature gate
 > enabled.
 
+### Forced rollback
+
+When using Rolling Updates with the default Pod Management Policy 
+(`OrderedReady`) it is possible to get into a broken state that requires manual 
+intervention to repair.
+
+If we update the Pod template to a configuraiton that never becomes Running and
+Ready (for example, due to a  bad binary or application-level configuration
+error), StatefulSet will stop the rollout and wait.
+
+In this state, it is not enough to revert the Pod template to a good
+configuraiton. Due to a known issue, StatefulSet will continue to wait for the
+broken Pod to become Ready (which never happens) before it will attempt to
+revert it back to the working configuration.
+
+After verting the template, we must also delete any Pods that StatefulSet had
+already attempted to run with the bad configuration. StatefulSet will then begin
+to recreate the Pods using the reverted template.
 
