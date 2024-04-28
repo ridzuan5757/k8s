@@ -233,3 +233,19 @@ When a Pod is rescheduled into a node, its `volumeMounts` mount the
 PersistentVolumes associated with its PersistentVolumeClaims. Note that, the
 PersistentVolumes associated with the Pod's PersistentVolumeClaims are not
 deleted when the Pods, or StatefulSet are deleted. This must be done manually.
+
+### Pod Name Label
+
+When the StatefulSet controller creates a Pod, it adds a label,
+`statefulset.kubernetes.io/pod-name`, that is set to the name of the Pod. this
+label allows us to attach a Service to a specific Pod in the StatefulSet.
+
+### Pod Index Label
+
+When the StatefulSet controller creates a Pod, the new Pod is labelled with
+`apps.kubernetes.io/pod-index`. The value of this label is the ordinal index of
+the Pod. this label allows us to route traffic to a particular pod index, filter
+logs/metrics using the pod index label, and more. The feature gate
+`PodIndexLabel` must be enabled for this feature. It is enabled by default.
+
+
