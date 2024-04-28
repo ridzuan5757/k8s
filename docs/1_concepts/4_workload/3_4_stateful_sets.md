@@ -152,6 +152,31 @@ This is used to check progression of a rollout when using a RollingUpdate
 strategy. The field defaults to 0 (the Pod will be considered available as soon
 as it ready).
 
+## Pod identity
+
+StatefulSet Pods have a unique identity that consists of an ordinal, a stable
+network identity, and stable storage. The identity sticks to the Pod, regardless
+of which node it is rescheduled on.
+
+### Ordinal Index
+
+For a StatefulSet with N replicas, each Pod in the StatefulSet will be assigned
+an integer ordinal, that is unqique over the Set. By default, Pods will be
+assigned orginals from 0 up through N-1. The StatefulSet controller will also
+add a pod label with this index `apps.kubernetes.io/pod-index`.
+
+### Start Ordinal
+
+`.spec.ordinals` is an optional field that allows us to configure the integer
+ordinals assigned to each Pod. It defaults to nil. We must enable the
+`StatefulSetStartOrdinal` feature gate to use this field. Once enabled, we can
+configure the following options:
+- `.spec.ordinals.start` : If the `.spec.ordinals.start` field is set, Pods will
+  be assigned ordinals from `.spec.ordinals.start` up through
+  `.spec.ordinals.start + .spec.replicas - 1`.
+
+### Stable Network ID
+
 
 
 
