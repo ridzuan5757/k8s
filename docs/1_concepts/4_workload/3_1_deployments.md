@@ -1467,4 +1467,36 @@ More specifically, setting this field to zero means that all old ReplicaSets
 with 0 replicas will be cleaned up. In this case, a new Deployment rollout
 cannot be undone, since its revision history is cleaned up.
 
+##### Paused
+
+```yaml
+apiVersion:
+kind:
+metadata:
+spec:
+    replicas: <optional>
+    selector: <identical>
+    template:
+        metadata:
+            labels: <identical>
+        spec:
+    strategy:
+        type: RollingUpdate | Recreate
+        rollingUpdate:
+            maxSurge: <optional>
+            maxUnavailable: <optional>
+    progressDeadlineSeconds: <optional>
+    minReadySeconds: <optional>
+    revisionHistoryLimit: <optional>
+    paused: <optional>
+```
+
+`.spec.paused` is an optional boolean field for pausing and resuming a
+Deployment. The only difference between a pause Deployment and one that is not
+paused, is that any changes into the PodTemplateSpec of the paused Deployment
+will not trigger new rollouts as long as it is paused. A Deployment is not
+paused by default when it is created.
+
+
+
 
