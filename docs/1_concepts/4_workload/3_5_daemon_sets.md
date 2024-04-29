@@ -104,3 +104,35 @@ In addition to required fields for a Pod, a Pod template in a DaemonSet has to
 specify appropriate labels. **A Pod Template in a DaemonSet must have a
 `RestartPolicy` equal to `Always`, or be unspecified, which defaults to
 `Always`.
+
+### Pod Selector
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+spec:
+    template:
+    selector:
+```
+
+`.spec.selector` field is a pod selector. It works the same as the
+`.spec.selector` of a Job.
+
+We must specify a pod selector that matches the labels of the `.spec.template`.
+Also once a DaemonSet is created, its `.spec.selector` can not be mutated.
+Mutating the pod selector can lead to the unintentional oprphaning of Pods, and
+it was found to be confusing to users.
+
+The `.spec.selector` is an object consisting of two fields:
+- `matchLabels` - works the same as `.spec.selector` of a
+  ReplicationController.
+- `matchExpresstion` - allows to build more sophisticated selectors by
+  specifying key, list of values and an operator that relates the key and
+  values.
+
+When the two are specified, the result is AND-ed. The `.spec.selector` must
+match the `.spec.template.metadata.labels`. Config with these two not matching
+will be rejected by the API.
+
+
