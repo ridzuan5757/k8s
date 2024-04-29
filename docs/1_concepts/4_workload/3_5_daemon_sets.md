@@ -69,4 +69,38 @@ spec:
             path: /var/log
 ```
 
+### Required Fields
 
+As with all other k8s config, a DaemonSet needs the following fields:
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+spec:
+```
+
+The name of a DaemonSet object must be a valid DNS subdomain name.
+
+### Pod Template
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+spec:
+    template:
+```
+
+`.spec.template` is a pod template. It has exactly the same schema as a Pod,
+except it is nested and does not contain the following fields:
+
+```yaml
+apiVersion:
+kind:
+```
+
+In addition to required fields for a Pod, a Pod template in a DaemonSet has to
+specify appropriate labels. **A Pod Template in a DaemonSet must have a
+`RestartPolicy` equal to `Always`, or be unspecified, which defaults to
+`Always`.
