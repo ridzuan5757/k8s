@@ -135,4 +135,43 @@ When the two are specified, the result is AND-ed. The `.spec.selector` must
 match the `.spec.template.metadata.labels`. Config with these two not matching
 will be rejected by the API.
 
+### Running Pods on select Nodes
 
+If we specify the following field:
+
+```yaml
+spec:
+    template:
+        spec:
+            nodeSelector:
+```
+
+The DaemonSet controller will create Pods on nodes which match that node
+selector. Likewise if we specify the following field:
+
+```yaml
+spec:
+    template:
+        spec:
+            affinity:
+```
+
+The DaemonSet controller will create Pods on nodes that match that node
+affinity. If none are specified, then the DaemonSet controller will create Pods
+on all nodes.
+
+## DaemonPod Schedule
+
+A DaemonSet can be used to ensure that all elligible nodes run a copy of a Pod.
+The DaemonSet controller creates a Pod for each eligible node and adds the
+`.spec.affinity.nodeAffinity` field of the Pod to match the target host.
+
+After a Pod is created, the default scheduler typically takes over and then
+binds the Pod to the garget host by setting the `.spec.nodeName` field. If the
+new Pod cannot fit on the node, the default scheduler may preempt (evict) some
+of the existing Pods based on the priority of the new Pod.
+
+> [!NOTE]
+> If it is important that the DaemonSet pod run on each node, it is often
+> desirable to set the `.spec.template.spec.priorityClassName` of the DaemonSet
+> to a PriorityClass with a higher priority to ensure that this eviction occurs.
