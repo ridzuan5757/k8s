@@ -176,4 +176,29 @@ of the existing Pods based on the priority of the new Pod.
 > desirable to set the `.spec.template.spec.priorityClassName` of the DaemonSet
 > to a PriorityClass with a higher priority to ensure that this eviction occurs.
 
+The user can specify a different scheduler for the Pods of the DaemonSet, by
+setting the `.spec.template.spec.schedulerName` field of the DaemonSet.
 
+The original node affinity specified at the:
+
+```yaml
+spec:
+    template:
+        spec:
+            nodeAffinity:
+```
+
+is taken into consideration by the DaemonSet controller when evaluating the
+eligible nodes, but is replcaed on the created Pod with the node affinity that
+matches the name of eligible node.
+
+```yaml
+nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchFields:
+            - key: metadata.name
+              operator: In
+              values:
+              - target-host-name
+```
