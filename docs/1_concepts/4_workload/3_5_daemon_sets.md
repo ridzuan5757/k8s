@@ -202,3 +202,50 @@ nodeAffinity:
               values:
               - target-host-name
 ```
+
+### Taints and Tolerations
+
+The DaemonSet controller automatically adds a set of tolerations to DaemonSet
+Pods:
+
+#### `node.kubernetes.io/not-ready`
+Effect: `NoExecute`
+DaemonSet Pods can be scheduled onto nodes that are not healthy or ready to
+accepts Pods. Any DaemonSet Pods running on such nodes will not be evicted.
+
+#### `node.kubernetes.io/unreachable`
+Effect: `NoExecute`
+DaemonSet Pods can be scheduled onto nodes that are unreachable from the node
+controller. Any DaemonSet Pods running on such nodes will not be evicted.
+
+#### `node.kubernetes.io/disk-pressure`
+Effect: `NoSchedule`
+DaemonSet Pods can be scheduled onto nodes with disk pressure issues.
+
+#### `node.kubernetes.io/memory-pressure`
+Effect: `NoSchedule`
+DaemonSet Pods can be scheduled onto nodes with memory pressure issues.
+
+#### `node.kubernetes.io/pid-pressure`
+Effect: `NoSchedule`
+DaemonSet Pods can be scheduled onto nodes with process pressure issues.
+
+#### `node.kubernetes.io/unschedulable`
+Effect: `NoSchedule`
+**Only added for DaemonSet Pods that request host networking** i.e., Pods having
+`.spec.hostNetwork: true`. Such DaemonSet Pods can be scheduled onto nodes with
+unavailable network.
+
+We can add our own tolerations to the Pods of a DaemonSet as well, by defining
+these in the Pod template of the DaemonSet.
+
+Because the DaemonSet controller sets the
+`node.kubernetes.io/unschedulable:NoSchedule` toleration automatically, k8s can
+run DaemonSet Pods on nodes that are marked as unschedulable.
+
+If we use a DaemonSet to provide an important node-level function, such as
+cluster networking, it is helpful that Kubernetes places DaemonSet Pods on nodes
+before they are ready. For example, without that special toleration, we could
+end up in a deadlock situation where the node is not marked as ready because the
+network plugin is not running there, and at the same time the network plugin is
+not running on that node because the node is not yet ready.
