@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: opentelemetrycollector
+  namespace: observer
+spec:
+  selector:
+    app.kubernetes.io/name: opentelemetrycollector
+  type: ClusterIP
+  ports:
+  - name: prometheus
+    port: 8889
+    targetPort: 8889
+    protocol: TCP
+  - name: metrics
+    port: 8888
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: opentelemetrycollector-gateway
+  namespace: observer
+spec:
+  selector:
+    app.kubernetes.io/name: opentelemetrycollector
+  type: NodePort
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    targetPort: 4317
+    protocol: TCP
+    nodePort: 32001
+  

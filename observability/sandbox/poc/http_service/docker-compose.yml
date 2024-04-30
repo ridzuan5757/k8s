@@ -1,0 +1,20 @@
+version: '3.9'
+
+networks:
+  observer-network:
+    external: true
+
+services:
+  nest_http_service:
+    container_name: nest_http_service
+    build:
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - ENV_PLATFORM=${ENV_PLATFORM}
+      - SERVICE_NAME=${SERVICE_NAME}
+      - SERVICE_VERSION=${SERVICE_VERSION}
+      - OTLP_SERVICE_NAME=${OTLP_SERVICE_NAME}
+    networks:
+      - observer-network

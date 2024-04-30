@@ -1,0 +1,65 @@
+version: '3.9'
+
+networks:
+  observer-network:
+    name: observer-network
+    driver: bridge
+
+volumes:
+  portainer_data:
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - 8000:8000
+      - 9443:9443
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+  opentelemetry-agent:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: opentelemetry-agent
+    privileged: true
+    command:
+      [
+        '--config=/etc/otelcol-contrib/otel-agent-config.yaml'
+      ]
+    volumes:
+      - ./volume/otel-agent-config.yaml:/etc/otelcol-contrib/otel-agent-config.yaml
+      - /:/hostfs
+    environment:
+      - SERVICE_NAME=${SERVICE_NAME}
+      - STATION_CODE=${STATION_CODE}
+      - HOST_NAME=${HOST_NAME}
+    ports:
+      - 1888:1888
+      - 13133:13133
+      - 4317:4317
+      - 4318:4318
+      - 8888:8888
+      - 8889:8889
+      - 55670:55679
+      - 55681
+    networks:
+      - observer-network
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - 16686:16686
+      - 14268
+      - 14250
+    networks:
+      - observer-network
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./volume/prometheus-config.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - observer-network

@@ -1,0 +1,3 @@
+##[pylyzer] failed /users/ridzuan5757/documents/k8s-otel/sandbox/poc/sample-app/error.py 1712314179 441
+.___v_desugar_1 = pyimport "flask"
+.jsonify: Never

@@ -160,7 +160,7 @@ The DaemonSet controller will create Pods on nodes that match that node
 affinity. If none are specified, then the DaemonSet controller will create Pods
 on all nodes.
 
-## DaemonPod Schedule
+## Daemon Pod Schedule
 
 A DaemonSet can be used to ensure that all elligible nodes run a copy of a Pod.
 The DaemonSet controller creates a Pod for each eligible node and adds the
@@ -175,3 +175,5 @@ of the existing Pods based on the priority of the new Pod.
 > If it is important that the DaemonSet pod run on each node, it is often
 > desirable to set the `.spec.template.spec.priorityClassName` of the DaemonSet
 > to a PriorityClass with a higher priority to ensure that this eviction occurs.
+
+

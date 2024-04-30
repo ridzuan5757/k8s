@@ -1,0 +1,115 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 1s
+    scrapers:
+      cpu:
+      load:
+      memory:
+      disk:
+      filesystem:
+      network:
+  syslog:
+    tcp:
+      listen_address: '0.0.0.0:54527'
+    protocol: rfc3164
+    location: UTC
+    operators:
+      - type: move
+        from: attributes.message
+        to: body
+  filelog:
+    include:
+      - /var/log/system.log
+
+exporters:
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  otlp/gateway:
+    endpoint: 192.168.10.204:32001
+    tls:
+      insecure: true
+  otlp/dataprepper-traces:
+    endpoint: data-prepper:21890
+    tls:
+      insecure: true
+      insecure_skip_verify: true
+  otlp/dataprepper-metrics:
+    endpoint: data-prepper:21891
+    tls:
+      insecure: true
+      insecure_skip_verify: true
+  otlp/dataprepper-logs:
+    endpoint: data-prepper:21892
+    tls:
+      insecure: true
+      insecure_skip_verify: true
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  debug:
+    verbosity: detailed
+    
+processors:
+  batch:
+  resourcedetection/docker:
+    detectors:
+      - env
+      - docker
+    override: true
+  attributes/station:
+    actions:
+      - key: station.code
+        value: ${STATION_CODE}
+        action: insert
+      - key: host.name
+        value: ${HOST_NAME}
+        action: upsert
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 50
+    spike_limit_percentage: 30
+
+extensions:
+  memory_ballast:
+    size_in_percentage: 20
+  
+service:
+  telemetry:
+    logs:
+      encoding: json
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - resourcedetection/docker
+        - attributes/station
+      exporters:
+        - otlp/gateway
+        - otlp/jaeger
+        - otlp/dataprepper-traces
+    metrics:
+      receivers:
+        - otlp
+        - hostmetrics
+      processors:
+        - memory_limiter
+        - resourcedetection/docker
+        - attributes/station
+      exporters:
+        - prometheus
+        - otlp/gateway
+        - otlp/dataprepper-metrics
+    logs:
+      receivers:
+        - syslog
+        - filelog
+      exporters:
+        - otlp/dataprepper-logs

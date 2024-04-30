@@ -1,0 +1,54 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+  docker_stats:
+    collection_interval: 10s
+    metrics:
+      container.cpu.usage.percpu:
+        enabled: true
+      container.network.io.usage.tx_dropped:
+        enabled: true
+
+exporters:
+
+  prometheus:
+    endpoint: 0.0.0.0:8889
+      #  jaeger:
+      #endpoint: jaeger:14250
+      #tls:
+      #insecure: true
+  otlp/uptrace:
+    endpoint: otlp.uptrace.dev:4317
+    headers:
+      uptrace-dsn: ${UPTRACE_DSN}
+
+  logging:
+    loglevel: debug
+
+processors:
+  batch:
+
+
+extensions:
+  health_check:
+  pprof:
+    endpoint: :1888
+  zpages:
+    endpoint: :55679
+
+service:
+  extensions: [ pprof, zpages, health_check ]
+  telemetry:
+    logs:
+      level: info
+      development: true
+      encoding: json
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ logging, otlp/uptrace ]
+    metrics:
+      receivers: [ otlp ]
+      exporters: [ logging, prometheus, otlp/uptrace ]

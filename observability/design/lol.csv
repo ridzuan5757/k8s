@@ -1,0 +1,80 @@
+,Col 4,need
+0,,no
+1,,no
+2,Requirement Description,no
+3,Col 4,no
+4,All hardware components including all peripherals must be covered by comprehensive parts and labour warranties for 3 years.,no
+5,Warranties must entitle Shell’s nominated “Workshop Repair” service providers to source replacement parts / units free of charge from the OEM and to fully recover from the OEM the labour costs incurred when carrying out warranty repairs.,no
+6,An active and accessible register of equipment warranty details must be provided such that at any time an accredited service providers may access the register and confirm the warranty status of any item based on the serial number.,no
+7,Warranty repairs must be carried out within two weeks of being returned to the vendor or the vendor's accredited warranty repair centre(s).  This includes any transit time.,no
+8,"Shell's appointed Workshop Repair service providers and / or Onsite Repair service providers must be provided with swapstock, of an amount determined by Shell on a local basis.",no
+9,"Service providers' stock levels must never be less than twice the amount required to replace site systems components based on expected failure rates, accounting for delivery and installation times.",no
+10,Shell's appointed service providers must be provided with all diagnosis and resolution tools whether electronic / automated or manual knowledge databases / systems.,yes
+11,Vendors must provide Shell appointed service providers with access to problem databases and / or bulletin boards etc for resolution of problems. ,yes
+12,Vendors must provide Shell appointed service providers with access to basic installation and equipment replacement instructions. ,no
+13,Hardware and peripherals must be provided with Serial Numbers placed / attached / located on BOTH the front and top of all equipment. ,no
+14,All Serial Numbers must be easily located and clearly readable without needing to move the equipment.,no
+15,"All hardware and peripherals must be delivered to Shell within three weeks of placement of duly authorised orders.
+
+This applies to standard orders for single / small numbers of sites.  Large orders will be subject to individual agreements.",no
+16,Details of which components require adherence to local/country regulatory disposal regulations and data security regulation must be supplied.,no
+17,The responsibility for the disposal of all equipment that must be disposed of according to local/country regulations is owned by the equipment supplier or sub-contractor.,no
+18,"Both operational and troubleshooting references must be available for:
+
+1. Site personnel
+2. Support entities
+
+Copies of the manuals must be available to Shell in electronic format.",yes
+19,"The vendor must maintain an accessible knowledge database for reference by support organisations and continually maintain up to date content
+
+Controlled access to the database must be available Shell and it's service partners.",no
+20,There must be a process that exists for Shell to 'opt-out' of a central product release cycle. ,yes
+21,There must be a process that exists for Shell to 'opt-in' to a central product release cycle. ,yes
+22,"The tool chosen for remote systems connection support must allow for the system (unless a fault prevents this) to continue operations or business functions while conducting a support session  
+
+The site must have the ability to be supported from a remote location",no
+23,The vendor must provide its own Remote Access tool to support the site system from a remote location. BeyondTrust is recommended. TeamViewer is not allowed because of security breaches in the past.,no
+24,"The core solution must support configurations of parameters using support software based on standard languages like JAVA, .Net. This requirement gets more prominent in case Solution Vendor relies on third party to provide Support solution.",no
+25,"The system must support updates to configuration settings (from a remote location) once a site has gone live due to potential changes to site parameters (e.g. number of POS, pumps etc.).
+
+Logging of all site system parameter changes is required.",no
+26,The application should support the ability to store configuration files centrally and support mechanisms to ensure central copies are updated whenever a change is made at the site.,yes
+27,System Error Messages relevant to customers printed on receipt printer,no
+28,"The system should provide events management capabilities within the core product.
+
+Alerts should be configurable and have the ability to be sent to head-office events management systems",no
+29,The system should support industry standard events management tools,no
+30,The system must not inhibit O/S events management capabilities/logging,no
+31,"The system must have configurable logging levels
+
+E.g. Where troubleshooting is required, the logging level can be changed to “Debug” mode.  Thus, allowing more detailed information to be logged.  Under normal operation, logging must be set to a level where only required information is logged.",yes
+32,It must be possible to have multiple maintenance logs (for different components of the application),yes
+33,The naming convention of log files must be configurable (the ability to name files coming from a site in a standard way) e.g. siteID_date_time_logtype,yes
+34,"The vendor must keep the Operating System up-to-date with Security patches. The security patches must be deployed remotely and at regular intervals (quarterly as a minimum)
+
+It is critical that as improvements are identified and software updates are developed for the O/S that once tested and certified for release that this does not cause any conflicts with the application. ",no
+35,The build and solution applications must not inhibit third party software distribution tools to allow installation onto hardware devices using an automated build process/mechanism.,no
+36,The system must support a number of different sizes of software release (e.g. hotfix/patch/and major upgrades) dependent upon the size of the code being updated.,no
+37,"The solution applications must be able to accept software updates with minimal business interruption.
+
+It is critical that as improvements are identified and software updates are developed, tested and certified for release that this does not cause any conflicts with the O/S and integrated elements.",yes
+38,The application must support software updates (incl. Key injection) from a remote location (from a head-office or a support vendor location) i.e. software upgrade can be completed remotely without requiring a technician to be onsite.,no
+39,"Software updates can be deployed centrally and distributed to many sites (1000+) automatically, without impacting the site operation. The automatic installation onsite must take no longer than 5 minutes for minor updates and must take no longer than 30 minutes for major updates.",no
+40,"Support functions must have the ability to track version control of applications within the system (e.g. for support to clearly identify current version of the update) 
+
+Each module of the system must have clear version stamping in addition to the build of the system itself.",yes
+41,The application must allow for configuration changes to User or Support Profiles,no
+42,Ability to pre-install components at workshop.  Then facilitate swap without further configuration at sites.,no
+43,Solution application and patch installs must be provided as industry standard installer packages,no
+44,"Solution application and patch installs must support unattended installations (run automated, run in silent mode etc…)",no
+45,"Solution application and patch installs must support unattended removal (run automated, run in silent mode etc…)",no
+46,"Where possible, solution application patches must not require a need for system reboot after installation",no
+47,"Solution vendors must have in place procedures for testing and approving OS patches within a reasonable timeframe from release. Where applications are impacted, application patches must be produced to ensure continues OS compatibility.",no
+48,The solution must support the storage of install or patch packages on site for deployment at a later date,no
+49,"Solution applications must support automated configuration of application parameters (through scripts to third party tools), with methods for performing changes fully documented.",yes
+50,The vendor must provide anti-virus tool to protect the site system from malware. The anti-virus signatures must be kept up-to-date. Windows Defender is recommended.,no
+51,"Solution applications must not be impacted by third party backup tools and processes. Where impact may arise, solution must be designed so as to work around limitations.",no
+52,Solution applications must provide log files in a standard formats that can be read or captured by industry standard monitoring and reporting tools,no
+53,"Mobile application (android & IOS) for retailers and support personnels to report, monitor and get status updates for incidents, changes and users' requests.",no
+54," - Check hardware, cable & connectivity for any issues
+ - AOB",no

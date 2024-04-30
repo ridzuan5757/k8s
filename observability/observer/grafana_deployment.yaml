@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: observer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      name: grafana
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: grafana-conf
+          mountPath: /etc/grafana/provisioning/datasources
+          readOnly: false
+      volumes:
+      - name: grafana-storage
+        emptyDir: {}
+      - name: grafana-conf
+        configMap:
+          name: grafana-conf
+          defaultMode: 420
+
