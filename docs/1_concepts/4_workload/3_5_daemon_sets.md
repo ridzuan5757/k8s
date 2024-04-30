@@ -249,3 +249,59 @@ before they are ready. For example, without that special toleration, we could
 end up in a deadlock situation where the node is not marked as ready because the
 network plugin is not running there, and at the same time the network plugin is
 not running on that node because the node is not yet ready.
+
+## Daemon Pods Communication
+
+Some possible patterns for communicating with Pods in a DaemonSet are:
+- **Push** Pods in the DaemonSet are configured to send updates to another
+  service such as a stat database. They do not have clients.
+- **NodeIP and Known Port**: Pods in the DaemonSet can use a `hostPort`, os that
+  the pods are reachable via the node IPs. Clints know the list of node IPs
+  somehow, and know the port by convention.
+- **DNS** Create a headless service with the same pod selector, and then
+  discover DaemonSets using the `endpoints` resource or retrieve multiple A
+  records from DNS.
+- **Service** Create a service with the same Pod selector, and use the service
+  to reach a daemon on a random node. There is no way to reach specific node.
+
+## DaemonSet Update
+
+If node labels are changed, the DaemonSet will promptly add Pods to newly
+matching nodes and delete Pods from newly not-matching nodes.
+
+We can modify the Pods that a DaemonSet creates. However, Pods do not allow all
+fields to be updated. Also, the DaemonSet controller will use th eoriginal
+template the next time a node (even with the same name) is created.
+
+We can delete a DaemonSet. If we specify `--cascade=orphan` with `kubectl`, then
+the Pods will be left on the nodes. If we subsequently create a new DaemonSet
+with the same selector, the new DaemonSet adopts the existing Pods. If any Pods
+need replacing the DaemonSet replaces them according to its `updateStrategy`.
+
+Rolling update can be performed on a DaemonSet.
+
+## Alternatives to DaemonSet
+
+### Init scripts
+
+It is certainly possible to run daemon processes by directly starting them on a
+node (example `init`, `upstartd`, or `systemd`). This is perfectly fine.
+However, there are several advantages to running such processes via a DaemonSet:
+- Ability to monitor and manage logs for daemons in the same way as
+  applications.
+- Same config language and tools (e.g Pod templates, `kubectl`) for daemon and
+  applications.
+- Running daemons in containers with resource limits increases isolation between
+  daemons from app containers. However, this can also be accomplished by running
+  the daemons in a container but not in a Pod.
+
+### Bare Pods
+
+it is possible to create Pods by writing a file to a certain directory watched
+by Kubelet. These are called static pods. Unlike DaemonSet, static Pods cannot
+be managed with kubectl or other k8s API clients. Static Pods do not depend on
+the apiserver, making them useful in cluster bootstrapping cases.
+
+### Deployment
+
+
