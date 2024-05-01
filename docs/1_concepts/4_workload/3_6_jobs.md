@@ -295,3 +295,27 @@ into consideration.
 If either of these requirements is not satisfied, the Job controller counts a
 temrinating Pod as an immediate failure, even if that Pod later terminates with
 `phase: "Succeeded"`.
+
+### Pod Backoff Failure Policy
+
+There are situations where we want to fail a Job after some amount of reties due
+to logical error in configuration etc. To do so, set `.spec.backoffLimit` to
+specify the number of reties before considering a Job as failed. The back-off
+limit is set by default to 6. Failed Pods associated with the Job are recreated
+by the Job controller with an exponential back-off delay (10s, 20s, 40s, ...)
+capped at six minutes.
+
+The number of retries is calculated in two ways:
+- The number of Pods with `.status.phase = "Failed`.
+- When using `restartPolicy = "OnFailure"`, the number of reties in all the
+  containers of Pods with `.status.phase` equal to `Pending` or `Running`.
+
+If either of the calculations reaches the `.spec.backoffLimit`, the Job is
+considered failed.
+
+> [!NOTE]
+> If the job has `restartPolicy = "OnFailure"`, keep in mind that the pod
+> running the Job will be terminated once the job backoff limit has beenr
+> eached. This can make debugging the Job's executable more difficult. Setting
+> the `restartPolicy = "Never"` when debugging the Job or using a logging system
+> is recommended to ensure output from failed Jobs is not lost inadvertently.
