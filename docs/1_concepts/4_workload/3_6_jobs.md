@@ -207,3 +207,23 @@ and it will default to 1.
 For a work queue Job, we must leave `.spec.completions` unset, and set
 `.spec.parallelism` to a non-negative integer.
 
+### Controlling parallelism
+
+The requested parallelism `.spec.parallelism` can be set to any non=negative
+value. If it is unspecified, it defaults to 1. If it is specified as 0, then the
+Job is effectively paused until it is increased.
+
+Actual parallelism (number of pods running at any instant) may be more or less
+than requested parallelism, for a variety of reasons:
+- For fixed completion count Jobs, the actual number of pods running in parallel
+  will not exceed the number of remaining completions. Higher values of
+  `.spec.parallelism` are effectively ignored.
+- For work queue Jobs, no new Pods are started after any Pod has succeeded -
+  remaining Pods are allowed to complete, however.
+- If the Job Controller has no had time to react.
+- If th eJob Controller failed to create Pods for any reasons (lack of
+  `ResourceQuota`, lack of permission, etc.), then there may be fewer pods than
+  requested.
+- The Job controller may throttle new Pod creation due to excessive previous pod
+  failures in the same Job.
+- When a Pod is gracefully shut down, it takes time to stop.
