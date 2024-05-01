@@ -227,3 +227,37 @@ than requested parallelism, for a variety of reasons:
 - The Job controller may throttle new Pod creation due to excessive previous pod
   failures in the same Job.
 - When a Pod is gracefully shut down, it takes time to stop.
+
+### Completion Mode
+
+Jobs with fixed completion count - that is, jobs that have non-null
+`.spec.compltions` can have a completion mode that is specifed in
+`.spec.completionMode`:
+- `NonIndexed` (default) : The Job is considered complete when there have been
+  `.spec.completions` successfully completed Pods. In other words, each Pod
+  completion is homologous to each other. Note that Jobs that have null
+  `.spec.completions` are implicitly `NonIndexed`.
+- `Indexed` : The Pods of a Job get an associated completion index from 0 to
+  `.spec.completions-1`. The index is available through four mechanism:
+    - The Pod annotation `batch.kubernetes.io/job-completion-index`.
+    - The Pod label `batch.kubernetes.io/job-completion-index`. Note that the
+      feature gate `PodIndexLabel` must be enabled to use this label, and it is
+      enabled by default.
+    - As part of the Pod hostname, following the pattern `$(job-name)-$(index)`.
+      When we use an Indexed Job in combination with a Service, Pods within the
+      Job can use the deterministic hostnames to address each other via DNS.
+    - From the containerized task, in the environment variable
+      `JOB_COMPLETION_INDEX`.
+
+The Job is considered complete when there is one successfully completed Pod for
+each index.
+
+> [!NOTE]
+> Although rare, more than one Pod could be started for the same index due to
+> various reasons such as node failures, kubelet restarts or Pod evictions. In
+> this case, only the first Pod that compltes successfully will count towards
+> the completion count and update status of the Job. The other Pods that are
+> running or completed for the same index will be deleted by the Job controller
+> once they are detected.
+
+
