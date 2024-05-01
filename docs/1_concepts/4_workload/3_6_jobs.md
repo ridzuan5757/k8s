@@ -260,4 +260,38 @@ each index.
 > running or completed for the same index will be deleted by the Job controller
 > once they are detected.
 
+## Handling Pod and Container Failures
 
+A container in a Pod may fail for a number of reasons, such as because the
+process in it exited with a non-zero exit code, or the container was killed for
+exceeding memory limit, etc. If this happens, and the
+`.spec.tempalate.spec.restartPolicy = "OnFailure"`, then the Pod stays on the
+node, but the container is re-run. Therefore, the program needs to handle case
+when it is restarted locally, or else specify
+`.spec.template.spec.restartPolicy = Never`.
+
+An entire Pod can also fail, for number of reasons, such as when the Pod is
+kicked off the node (node is upgraded, rebooted, deleted, etc.), or if a
+container of the Pod fails and the 
+`.spec.template.spec.restartPolicty = "Never"`. When a Pod fails then the Job
+controller starts a new Pod. This means that the application needs to handle the
+case when it is restarted in a new pod. In particular, it needs to handle
+temporary files, locks, incomplete output and the like caused by previous runs.
+
+By default, each pod failure is counted towards the `.spec.backoffLimit` limit.
+However, we can customize handling of pod failures by setting the Jobs' pod
+failure policy.
+
+When the feature gate `PodDisruptionConditions` and `JobPodFailurePolicy` are
+both enabled, and the `spec.podFailurePolicy` field is set, the Job controller
+does not consider a terminating Pod (a pod that has a
+`.metadata.deletionTimestamp` field set) as a failure until that Pod is terminal
+(its `.status.phase` is either `Failed` or `Succeeded`). However, the Job
+controller creates a replacement Pod as soon as the termination becomes
+apparent. Once the pod terminates, the Job controller evaluates `.backoffLimit`
+and `.podFailurePolicy` for the relevant Job, taking this now-terminated Pod
+into consideration.
+
+If either of these requirements is not satisfied, the Job controller counts a
+temrinating Pod as an immediate failure, even if that Pod later terminates with
+`phase: "Succeeded"`.
