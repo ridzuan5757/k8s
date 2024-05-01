@@ -161,3 +161,9 @@ except it is nested and does not have `apiVersion` and `kind`.
 A Pod template in a Job must specify appropriate labels and an appropriate
 restart policy. Only a `RestartPolicy` equal to `Never` or `OnFailure` is
 allowed.
+
+### Pod Selector
+
+The `.spec.selector` field is optional. In almost all cases we should not
+specify it. 
+
