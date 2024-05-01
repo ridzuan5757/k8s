@@ -147,4 +147,17 @@ hostnames. For best compatibility, the name should follow more restrictive rules
 for a DNS label. Even when the name is a DNS subdomain, the name must be no
 longer than 63 characters.
 
+### Job Labels
 
+Job labels will have `batch.kubernetes.io/` prefix for `job-name` and
+`controller-uid`.
+
+### Pod Template
+
+The `.spec.template` is the only required field of the `.spec`. The
+`.spec.template` is a pod template. It has exactly the same schema as a Pod
+except it is nested and does not have `apiVersion` and `kind`.
+
+A Pod template in a Job must specify appropriate labels and an appropriate
+restart policy. Only a `RestartPolicy` equal to `Never` or `OnFailure` is
+allowed.
