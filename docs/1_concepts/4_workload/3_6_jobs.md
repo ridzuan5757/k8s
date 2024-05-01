@@ -167,3 +167,43 @@ allowed.
 The `.spec.selector` field is optional. In almost all cases we should not
 specify it. 
 
+
+### Parallel execution for Jobs
+
+There are three main types of task suitable to run as a Job:
+- Non-parallel Jobs
+    - Normally, only one Pod is started, unless the Pod fails.
+    - The Job is complete as soon as its Pod terminates sucessfully.
+- Parallel Jobs with a fixed completion count:
+    - Specify a non-zero positive value for `.spec.completions`.
+    - The Job represents the overall task, and is complete when there are
+      `.spec.completions` successful Pods.
+    - When using `.spec.completionMode="Indexed"`, each Pod gets a different
+      index in the range 0 to `.spec.completions-1`.
+- Parallel Jobs with a work queue:
+    - Do not specify `.spec.completions` and it will default to
+      `.spec.parallelism`.
+    - The Pods must coordinate amongst themselves or an external service to
+      determine what each should work on. For example, a Pod might fetch a batch
+      of up to N items from the work queue.
+    - Each Pod is independently capable of determining whether or not all its
+      peers are done, and thus that the entire Job is done.
+    - When any Pod from the Job terminates with success, no new Pods are
+      created.
+    - Once at least one Pod has terminated with success and all Pods are
+      terminated, then the Job is completed with success.
+    - Once any Pod has exited with success, no other Pod should still be doing
+      any work for this task or writing any output. They should all be in the
+      process of exiting.
+
+For a non-parallel Job, we can leave both `.spec.completions` and
+`.spec.parallelism` unset. When both are unset, both are defaulted to 1.
+
+
+For a fixed completion count Job, we should set `.spec.completions` to the
+number of completions needed. We can set `.spec.parallelism`, or leave it unset
+and it will default to 1.
+
+For a work queue Job, we must leave `.spec.completions` unset, and set
+`.spec.parallelism` to a non-negative integer.
+
