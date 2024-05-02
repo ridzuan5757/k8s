@@ -101,5 +101,29 @@ include:
 Use a ConfigMap if any of the following apply:
 - There is an existing, well-documented configuration file format, such as
   `mysql.cnf` or `pom.xml`.
-- We wnat to put the entire configuration into one key of a ConfigMap.
--
+- We want to put the entire configuration into one key of a ConfigMap.
+- The main use of the configuration file is for a program running in a Pod or
+  environment variablein a pod, rather than the k8s API.
+- We want to perform rolling updates via Deployment, etc., when the file is
+  updated.
+
+> [!NOTE]
+> Use a Secret for sensitive data, which is similar to a ConfigMap but more
+> secure.
+
+Use a custom resource CRD or Aggregated API if most of the following apply:
+- We want to use k8s client libraries and CLIs to create and update the new
+  resource.
+- We want top-level support form `kubectl`. For example, `kubectl get my-object
+  object-name`.
+- We want to write automation that handles updates to the object.
+- We want to use k8s API conventions like `.spec`, `.status`, and `.metadata`.
+- We want the object to be an abstraction over a collection of controlled
+  resources, or a summarization of other resources.
+
+## Adding custom resources
+
+k8s provides two ways to add custom resources to the cluster:
+- CRDs are simple and can be created without any programming.
+- API Aggregation requires programming, but allows more control over API
+  behaviour like how data is stored and conversion between API versions.
