@@ -319,3 +319,79 @@ considered failed.
 > eached. This can make debugging the Job's executable more difficult. Setting
 > the `restartPolicy = "Never"` when debugging the Job or using a logging system
 > is recommended to ensure output from failed Jobs is not lost inadvertently.
+
+### Backoff Limit per Index
+
+> [!NOTE]
+> We can only configure the backoff limit per index for an Indexed Job, if we
+> have the `JobBackoffLimitPerIndex` feature gate enabled in your cluster.
+
+When we run an indexed Job, we can choose to handle retries for pod failures
+independently for each index. To do so, set the `.spec.backoffLimitPerIndex` to
+specify the maximumal number of pod failures per index.
+
+When the per-index backoff limit is exceeded for an index, K8s considers the
+index as failed and adds it to the `.status.failedIndexes` field. When the
+number of failed indexes exceeds the `maxFailedIndexes` field, the Job
+controller triggers termination of all remaining running Pods for the Job. Once
+all pods are terminated, the entire Job is marked failed by the Job controller,
+by setting the Failed condition in the Job status.
+
+Here is an example manifest for a Job that defines a `backoffLimitPerIndex`:
+
+```yaml
+# job-backoff-limit-per-index-example.yaml
+
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-backoff-limit-per-index-example
+spec:
+  completions: 10
+  parallelism: 3
+  completionMode: Indexed  # required for the feature
+  backoffLimitPerIndex: 1  # maximal number of failures per index
+  maxFailedIndexes: 5      # maximal number of failed indexes before terminating the Job execution
+  template:
+    spec:
+      restartPolicy: Never # required for the feature
+      containers:
+      - name: example
+        image: python
+        command:           # The jobs fails as there is at least one failed index
+                           # (all even indexes fail in here), yet all indexes
+                           # are executed as maxFailedIndexes is not exceeded.
+        - python3
+        - -c
+        - |
+          import os, sys
+          print("Hello world")
+          if int(os.environ.get("JOB_COMPLETION_INDEX")) % 2 == 0:
+            sys.exit(1)          
+```
+
+In the example above, the Job controller allows for one restart for each of the
+indexes. When the total number of failed indexes exceeds 5, then the entire Job
+is terminated. Once the job is finished, the Job status looks as follows:
+
+```bash
+kubectl get -o yaml job job-backoff-limit-per-index-example
+```
+
+```bash
+status:
+    completedIndexes: 1,3,5,7,9
+    failedIndexes: 0,2,4,6,8
+    succeeded: 5          # 1 succeeded pod for each of 5 succeeded indexes
+    failed: 10            # 2 failed pods (1 retry) for each of 5 failed indexes
+    conditions:
+    - message: Job has failed indexes
+      reason: FailedIndexes
+      status: "True"
+      type: Failed
+```
+
+Additionally, we may want to use the per-index backoff along with a pod failure
+policy. When using per-index backoff, there is a new `FailIndex` action
+available which allows us to avoid unnecessary retries within an index.
