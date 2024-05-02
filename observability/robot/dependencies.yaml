@@ -56,10 +56,10 @@
       ansible.builtin.command: dpkg --print-architecture
       register: architecture_output
     
-    - name: Get OS version codename
-      become: true
-      ansible.builtin.shell: /etc/os-release && echo "$VERSION_CODENAME"
-      register: version_codename
+    # - name: Get OS version codename
+    #   become: true
+    #   ansible.builtin.shell: /etc/os-release && echo "$VERSION_CODENAME"
+    #   register: version_codename
     
     - name: Add repository to Apt sources
       ansible.builtin.apt_repository:
@@ -67,14 +67,14 @@
           deb [arch={{ architecture_output.stdout }}
           signed-by=/etc/apt/keyrings/docker.asc] 
           https://download.docker.com/linux/debian
-          {{ version_codename.stdout }} stable
-        filename: docker.list
+          {{ ansible_distribution_release }} stable
+        filename: docker
         state: present
       
     - name: Verify file repository exist
       ansible.builtin.stat:
         path: /etc/apt/sources.list.d/docker.list
-        register: filestat
+      register: filestat
 
     - name: Validate file existence
       ansible.builtin.assert:
@@ -150,7 +150,7 @@
         dest: /tmp/Release.key
 
     - name: Dearmor GPG key
-      ansible.builtin.shell: |
+      ansible.builtin.command: |
         gpg --dearmor /tmp/Release.key 
         -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
