@@ -395,3 +395,126 @@ status:
 Additionally, we may want to use the per-index backoff along with a pod failure
 policy. When using per-index backoff, there is a new `FailIndex` action
 available which allows us to avoid unnecessary retries within an index.
+
+### Pod Failure Policy
+
+> [!note] We can only configure a Pod failure policy for a Job isf we have the
+> `JobPodFailurePolicy` feature gate enabled in the cluster. Additionally, it is
+> recommended to enable the `PodDisruptionConditions` feature gate in order to
+> be able to detect and handle Pod disruption conditions in the Pod failure
+> policy. Both feature gates are available in K8s v.1.30.
+
+A Pod failure policy, defined with the `.spec.podFailurePolicy` field, enables
+the cluster to handle Pod failures based on the container exit codes and the Pod
+conditions.
+
+In some situations, we may want to have a better control when handling Pod
+failures than the control provided by the Pod backoff failure policy, which is
+based on the Job's `.spec.backoffLimit`. These are some examples of use cases:
+- To optimize costs of running workloads by avoiding unnecessary Pod restarts,
+  we can terminate a Job as soon as one of its Pods fails with an exit code
+  indicating a software bug.
+- To guarantee that the Job finishes even if there are disruptions, we can
+  ignore Pod failures caused by disruptions such as preemption, API-initiated
+  eviction or taint-based eviction so that they do not count towards the
+  `.spec.backoffLimit` limit of retries.
+
+We can configure a Pod failure policy, in the `.spec.podFailurePolicy` field, to
+meet the above use cases. This policy can handle Pod failures based on the
+container exit codes and the Pod conditions.
+
+Here is a manifest for a Job that defines a `podFailurePolicy`:
+
+```yaml
+# job-pod-failure-policy-example.yaml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: job-pod-failure-policy-example
+spec:
+    completions: 12
+    parallelism: 3
+    template:
+        spec:
+            restartPolicy: Never
+            containers:
+            - name: main
+              image: docker.io/library/bash:5
+              # example command simulating a bug which triggers the failjob
+              # action
+              command: ["bash"]
+              args:
+              - -c
+              - echo "Hello world!" && sleep 5 && exit 42
+    backoffLimit: 6
+    podFailurePolicy:
+        rules:
+        - action: FailJob
+          onExitCodes:
+            # this container name is optional
+            containerName: main
+            operator: In    # one of In, NotIn
+            values: [42]
+        - action: Ignore    # one of Ignore, FailJob, Count
+          onPodConditions:
+          # indicates pod disruption
+          - type: DisruptionTarget
+```
+
+In the example above, the first rule of the Pod failure policy specifies that
+the Job should be marked failed if the `main` container fails with the 42 exit
+code. The following are rules for the `main` container specifically:
+- An exit code of `0` means that the container succeeded.
+- An exit code of `42` means that the entire job failed.
+- Any other exit code represents that the container failed, and hence the entire
+  Pod. The Pod will be re-created if the total number of restarts is below
+  `backoffLimit`. If the `backoffLimit` is reached the **entire Job** failed.
+
+> [!NOTE]
+> Because the Pod template specifies a `restartPolicy: Never`, the kubelet does
+> not restart the `main` container in that particular Pod.
+
+The second rule of the Pod failure policy, specifying the `Ignore` action for
+failed Pods with condition `DisruptionTarget` excludes Pod disruptions from
+being counted towards the `.spec.backoffLimit` limit of retries.
+
+> [!NOTE]
+> If the Job failed, either by the Pod failure policy or Pod backoff failure
+> policy, and the Job is running multiple Pods, K8s terminates all the Pods in
+> that Job that are still Pending or Running.
+
+These are some requirements and semantics of the API:
+- If we want to use a `.spec.podFailurePolicy` field for a Job, we must also
+  define that Job is pod template with `.spec.restartPolicy` set to `Never`.
+- The Pod failure policy rules that we have to specify under
+  `spec.podFailurePolicy.rules` are evaluated in order. Once a rule matches a
+  Pod failure, the remaining rules are ignored. When no rule matches the Pod
+  failure, the default handling applies.
+- We may want to restrict a rule to a specific container by specifying its name
+  in `spec.podFailurePolicy.rules[*].onExitCodes.containerName`. When not
+  specified the rule applies to all containers. When specified, it should match
+  one the container or `initContainer` names in the Pod template.
+- We may specify the action taken when a Pod failure policy is matched by
+  `spec.podFailurePolicy.rules[*].action`. Possible values are:
+    - `FailJob` use to indicate that the Pod's job should be marked as Failed
+      and all running Pods should be terminated.
+    - `Ignore` use to indicate that the counter towards the `.spec.backoffLimit`
+      should not be incremented and a replacement Pod should be created.
+    - `Count` use to indicate that the Pod should be handled in the default way.
+      The counter towards the `.spec.backoffLimit` should be incremented.
+    - `FailIndex` use this action along with backoff limit per index to avoid
+      unnecessary retries within the index of a failed pod.
+
+> [!NOTE]
+> When we use a `podFailurePolicy`, the job controller only matches Pods in the
+> `Failed` phase. Pods with a deletion timestamp that are not in a terminal
+> phase `Failed` or `Succeeded` are considered still terminating. this implies
+> that terminating pods retain a tracking finalizer until they reach a terminal
+> phase. Kubelet transitions deleted pods to a terminal phase. This ensures that
+> deleted pods have their finalizers removed by the Job controller.
+
+> [!NOTE]
+> When Pod failure policy is used, the Job controller recreates terminating Pods
+> only once these Pods reach the terminal `Failed` phase. This behaviour is
+> similar to `podReplacementPolicy: Failed`.
