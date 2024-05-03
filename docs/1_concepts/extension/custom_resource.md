@@ -204,4 +204,23 @@ Typically, CRDs are a good fit if:
 - We need to handle multiple versions of the API. For example, when developing
   an extension to share with the world.
 
+### Advanced features and flexibility
+
+Aggregated APIs offer more advanced API features and customization of other
+features; for example, the storage layer.
+
+#### Feature
+
+##### Validation and Defaulting
+
+Help users prevent errors and allow us to evolve the API independently to our
+clients. These features are most useful when there are many clients who cannot
+all update at the same time.
+- **CRDs** Most validation can be specified in the CRD using OpenAPI v3,0
+  validation. CRDValidationRatcheting feature gate allows failing validations
+  specified using OpenAPI also can be ignored if the failing part of the
+  resource was unchanged. Any other validations supported by adding of a
+  Validating Webhook.
+- **Aggregation API** Arbitrary validation checks.
+
 
