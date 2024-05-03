@@ -16,9 +16,7 @@
       ansible.builtin.command: swapoff -a
 
     - name: File disable
-      ansible.builtin.lineinfile:
+      ansible.builtin.replace:
         path: /etc/fstab
-        regexp: '^([^#].*?\s+)(/\S+\s+swap\s+\S+.*)$'
-        backrefs: yes
-        line: '# \1\2'
-        state: present
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '#\ 1'

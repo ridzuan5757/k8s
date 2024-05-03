@@ -127,3 +127,52 @@ k8s provides two ways to add custom resources to the cluster:
 - CRDs are simple and can be created without any programming.
 - API Aggregation requires programming, but allows more control over API
   behaviour like how data is stored and conversion between API versions.
+
+k8s provides these two options to meet the needs of different users, so that
+neither ease of use nor flexibility is compromised.
+
+Aggregated APIs are subordinate API servers that sit behind the primary API
+server, which acts as a proxy. This arrangement is called API aggregation AA. To
+users, the k8s API appears extended.
+
+CRDs allow users to create new types of resources without adding another API
+server. We do not need to understand API aggregation to use CRDs.
+
+Regardless of how they are installed, the new resources are referred to as
+Custom Resources to distinguih them from built-in k8s resources like Pods.
+
+> [!NOTE]
+> Avoid using a Custom Resource as data storage for application, end user, or
+> monitoring data. Architecture design that store application data within the
+> k8s API typically represent a design that is too closely coupled.
+>
+> Architecturally, cloud native application architectures favor loose coupling
+> between components. If part of the workload requires a backing service for its
+> routine operation, run that backing service as a component or consume it as an
+> external service. This way, the workload does not rely on k8s API for its
+> normal operation.
+
+## CustomResourceDefinition
+
+The CRD API resource allows us to define custom resources. Defining a CRD object
+creates a new custome resource with a name and schema that we specify, The k8s
+API serves and handles the storage of the custom resource. The name of a CRD
+object must be a valid DNS subdomain name. 
+
+This frees us from writing our own API server to handle csutom resource, but the
+generic nature of the implementation means that we have less flexibility than
+with API aggregation.
+
+## API server aggregation
+
+Usually, each resource in k8s API requires code that handles REST requests and
+manages persistent storage of objects. The main k8s API server handles built-in
+resources like Pods and Services, and can also generically handle custom
+resources through CRDs.
+
+The aggregation layer wllows us to provide specialized implementatuins for
+custom resources by writing and deploying our own API server. The main API
+server delegates requests to the API server for the custom resources that we
+handle, making them available to all of its clients.
+
+

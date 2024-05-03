@@ -39,6 +39,11 @@
         path: /etc/apt/keyrings
         state: directory
         mode: "0755"
+
+    - name: Check if Docker GPG keyfile exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/docker.asc
+      register: gpg_key_file
     
     - name: Get Docker's official GPG key
       ansible.builtin.uri:
@@ -46,7 +51,9 @@
         method: GET
         dest: /etc/apt/keyrings/docker.asc
         follow_redirects: safe
-
+      when: gpg_key_file.stat.exists == False
+      register: gpg_key_response
+    
     - name: Modify key permission
       ansible.builtin.file:
         path: /etc/apt/keyrings/docker.asc
@@ -119,40 +126,65 @@
   become: true
   tasks:
     - name: Create the /etc/containerd/directory
-      file:
+      ansible.builtin.file:
         path: /etc/containerd
         state: directory
         mode: "0755"
 
-    - name: Retrieve default containerd configuration
-      ansible.builtin.command: containerd config default
-      register: containerd_config
+    - name: Set systemd cgroup
+      ansible.builtin.command: |
+        sudo containerd config default | 
+        sudo tee /etc/containerd/config.toml
 
-    - name: Write containerd configuration to file
-      ansible.builtin.copy:
-        content: containerd_config.stdout
-        dest: /etc/containerd/config.toml
+    # - name: Retrieve default containerd configuration
+    #   ansible.builtin.command: containerd config default
+    #   register: containerd_config
 
-    - name: Set SystemCgroup option to true
-      ansible.builtin.lineinfile:
-        path: /etc/containerd/config.toml
-        regexp: '^SystemdCgroup\s*='
-        line: "SystemdCgroup = true"
-        state: present
+    # - name: Write containerd configuration to file
+    #   ansible.builtin.copy:
+    #     content: containerd_config.stdout
+    #     dest: /etc/containerd/config.toml
+
+    # - name: Set SystemCgroup option to true
+    #   ansible.builtin.lineinfile:
+    #     path: /etc/containerd/config.toml
+    #     regexp: '^SystemdCgroup\s*='
+    #     line: "SystemdCgroup = true"
+    #     state: present
 
 - name: k8s installation
   hosts: all
   become: true
   tasks:
+    - name: Check if k8s GPG keyfile exists
+      ansible.builtin.stat:
+        path: /tmp/Release.key
+      register: gpg_key_file
+    
     - name: Add k8s apt key
-      ansible.builtin.get_url:
+      ansible.builtin.uri:
         url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+        method: GET
         dest: /tmp/Release.key
+        follow_redirects: safe
+      when: gpg_key_file.stat.exists == False
+
+    - name: Modify key permission
+      ansible.builtin.file:
+        path: /tmp/Release.key
+        mode: 'a+r'
 
     - name: Dearmor GPG key
       ansible.builtin.command: |
-        gpg --dearmor /tmp/Release.key 
-        -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+          gpg          
+          --yes 
+          --output /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+          --dearmor /tmp/Release.key 
+
+    # - name: Move GPG key
+    #   ansible.builtin.command: |
+    #     mv /tmp/Release.key.gpg
+    #     /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
     - name: Add k8s repository
       ansible.builtin.apt_repository:
@@ -161,17 +193,17 @@
           https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /
         state: present
 
-    - name: Verify file repository exist
-      ansible.builtin.stat:
-        path: /etc/apt/sources.list.d/kubernetes.list
-        register: filestat
+    # - name: Verify file repository exist
+    #   ansible.builtin.stat:
+    #     path: /etc/apt/sources.list.d/kubernetes.list
+    #   register: filestat
 
-    - name: Validate file existence
-      ansible.builtin.assert:
-        that: filestat.stat.exists
-        fail_msg: |
-          k8s repository does not exist at 
-          /etc/apt/sources.list.d/kubernetes.list
+    # - name: Validate file existence
+    #   ansible.builtin.assert:
+    #     that: filestat.stat.exists
+    #     fail_msg: |
+    #       k8s repository does not exist at 
+    #       /etc/apt/sources.list.d/kubernetes.list
 
     - name: Update package cache
       ansible.builtin.apt:

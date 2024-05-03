@@ -1,0 +1,21 @@
+{
+  "name": "metricapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.51.0",
+    "@opentelemetry/resources": "^1.24.0",
+    "@opentelemetry/sdk-metrics": "^1.24.0",
+    "@opentelemetry/sdk-node": "^0.51.0",
+    "axios": "^1.6.8",
+    "express": "^4.19.2"
+  }
+}
