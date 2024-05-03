@@ -175,4 +175,33 @@ custom resources by writing and deploying our own API server. The main API
 server delegates requests to the API server for the custom resources that we
 handle, making them available to all of its clients.
 
+## Choosing a Method for Adding Custom Resource
+
+CRDs are easier to use. Aggregated APIs are more flexible. Choose the method
+that best meets your needs. 
+
+Typically, CRDs are a good fit if:
+- We have handful of fields.
+- We are using the resource within our own company, or as part of a small
+  open-serouce project (as opposed to a commercial product)
+
+### Ease of use
+
+#### CRDs
+- Do not require programming. Users can choose any language for a CRD
+  controller.
+- No additional service to run; CRDs are handled by API server.
+- No ongoing support once the CRD is created. Any bug fixes are picked up as
+  part of normal k8s Master upgrades.
+- No need to handle multiple versions of the API. For example, when we control
+  the client for this resource, we can upgrade it in sync with API.
+
+#### Aggregated API
+- Require programming and building binary and image.
+- An additional service to create and could fail.
+- May need to periodically pickup bug fixes from upstream and rebuild and update
+  the Aggregated API server.
+- We need to handle multiple versions of the API. For example, when developing
+  an extension to share with the world.
+
 
