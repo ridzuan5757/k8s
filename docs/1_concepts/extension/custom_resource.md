@@ -345,3 +345,11 @@ Deployment of third-party code that implements the business logic for a new
 custom resource.
 
 Installing an Aggregated API server always involves running a new Deployment.
+
+#### Storage
+
+Custom resources consume storage space in the same way that ConfigMaps do.
+Creating too many custom resources may overload the API server's storage space.
+
+Aggregated API servers may use the same storage as the main API server, in which
+case the same warning applies.
