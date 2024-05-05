@@ -96,4 +96,45 @@ rules:
 
 The nae of a Role or a ClusterRole object must be a valid path segment name.
 
+### RoleBinding and ClusterRoleBinding
+
+A role binding grants the permissions defined in a role to a user or set of
+users. It holds a list of subjects (user, groups, or service accounts), and a
+reference to the role being granted. A RoleBinding grants permissions within a
+specific namespace whereas a ClusterRoleBinding grants that access cluster-wide.
+
+A RoleBinding may reference any Role in the same namespace. Alternatively, a
+RoleBinding can reference a ClusterRole and bind that ClusterRole to the
+namespace of the RoleBinding. If we want to bind a ClusterRole to all the
+namespaces in the cluster, we use a ClusterRoleBinding.
+
+The name of a RoleBinding or ClusterRoleBinding object must be a valid path
+segment name.
+
+#### RoleBinding example
+
+Here is an example of a RoleBinding that grants the "pod-reader" Role to the
+user "jane" with "default" namespace. This allows "jane" to read pods in the
+"default" namespace.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    name: read-pods
+    namespace: default
+subjects:
+# more than one subject can be specified
+- kind: User
+  name: jane
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+    # roleRef specifies the binding to a Role / ClusterRole
+    kind: Role
+    # this must match the name of the Role or the ClusterRole that need to be
+    # bind to
+    name: pod-reader
+    apiGroup: rbac.authorization.k8s.io
+```
+
 
