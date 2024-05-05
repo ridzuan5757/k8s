@@ -134,17 +134,10 @@
       ansible.builtin.command: containerd config default
       register: containerd_config
 
-    - name: Write containerd configuration to file
-      ansible.builtin.copy:
-        content: "{{ containerd_config.stdout }}"
+    - name: Create systemd drop-in config
+      ansible.builtin.template:
+        src: ./template/containerd.toml
         dest: /etc/containerd/config.toml
-
-    - name: Set SystemCgroup option to true
-      ansible.builtin.lineinfile:
-        path: /etc/containerd/config.toml
-        regexp: '^SystemdCgroup\s*='
-        line: "SystemdCgroup = true"
-        state: present
 
     - name: Restart containerd service
       ansible.builtin.systemd:

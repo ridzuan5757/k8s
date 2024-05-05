@@ -216,11 +216,42 @@ features; for example, the storage layer.
 Help users prevent errors and allow us to evolve the API independently to our
 clients. These features are most useful when there are many clients who cannot
 all update at the same time.
-- **CRDs** Most validation can be specified in the CRD using OpenAPI v3,0
-  validation. CRDValidationRatcheting feature gate allows failing validations
-  specified using OpenAPI also can be ignored if the failing part of the
-  resource was unchanged. Any other validations supported by adding of a
-  Validating Webhook.
-- **Aggregation API** Arbitrary validation checks.
+
+###### CRDs
+Most validation can be specified in the CRD using OpenAPI v3.0 validation.
+CRDValidationRatcheting feature gate allows failing validations specified using
+OpenAPI also can be ignored if the failing part of the resource was unchanged.
+Any other validations supported by addition of a Validating Webhook.
+
+Defaulting is possible via OpenAPI v3.0 validation `default` keyword or via a
+mutating webhook. This will not be run when reading from etcd for old object.
+
+###### Aggregation APIs
+
+Arbitration validation checks.
+
+##### Multi-versioning
+
+Allows serving the same object through two API versions. Can help ease API
+changes like renaming fields. Less important if we control our client versions.
+Available for both CRDs and Aggregation APIs.
+
+##### Custom Business Logic
+
+Perform arbitrary checks or actions when creating, reading, updating or deleting
+an object. Possible for CRDs via webhooks.
+
+##### Scale Subresource
+
+Allow systems like HorizontalPodAutoscaler and PodDisruptionBudget interact with
+new resource. Possible for both CRDs and Aggregation API.
+
+##### Status Subresource
+
+Allows fine-grained access control where user writes the spec section and the
+controller writes the status section. Allows incrementing object Generation on
+custom resource data mutation (requires separate spec and status sections in the
+resource). Possible for both CRDs and Aggregation API.
+
 
 
