@@ -353,3 +353,17 @@ Creating too many custom resources may overload the API server's storage space.
 
 Aggregated API servers may use the same storage as the main API server, in which
 case the same warning applies.
+
+#### Authentication, authorization, and auditing
+
+CRDs always use the same authentication, authorization, and audit logging as the
+built-in resources of the API server.
+
+If we use RBAC for authorization, most RBAC roles will not grant access to the
+new resources (except the cluster-admin role or any role created with wildcard
+rules).
+
+Aggregated API servers may or may not use the same authentication,
+authorization, and auditing as the primary API server.
+
+
