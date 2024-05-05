@@ -366,4 +366,25 @@ rules).
 Aggregated API servers may or may not use the same authentication,
 authorization, and auditing as the primary API server.
 
+## Accessing a custom resource
 
+k8s client libraries can be used to access custom resources. Not all client
+libraries support custom resources. The Go and Python client libraries do.
+
+When custom resource is added, we can access it using:
+- kubectl
+- k8s dynamic client
+- REST client
+- client generated using k8s client generation tools.
+
+## Custom resource field selectors
+
+Field selectors let clients select custom resources based on the value of one or
+more resource fields.
+
+All custom resources support the `metadata.name` and `metadata.namespace` field
+selectors.
+
+Field declared in a CustomResourceDefinition may also be used with field
+selectors when included in the `spec.versions[*].selectableFields` field of the
+CustomResourceDefinition.
