@@ -277,4 +277,58 @@ ensuring only allowed fields are set? Are types enforced(in other words, do not
 put an `int` in a `string` field?). This feature available for both CRDs and
 Aggregation API.
 
+### Common features
+
+When we cerate a custom resource, either via a CRD or an AA, we get many
+features for the API, compared to implementing it outside the k8s platform.
+
+#### CRUD
+The new endpoints support CRUD basic operations via HTTP and kubectl.
+
+#### Watch
+The new endpoints support k8s watch operations via HTTP.
+
+#### Discovery
+Clients like kubectl and dashboard automatically offer list, display, and field
+edit operations on the resources.
+
+#### json-path
+The new endpoints support PATCH request with `Content-Type:
+application/json-path+json`.
+
+#### merge-path
+The new endpoints support PATCH request with `Content-Type:
+application/merge-patch+json`.
+
+#### HTTPS
+The new endpoints uses HTTPS.
+
+#### Built-in Authentication
+Access to the extension uses the core API server (aggregation layer) for
+authentication.
+
+#### Built-in Authorization
+Access to the extension can reuse the authorization used by the core API server;
+for example, RBAC.
+
+#### Finalizers
+Block deletion of extension resources until external cleanup happens.
+
+#### Admission Webhooks
+Set default values and validate extension resources during any
+create/update/delete operation.
+
+#### UI/CLI Display
+Kubectl, dashboard can display extension resources.
+
+#### Unset versus Empty
+Clients can distinguish unset fields from zero-valued fields.
+
+#### Client Libraries Generationk8s provides generic client libraries, as well
+as tools to generate type-specific client libraries.
+
+#### Labels and annotations
+Common metadata across objects that tools know how to edit for core and custom
+resources.
+
 
