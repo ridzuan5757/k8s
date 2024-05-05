@@ -244,7 +244,8 @@ an object. Possible for CRDs via webhooks.
 ##### Scale Subresource
 
 Allow systems like HorizontalPodAutoscaler and PodDisruptionBudget interact with
-new resource. Possible for both CRDs and Aggregation API.
+new resource. Possible for both CRDs and Aggregation API. For CRDs, WebHooks
+would be required.
 
 ##### Status Subresource
 
@@ -253,5 +254,27 @@ controller writes the status section. Allows incrementing object Generation on
 custom resource data mutation (requires separate spec and status sections in the
 resource). Possible for both CRDs and Aggregation API.
 
+##### Other Subresources
+
+Add operations other than CRUD, such as `logs` or `exec`. Only available for Aggregation API.
+
+##### Strategic Merge Patch
+
+The new endpoints support `PATCH` request with `Content-Type:
+application/strategic-merge-patch+json`. Useful for updating objects that may be
+modified both locally, and by the server. Only available via Aggregation API.
+
+##### Protocol Buffer
+
+The new resource supports clients that want to use Protocol Buffers. Only
+available via Aggregation API.
+
+##### OpenAPI Schema
+
+Is there an OpenAPI (swagger) schema for the types that can be dynamically
+fetched from the server? Is the user protected from misspelling field names by
+ensuring only allowed fields are set? Are types enforced(in other words, do not
+put an `int` in a `string` field?). This feature available for both CRDs and
+Aggregation API.
 
 
