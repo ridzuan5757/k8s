@@ -331,4 +331,17 @@ as tools to generate type-specific client libraries.
 Common metadata across objects that tools know how to edit for core and custom
 resources.
 
+## Preparing to Install Custom Resource
 
+There are several points to be aware of before adding a custom resource to the
+cluster.
+
+### Third party code and new points of failure
+
+While creating a CRD does not automatically add any new points of failure (for
+example, by causing third party code to run on the API server), packages (for
+example, Charts) or other installation bundles often include CRDs as well as
+Deployment of third-party code that implements the business logic for a new
+custom resource.
+
+Installing an Aggregated API server always involves running a new Deployment.
