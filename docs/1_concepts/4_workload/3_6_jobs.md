@@ -518,3 +518,93 @@ These are some requirements and semantics of the API:
 > When Pod failure policy is used, the Job controller recreates terminating Pods
 > only once these Pods reach the terminal `Failed` phase. This behaviour is
 > similar to `podReplacementPolicy: Failed`.
+
+## Success Policy
+
+> [!NOTE]
+> We can only configure a success policy for an Indexed Job if we have the
+> JobSuccessPolicy feature gate enabled in the cluster.
+
+When creating an Indexed Job, we can define when a Job can be declared as
+succeeded unsing a `.spec.successPolicy`, based on the pods that succeeded.
+
+By default, a Job succeeds when the number of succeeded Pods equals
+`.spec.completions`. These are some situations where we might want additional
+control for declaring a Job succeeded:
+- When running simulations with different parameters, we might not need all
+  simulations to succeed for the overall Job to be successful.
+- When following a leader-worker pattern, only the success of the leader
+  determines the success or failure of a Job. Examples of this are frameworks
+  like MPI and PyTorch.
+
+We can configure a success policy, in the `.spec.successPolicy` field, to meet
+the above use cases. This policy can handle Job success based on the succeeded
+pods. After the Job meets the success policy, the Job controller terminates the
+lingering Pods. A success policy is defined by rules. Each rule can take one of
+the following forms:
+- When we specify the `succeededIndexes` only, once all indexes specified in the
+  `succeededIndexes` succeed, the job controller makrs the job as succeeded.
+  The `succeededIndexes` must be a list of intervals between 0 and
+  `.spec.completions-1`.
+- When we specify the `succeededCount` only, once the number of succeeded
+  indexes reaches the `succeededCount`, the Job controller marks the Job as
+  succeeded. 
+- When we specify both `succeededIndexes` and `succeededCount`, once the number
+  of succeeded indexes from the subset of indexes specified in the
+  `succeededIndexes` reaches the `succeededCount`, the Job controller marks the
+  Job as succeded.
+
+Note that when we specify multiple rules in the `.spec.successPolicy.rules`, the
+Job controller evaluates the rules in order. Once the Job meets a rule, the Job
+controller ignores remaining rules. Here is a manifest for a Job with
+`successPolicy`:
+
+```yaml
+# job-success-policy.yaml
+
+apiVersion: batch/v1
+kind: Job
+spec:
+    parallelism: 10
+    completions: 10
+    completionMode: Indexed     # required for the success policy
+    successPolicy:
+        rules:
+            - succeededIndexes: 0, 2-3
+              succeededCount: 1
+    template:
+        spec:
+            containers:
+            - name: main
+              image: python
+              command:
+              # provided that at least one of the Pods with 0, 2 and 3 indexes
+              # has succeded, the overall job count as successful
+                - python 3
+                - -c
+                - |
+                    import os, sys
+                    if os.environ.get("JOB_COMPLETION_INDEX") == "2":
+                        sys.exit(0)
+                    else:
+                        sys.exit(1)
+```
+
+In the example above, both `succeededIndexes` and `succeededCount` have been
+specified. Therefore, the job controller will mark the Job as succeeded and
+terminate the lingering Pods when either of the specified indexes, 0, 2, or 3,
+succeed. The Job that meets the success policy gets the `SuccessCriteriaMet`
+condition. After the removal of the lingering Pods is issued, the Job gets the
+`Complete` condition.
+
+Note that the `succeededIndexes` is represented as intervals separated by a
+hyphen. The number are liested in represented by the first and last element of
+the series, separated by hyphen.
+
+> [!NOTE]
+> When we specify both a success policy and some terminating policies such as
+> `.spec.backoffLimit` and `.spec.podFailurePolicy`, once the Job meets either
+> policy, the Job controller respects the terminating policy and ignores the
+> success policy.
+
+
