@@ -388,3 +388,68 @@ selectors.
 Field declared in a CustomResourceDefinition may also be used with field
 selectors when included in the `spec.versions[*].selectableFields` field of the
 CustomResourceDefinition.
+
+### Selectable fields for custom resources
+
+We need to enable the `CustomResourceFeildSelectors` feature gate to use this
+behaviour, which then applies to all CustomResourceDefinition in the cluster.
+
+The `spec.versions[*].selectableFields` field of a CustomResourceDefinition may
+be used to declare which other fields in a custom resource may be used in field
+selectors. The following example adds the `.spec.color` and `.spec.size` fields
+as selectable fields.
+
+```yaml
+#shirt-resource-definition.yaml
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+    name: shirts.stable.example.com
+spec:
+    group: stable.example.com
+    scope: Namespaced
+    names:
+        plural: shirts
+        singular: shirt
+        kind: Shirt
+    versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+            type: object
+            properties:
+                spec:
+                    type: object
+                    properties:
+                        color:
+                            type: string
+                        size:
+                            type: string
+    selectableFields:
+    - jsonPath: .spec.color
+    - jsonPath: .spec.size
+    additionalPrinterColumns:
+    - jsonPath: .spec.color
+      name: Color
+      type: string
+    - jsonPath: .spec.size
+      name: Size
+      type: string
+```
+
+Field selectors can then be used to get only resources with a `color` of `blue`:
+
+```bash
+kubectl get shirts.stable.example.com --field-selector spec.color=Blue
+```
+
+The output should be:
+
+```bash
+NAME       COLOR  SIZE
+example1   blue   S
+example2   blue   M
+```
