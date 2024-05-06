@@ -167,4 +167,48 @@ roleRef:
     name: secret-reader
     apiGroup: rbac.authorization.k8s.io
 ```
+### ClusterRoleBinding example
+
+To grant permissions across a whole cluster, we can use ClusterRoleBinding. The
+following ClusterRoleBinding allows any user in the group "manager" to read
+secrets in any namespace.
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+# this cluster role binding allows anyone in the "manager" group to read
+# secrets in any namespace.
+kind: ClusterRoleBinding
+matadata:
+    name: read-secrets-global
+subjects:
+- kind: Group
+  # name is case sensitive
+  name: manager
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+    kind: ClusterRole
+    name: secret-reader
+    apiGroup: rbac.authorization.k8s.io
+```
+
+After we create a binding, we cannot change the Role or ClusterRole that it
+refers to. If we try to change a binding's `roleRef`, we get a validation error.
+If we do want to change to `roleRef` for a binding, we need to remove the
+binding object and create a replacement. 
+
+There are two reasons for this restriction:
+- Making `roleRef` immutable allows granting someone `update` permission on an
+  existing binding object, so that they can manage list of subjects, without
+  being able to change the role that is granted to those subjects.
+- A binding to a different role is a fundamentally different binding. Requiring
+  a binding to be deleted/recreated in order to chnage the `roleRef` ensures the
+  full list subjects in the binding is intended to be granted the new role as
+  opposed to enabling or accidentally modifying only the roleRef without
+  verifying all of the existing subjects should be given the new role's
+  permissions.
+
+The `kubectl auth reconcile` command-line utility creates or updates a manifest
+file containing RBAC objects, and handles deleting and recreating binding
+objects if required to change the role they refer to.
+
 
