@@ -5,7 +5,7 @@
     join_command: ""
   tasks:
     - name: Initialize kubeadm
-      ansible.builtin.command: kubeadm init --pod-network-cidr=192.168.0.0/16
+      ansible.builtin.command: kubeadm init --pod-network-cidr=192.168.10.0/16
     
     - name: Create join command
       ansible.builtin.command: kubeadm token create --print-join-command
@@ -29,13 +29,13 @@
         group: "{{ ansible_user}}"
 
     - name: Setup network configuration pod
-      community.kubernetes.k8s:
-        src: https://docs.projectcalico.org/manifests/calico.yaml
-        state: present
+      ansible.builtin.shell: |
+        kubectl apply -f
+        https://docs.projectcalico.org/manifests/calico.yaml
 
     - name: Set join command output
       ansible.builtin.set_fact:
-        join_command: {{ join_command_output.stdout }}
+        join_command: "{{ join_command_output.stdout }}"
 
 - name: Link k8s cluster
   hosts: slaves

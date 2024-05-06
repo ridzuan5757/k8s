@@ -137,4 +137,34 @@ roleRef:
     apiGroup: rbac.authorization.k8s.io
 ```
 
+A RoleBinding can also reference a ClusterRole to grant the permisison defined
+in that ClusterRole to resources inside the RoleBinding's namespace. This kind
+of reference lets we define a set of common roles across the cluster, then reuse
+them within multiple namespaces.
+
+For instance, even though the following RoleBinding refers to a ClusterRole,
+"dave" (the subject, case sensitive) will only be able to read Secrets in the
+"development" namespace, because the RoleBinding's namespace (in its metadata)
+is "development".
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+# this role binding allows "dave" to read secrets in the "development"
+# namespace
+# we need to already have a ClusterRole named "secret-reader"
+kind: RoleBinding
+metadata:
+    name: read-secrets
+    # the namespace of RoleBinding determines where the permissions are granted.
+    # this only grants permissions within the "development" namespace.
+    namespace: development
+subjects:
+- kind: User
+  name: dave # name is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+    kind: ClusterRole
+    name: secret-reader
+    apiGroup: rbac.authorization.k8s.io
+```
 
