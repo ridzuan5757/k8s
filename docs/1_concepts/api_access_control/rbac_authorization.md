@@ -390,4 +390,58 @@ rules:
   verbs: ["get", "list", "watch"]
 ```
 
+### Role examples
 
+The following examples are excerpts from Role or ClusterRole objects, showing
+only `rules` section.
+
+To adlow reading "pods" resources in the core API Group:
+
+```yaml
+rules:
+- apiGroups: [""]
+  # at the HTTP level, the name of the resource for access Pod object is pods
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+```
+
+To allow reading/writing Deployment at the HTTP level (object with "deployments" in the resource part of their URL) in the "apps" aPI groups:
+
+```yaml
+rules:
+- apiGroups: ["apps"]
+  # at the HTTP level, the name of the resource for accessing Deployment object
+  # is deployment
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+Allow reading Pods in the core API group, as well as reading or writing job
+resources in the `"batch"` API group:
+
+```yaml
+rules:
+- apiGroups: [""]
+  # at the HTTP level, the name of the resource for accessing Pod objects is
+  # "pods"
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  # at the HTTP level, the name of the resource for accessing Job object is
+  # "jobs"
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+Allow reading ConfigMap named "my-config" (must be bound with a RoleBinding to
+limit to a single ConfigMap in a single namespace):
+
+```yaml
+rules:
+- apiGroups: [""]
+  # at the HTTP level, the name of the resource for accessing ConfigMap object
+  # is "configmaps"
+  resources: ["configmaps"]
+  resourceNames: ["my-config"]
+  verbs: ["get"]
+```

@@ -5,7 +5,7 @@
     join_command: ""
   tasks:
     - name: Initialize kubeadm
-      ansible.builtin.command: kubeadm init --pod-network-cidr=192.168.10.0/16
+      ansible.builtin.command: kubeadm init
     
     - name: Create join command
       ansible.builtin.command: kubeadm token create --print-join-command
@@ -13,23 +13,28 @@
 
     - name: Create .kube config directory
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME}}/.kube"
+        path: "$HOME/.kube"
         state: directory
         mode: "0755"
+
+    - name: Update config file permission
+      ansible.builtin.shell: chmod 777 /etc/kubernetes/admin.conf
+        
 
     - name: Copy kube config
       ansible.builtin.copy:
         src: /etc/kubernetes/admin.conf
-        dest: "{{ ansible_env.HOME }}/.kube/config"
+        dest: "$HOME/.kube/config"
+        remote_src: yes
 
     - name: Change config ownership
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.kube/config"
+        path: "$HOME/.kube/config"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user}}"
 
     - name: Setup network configuration pod
-      ansible.builtin.shell: |
+      ansible.builtin.command: |
         kubectl apply -f
         https://docs.projectcalico.org/manifests/calico.yaml
 
@@ -43,5 +48,3 @@
   tasks:
     - name: Join nodes to cluster
       ansible.builtin.shell: "{{ hostvars['masters'].join_command }}"
-
-
