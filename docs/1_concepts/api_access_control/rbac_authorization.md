@@ -499,3 +499,80 @@ groups that have names prefixed with `system:serviceaccounts:`.
 >   usernames.
 > - `system:serviceaccounts:` (plural) is the prefix for service account groups.
 
+### RoleBinding examples
+
+The following examples are `RoleBinding` excerpts that only show the subjects
+section. For a user named `alice@example.com`:
+
+```yaml
+subjects:
+- kind: User
+  name: "alice@example.com"
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For a group named `frontend-admins`:
+
+```yaml
+subjects:
+- kind: Group
+  name: "frontend-admins"
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For the default service account in the `kube-system` namespace:
+
+```yaml
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kube-system
+```
+
+For all service accounts in the `qa` namespace:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:serviceaccounts:qa
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all service accounts in any namespace:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:serviceaccounts
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all authenticated users:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:authenticated
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all unauthenticated users:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:unauthenticated
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all users:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:unauthenticated
+  apiGroup: rbac.authorization.k8s.io
+- kind: Group
+  name: system:authenticated
+  apiGroup: rbac.authorization.k8s.io
+```
