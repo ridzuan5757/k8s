@@ -445,3 +445,29 @@ rules:
   resourceNames: ["my-config"]
   verbs: ["get"]
 ```
+
+Allow reading the resources `"nodes"` in the core group because a Node is
+cluster-scoped, this must be in ClusterRole bound with a ClusterRoleBinding to
+be effective:
+
+```yaml
+rules:
+- apiGroups: [""]
+  # at the HTTP level, the name of the resource for accessing node objects is
+  # "nodes"
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+```
+
+Allow GET and POST requests to the non-resource endpoint `/healthz` and all
+subpaths must be in a ClusterRole bound with a ClusterRoleBinding to be
+effective:
+
+```yaml
+rules:
+  # '*' in a nonResourceURLs is a suffix glob match
+- nonResourceURLs: ["/healthz", "/healthz/*"]
+  verbs: ["get", "post"]
+```
+
+
