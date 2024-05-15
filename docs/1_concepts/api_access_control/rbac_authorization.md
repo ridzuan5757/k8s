@@ -445,3 +445,147 @@ rules:
   resourceNames: ["my-config"]
   verbs: ["get"]
 ```
+
+Allow reading the resources `"nodes"` in the core group because a Node is
+cluster-scoped, this must be in ClusterRole bound with a ClusterRoleBinding to
+be effective:
+
+```yaml
+rules:
+- apiGroups: [""]
+  # at the HTTP level, the name of the resource for accessing node objects is
+  # "nodes"
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+```
+
+Allow GET and POST requests to the non-resource endpoint `/healthz` and all
+subpaths must be in a ClusterRole bound with a ClusterRoleBinding to be
+effective:
+
+```yaml
+rules:
+  # '*' in a nonResourceURLs is a suffix glob match
+- nonResourceURLs: ["/healthz", "/healthz/*"]
+  verbs: ["get", "post"]
+```
+
+### Referring to subjects
+
+A RoleBinding or ClusterRoleBinding binds a role to subjects. Subjects can be
+groups, users, or ServiceAccounts.
+
+k8s represents usernames as strings. These can be: plain names, such as 
+"alice", email-style names, like "bob@example.com"; or numeric user IDs
+represented as string. It is up to us as a cluster admin to configure the
+authentication modules so that authentication produces usernames in the format
+we want.
+
+> [!CAUTION]
+> The prefix `system:` is reserved for k8s system use, so we should ensure that
+> we do not have users or groups with names that start with `system:` by
+> accident. Other than this special prefix, the RBAC authorization system does
+> not require any format for usernames.
+
+In k8s, Authenticator modules provide group information. Groups, like users, are
+represented as strings, and that string has no format requirements, other than
+that the prefix `system:` is reserved.
+
+ServiceAccounts have names prefixed with `system:serviceaccount:`, and belong to
+groups that have names prefixed with `system:serviceaccounts:`.
+
+> [!NOTE]
+> - `system:serviceaccount:` (singular) is the prefix for service account
+>   usernames.
+> - `system:serviceaccounts:` (plural) is the prefix for service account groups.
+
+### RoleBinding examples
+
+The following examples are `RoleBinding` excerpts that only show the subjects
+section. For a user named `alice@example.com`:
+
+```yaml
+subjects:
+- kind: User
+  name: "alice@example.com"
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For a group named `frontend-admins`:
+
+```yaml
+subjects:
+- kind: Group
+  name: "frontend-admins"
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For the default service account in the `kube-system` namespace:
+
+```yaml
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kube-system
+```
+
+For all service accounts in the `qa` namespace:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:serviceaccounts:qa
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all service accounts in any namespace:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:serviceaccounts
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all authenticated users:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:authenticated
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all unauthenticated users:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:unauthenticated
+  apiGroup: rbac.authorization.k8s.io
+```
+
+For all users:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:unauthenticated
+  apiGroup: rbac.authorization.k8s.io
+- kind: Group
+  name: system:authenticated
+  apiGroup: rbac.authorization.k8s.io
+```
+
+## Default roles and role bindings 
+
+API servers create a set of default ClusterRole and ClusterRoleBinding objects.
+Mange of these are `system:` prefixed, which indicates that the resource is
+directly managed by the cluster control plane. All of the default ClusterRole
+and ClusterRoleBinding are labeled with
+`kubernetes.io/bootstrapping=rbac-defaullts`.
+
+> [!Caution]
+Take care when modifying ClusterRole and ClusterRoleBinding with names that have
+`system:` prefix. Modifications to these resources can result in non-functional
+clusters.
