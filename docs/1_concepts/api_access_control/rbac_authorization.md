@@ -576,3 +576,16 @@ subjects:
   name: system:authenticated
   apiGroup: rbac.authorization.k8s.io
 ```
+
+## Default roles and role bindings 
+
+API servers create a set of default ClusterRole and ClusterRoleBinding objects.
+Mange of these are `system:` prefixed, which indicates that the resource is
+directly managed by the cluster control plane. All of the default ClusterRole
+and ClusterRoleBinding are labeled with
+`kubernetes.io/bootstrapping=rbac-defaullts`.
+
+> [!Caution]
+Take care when modifying ClusterRole and ClusterRoleBinding with names that have
+`system:` prefix. Modifications to these resources can result in non-functional
+clusters.
