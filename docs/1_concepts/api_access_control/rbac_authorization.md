@@ -589,3 +589,13 @@ and ClusterRoleBinding are labeled with
 Take care when modifying ClusterRole and ClusterRoleBinding with names that have
 `system:` prefix. Modifications to these resources can result in non-functional
 clusters.
+
+### Auto-reconciliation
+
+At each startup, the API server updates default cluster roles with any missing
+permissions, and updates default cluster role bindings with any missing
+subjects. This allows the cluster to repair accidental modifications, and helps
+to keep roles and role binding to `false`. Be aware that missing default
+permissions and subjects can result in non-functional clusters.
+
+Auto-reconciliation is enabled by default if the RBAC authorizer is active.
