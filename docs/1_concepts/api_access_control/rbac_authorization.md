@@ -599,3 +599,27 @@ to keep roles and role binding to `false`. Be aware that missing default
 permissions and subjects can result in non-functional clusters.
 
 Auto-reconciliation is enabled by default if the RBAC authorizer is active.
+
+### API discovery roles
+
+Default role bindings authorize unauthenticated and authenticated users to read
+API information that is deemed safe to be publicly accessible (including
+CustomResourceDefinitions). To disable anonymous unauthenticated access, add
+`--anonymous-auth=false` to the API server configuration.
+
+To view the configuration of these roles via `kubectl`:
+
+```bash
+kubectl get clusterroles system:discovery -o yaml
+```
+
+> [!NOTE]
+> If we edit that ClusterRole, the changes will be overwritten on API server
+> restart via auto-reconciliation. To avoid that overwriting, either do not
+> manually edit the role or disable auto-reconciliation.
+
+Default ClusterRole: `system:basic-user`
+Default ClusterRoleBinding: `system:authenticated` group
+- Allows a user read-only access to basic information about themselves. Prior to
+  version v1.14, this role was also bound to `system:unauthenticated` by
+  default.
