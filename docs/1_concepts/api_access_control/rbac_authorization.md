@@ -618,8 +618,21 @@ kubectl get clusterroles system:discovery -o yaml
 > restart via auto-reconciliation. To avoid that overwriting, either do not
 > manually edit the role or disable auto-reconciliation.
 
+### k8s RBAC API discovery roles
+
 Default ClusterRole: `system:basic-user`
 Default ClusterRoleBinding: `system:authenticated` group
 - Allows a user read-only access to basic information about themselves. Prior to
   version v1.14, this role was also bound to `system:unauthenticated` by
   default.
+
+Default ClusterRole: `system:discovery`
+Default ClusterRoleBinding: `system:authenticated` group
+Allow read-only access API discovery endpoints needed to discover and negotiate
+an API level. Prior to v1.14, this role was also bound to
+`system:unauthenticated` by default.
+
+Default ClusterRole: `system:public-info-viewer`
+Default ClusterRoleBinding: `system:authenticated` and `system:unauthenticated`
+group.
+Allow read-only access to non-sensitive information about the cluster.
