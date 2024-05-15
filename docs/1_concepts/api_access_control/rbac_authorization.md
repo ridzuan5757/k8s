@@ -636,3 +636,24 @@ Default ClusterRole: `system:public-info-viewer`
 Default ClusterRoleBinding: `system:authenticated` and `system:unauthenticated`
 group.
 Allow read-only access to non-sensitive information about the cluster.
+
+### User-facing roles
+
+Some of the default ClusterRoles are not `system:` prefixed. These are inteded
+to be user-facing roles. They include super-user roles(`cluster-admin`), roles
+intended to be granted cluster-wide using ClusterRoleBindings, and roles
+intended to be granted within particular namespaces using RoleBindings (`admin`,
+`edit`, `view`).
+
+User-facing ClusterRoles use ClusterRole aggregation to allow admins to include
+rules for custom resources on these ClusterRoles. To add rules to the `admin`,
+`edit`, or `view` roles, create a ClusterRole with one or more of the following
+labels:
+
+```yaml
+metadata:
+    labels:
+        rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rbac.authorization.k8s.io/aggregate-to-edit: "true"
+        rbac.authorization.k8s.io/aggregate-to-view: "true"
+```
