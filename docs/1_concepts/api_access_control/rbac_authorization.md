@@ -723,3 +723,22 @@ DCRB: None
 DCR: `system:node-proxier`
 DCRB: `system:kube-proxy` user
 - Allow access to the resources required by the kube-proxy component.
+
+### Other component roles
+
+DCR: `system:auth-delegator`
+DCRB: None
+- Allows delegated authentication and authorization checks. This is commonly
+  used by add-on API servers for unified authentication and authorization.
+
+DCR: `system:heapster`
+DCRB: None
+- Role for the Heapster component. Deprecated.
+
+DCR: `system:kube-aggregator`
+DCRB: None
+- Role for the kube-aggregator component.
+
+DCR: `system:kube-dns`
+DCRB: `kube-dns` service account in the `kube-system` namespace.
+- Role for the kube-dns component.
