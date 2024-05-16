@@ -54,6 +54,25 @@ exporters:
     endpoint: 0.0.0.0:8889
   debug:
     verbosity: detailed
+  awss3/metrics:
+    s3uploader:
+      region: ap-southeast-1
+      s3_bucket: proactive-monitoring-bucket
+      s3_prefix: staging-metric
+      s3_partition: minute
+  awss3/traces:
+    s3uploader:
+      region: ap-southeast-1
+      s3_bucket: proactive-monitoring-bucket
+      s3_prefix: staging-traces
+      s3_partition: minute
+  awss3/logs:
+    s3uploader:
+      region: ap-southeast-1
+      s3_bucket: proactive-monitoring-bucket
+      s3_prefix: staging-logs
+      s3_partition: minute
+
     
 processors:
   batch:
@@ -92,9 +111,9 @@ service:
         - resourcedetection/docker
         - attributes/station
       exporters:
-        - otlp/gateway
         - otlp/jaeger
         - otlp/dataprepper-traces
+        - awss3/traces
     metrics:
       receivers:
         - otlp
@@ -105,11 +124,12 @@ service:
         - attributes/station
       exporters:
         - prometheus
-        - otlp/gateway
         - otlp/dataprepper-metrics
+        - awss3/metrics
     logs:
       receivers:
         - syslog
         - filelog
       exporters:
         - otlp/dataprepper-logs
+        - awss3/logs

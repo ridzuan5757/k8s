@@ -25,13 +25,13 @@ raw-pipeline:
   processor:
     - otel_traces:
     - otel_trace_group:
-        hosts: ["https://opensearch:9200"]
+        hosts: ["https://opensearch-node1:9200"]
         insecure: true
         username: "admin"
         password: "zmgf-x19a/M12"
   sink:
     - opensearch:
-        hosts: ["https://opensearch:9200"]
+        hosts: ["https://opensearch-node1:9200"]
         index_type: trace-analytics-raw
         insecure: true
         username: "admin"
@@ -46,7 +46,7 @@ service-map-pipeline:
     - service_map_stateful:
   sink:
     - opensearch:
-        hosts: ["https://opensearch:9200"]
+        hosts: ["https://opensearch-node1:9200"]
         index_type: trace-analytics-service-map
         insecure: true
         username: "admin"
@@ -64,7 +64,7 @@ log-pipeline:
             - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
   sink:
     - opensearch:
-        hosts: [ "https://opensearch:9200" ]
+        hosts: [ "https://opensearch-node1:9200" ]
         insecure: true
         username: admin
         password: zmgf-x19a/M12
@@ -75,14 +75,34 @@ metrics-pipeline:
   source:
     otel_metrics_source:
       ssl: false
-      port: 8889
+      port: 21891
   processor:
-    - otel_metrics:
+    - otel_metrics_raw_processor:
   sink:
     - opensearch:
-        hosts: [ "https://opensearch:9200" ]
+        hosts: [ "https://opensearch-node1:9200" ]
         insecure: true
         username: admin
         password: zmgf-x19a/M12
         index: metrics-analytics
+
+s3-log-pipeline:
+  source:
+    s3:
+      notification_type: sqs
+      codec:
+        newline:
+      sqs:
+        queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/proactive-monitoring-queue
+      aws:
+        region: ap-southeast-1
+        # sts_role_arn: arn:aws:iam::530830676072:role/proactive-monitoring-role
+  sink:
+    - stdout:
+    - opensearch:
+        hosts: ["https://opensearch-node1:9200"]
+        insecure: true
+        username: admin
+        password: zmgf-x19a/M12
+        index: s3_logs
 
