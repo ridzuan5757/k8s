@@ -43,13 +43,18 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "bootstrap.yaml"
   end
 
-  # config.vm.provision :ansible do |ansible|
-  #   ansible.verbose = "vv"
-  #   ansible.playbook = "../../robot/initial.yaml"
-  # end
+  config.vm.provision :ansible do |ansible|
+    ansible.verbose = "vv"
+    ansible.playbook = "../../robot/initial.yaml"
+  end
 
-  # config.vm.provision :ansible do |ansible|
-  #   ansible.verbose = "vv"
-  #   ansible.playbook = "../../robot/dependencies.yaml"
-  # end
+  config.vm.provision :ansible do |ansible|
+    ansible.verbose = "vv"
+    ansible.playbook = "../../robot/dependencies.yaml"
+  end
+
+  config.vm.provision :ansible do |ansible|
+    ansible.verbose = "vv"
+    ansible.playbook = "../../robot/k8scluster.yaml"
+  end
 end

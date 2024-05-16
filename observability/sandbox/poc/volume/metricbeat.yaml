@@ -1,0 +1,20 @@
+metricbeat.modules:
+- module: system
+  period: 10s
+  metricsets:
+    - cpu
+    - load
+    - memory
+    - network
+    - process
+    - process_summary
+    - system
+    - filesystem
+
+- module: docker
+  period: 10s
+  metricsets:
+    - containers
+    - images
+    - info
+    - volumes
