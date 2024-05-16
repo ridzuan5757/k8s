@@ -657,3 +657,38 @@ metadata:
         rbac.authorization.k8s.io/aggregate-to-edit: "true"
         rbac.authorization.k8s.io/aggregate-to-view: "true"
 ```
+
+Default ClusterRole: `cluster-admin`
+Default ClusterRoleBinding: `system:masters` group
+- Allows super-user access to perform any action on any resource. When used in a
+  `ClusterRoleBinding`, it gives full control over every resource in the cluster
+  and in all namespaces. When used in a `RoleBinding`, it gives full control
+  over every resource in the role binding's namespace, including the namespace
+  itself.
+
+Default ClusterRole: `admin`
+Default ClusterRoleBinding: None
+- Allows admin access, intended to be granted within a namespace using a
+  `RoleBinding`. If used in `RoleBinding`, allows read/write access to most
+  resources in a namespace, including the ability to create roles and role
+  bindings within the namespace. This role does not allow write access to
+  resoure quota or to the namespace itself. This role also does not allow write
+  access to EndpointSlices or Endpoints in clusters created using k8s v1.22+.
+
+Default ClusterRole: `edit`
+Default ClusterRoleBinding: None
+- Allows read/write access to most objects in a namespace. This role does not
+  allow viewing or modifying roles or role bindings. However, this role allows
+  accessing Secrets and running Pods as any ServiceAccount in the namespace, so
+  it can be used to gain the API access levels of any ServiceAccount in the
+  namespace.
+- This role also does not allow write access to EndpointSlices or Endpoints in
+  clusters created using k8s v1.22+.
+
+Default ClusterRole: `view`
+Default ClusterRoleBinding: None
+- Allows read-only access to see most objects in a namespace. It does not allow
+  viewing roles or role bindings. This role does not allow viewing Secrets,
+  since reading the contents of Secrets enables access to ServiceAccount
+  credentials in the namespace, which would allow API access as any
+  ServiceAccount in the namespace. (A form of privelege escalation).
