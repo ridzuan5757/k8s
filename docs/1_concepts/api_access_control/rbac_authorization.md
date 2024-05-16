@@ -742,3 +742,30 @@ DCRB: None
 DCR: `system:kube-dns`
 DCRB: `kube-dns` service account in the `kube-system` namespace.
 - Role for the kube-dns component.
+
+DCR: `system:kubelet-api-admin`
+DCRB: None
+- Allow full access to the kubelet API.
+
+DCR: `system:node-bootstrapper`
+DCRB: None
+- Allows access to the resources required to perform kubelet TLS bootstrapping.
+
+DCR: `system:node-problem-detector`
+DCRB: None
+- Role for the node-problem-detector component.
+
+DCR: `system:persistent-volume-provisioner`
+DCRB: None
+- Allow access to the resources required by most dynamic volume provisioners.
+
+DCR: `system:monitoring`
+DCRB: `system:monitoring` group
+- Allow read access to control-plane monitoring endpoints i.e `kube-apiserver`
+  liveness and readiness endpoints (`/healthz`, `/livez`, `/readyz`), the
+  individual health-check endpoints (`/healthz/*`, `/livez/*`, `readyz/*`) and
+  `/metrics`. 
+- Note that the individual health check endpoints and the metric endpoint may
+  expose sensitive information.
+
+
