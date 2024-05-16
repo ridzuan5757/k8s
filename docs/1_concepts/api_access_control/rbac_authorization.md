@@ -692,3 +692,34 @@ Default ClusterRoleBinding: None
   since reading the contents of Secrets enables access to ServiceAccount
   credentials in the namespace, which would allow API access as any
   ServiceAccount in the namespace. (A form of privelege escalation).
+
+### Core component roles
+
+DCR: `system:kube-scheduler`
+DCRB: `system:kube-scheduler` user
+- Allow access to the resources required by the scheduler component.
+
+DCR: `system:volume-scheduler`
+DCRB: `system:kube-scheduler` user
+- Allows access to the volume resources required by the kube-scheduler
+  component.
+
+DCR: `system:kube-controller-mamanger`
+DCRB: `system:kube-controller-manager` user
+- Allows access to the resources required by the controller manager component.
+  The permissions required by individual controllers are detailed in the
+  controller roles.
+
+DCR: `system:node`
+DCRB: None
+- Allows access to resources required by the kubelet, including read access to
+  all secrets, and write ccess to all pod status objects.
+- We should use the NodeAuthorizer and NodeRestriction admission plugin instead
+  of the `system:node` role, and allow granting API access to kubelets based on
+  the Pods scheduled to run on them.
+- The `system:node` role only exists for compatibility with k8s clusters
+  upgraded from versions prior to v1.8.
+
+DCR: `system:node-proxier`
+DCRB: `system:kube-proxy` user
+- Allow access to the resources required by the kube-proxy component.
