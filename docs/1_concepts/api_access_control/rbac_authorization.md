@@ -768,4 +768,40 @@ DCRB: `system:monitoring` group
 - Note that the individual health check endpoints and the metric endpoint may
   expose sensitive information.
 
+### Roles for built-in controllers
 
+The k8s controller manager runs controllers that are built in to the k8s control
+plane. When invoked with `--use-service-account-credentials`,
+kube-controller-manager starts each controller using a separate service account.
+Corresponding roles exist for each built-in controller, prefixed with
+`system:controller:`. If the controller manager is not started with
+`--use-service-account-credentials`, it runs all control loops using its own
+credential, which musht be granted all the relevant roles. these roles include:
+
+`system:controller:`
+- `attachdetach-controller`
+- `certificate-controller`
+- `clusterrole-aaggregation-controller`
+- `cronjob-controller`
+- `daemon-set-controller`
+- `deployment-controller`
+- `disruption-controller`
+- `endpoint-controller`
+- `expand-controller`
+- `generic-garbage-collector`
+- `horizontal-pod-autoscaler`
+- `job-controller`
+- `namespace-controller`
+- `node-controller`
+- `persistent-volume-controller`
+- `pod-garbage-collector`
+- `pv-protection-controller`
+- `pvc-protection-controller`
+- `replicaset-controller`
+- `replication-controller`
+- `root-ca-cert-publisher`
+- `route-controller`
+- `service-account-controller`
+- `service-controller`
+- `statefulset-controller`
+- `ttl-controller`
