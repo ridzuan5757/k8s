@@ -835,3 +835,58 @@ create/update roles:
     - Or explicitly allow specifying any permission in a `Role` or `ClusterRole`
       by giving them permission to perform the `escalate` verb on `roles` or
       `clusterroles` resources in the `rbac.authorization.k8s.io` API group.
+
+### Restriction on role binding creation or update
+
+We can only create/update a role binding if we already have a permissions
+contained in the referenced role at the same scope as the role binding or if we
+have been authorized to perform the `bind` verb on the referenced role. For
+example, if `user-1` does not have the ability to list Secrets cluster-wide, we
+cannot create ClusterRoleBinding to a role that grants that permission. To allow
+a user to create/update role bindings:
+- Grant them a role that allows them to create/update RoleBinding or
+  ClusterRoleBinding objects, as desired.
+- Grant them permissions needed to bind a particular role:
+    - Implicity by giving them permissions contained in the role.
+    - Explicitly by giving them permission to perform the `bind` verb on the
+      particular Role or ClusterRole.
+
+For example, this ClusterRole and RoleBinding would allow `user-1` to grant
+other users the `admin`, `edit`, and `view` roles in the namespace
+`user-1-namespace`:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: role-grantor
+rules:
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["rolebindings"]
+  verbs: ["create"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["clusterroles"]
+  verbs: ["bind"]
+  # omit resourceNames to allow binding any ClusterRole
+  resourceNames: ["admin", "edit", "view"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    name: role-grantor-binding
+    namespace: user-1-namespace
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: role-grantor
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: user-1
+```
+
+When bootstrapping the first roles and role bindings, it is necessary for the
+initial user to grant permissions they do not yet have. To bootstrap initial
+roles and role bindings:
+- User a credential with the `system:masters` group, which is bound to the
+  `cluster-admin` super-user role by the default bindings.
