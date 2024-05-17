@@ -805,3 +805,33 @@ credential, which musht be granted all the relevant roles. these roles include:
 - `service-controller`
 - `statefulset-controller`
 - `ttl-controller`
+
+## Prevelege escalation prevention and bootstrapping
+
+The RBAC API prevents users from escalating priveleges by editing roles or role
+bindigns. Because this is enforced at the API level, it applies even when the
+RBAC authorizer is not in use.
+
+### Restriction on role creation or update
+
+We can only create/update a role if at least one of the following thingis is
+true:
+- We already have all the permissions contained in the role, at the same scope
+  as the object being modified (cluster-wide for a ClusterRole, within the same
+  namespace or cluster-wide for a Role).
+- We are granted explicit permission to perform `escalate` verb on the `roles`
+  or `clusterroles` resource int the `rbac.authorization.k8s.io` API group.
+
+For example, if `user-1` does not have the ability to list Secrets cluster-wide,
+they cannot create a ClusterRole containing that permission. To allow user to
+create/update roles:
+- Grant them a role that allows them to create/update Role or ClusterRole
+  objects, as desired.
+- Grant them permission to include specific permissions in the roles the
+  create/update:
+    - Implicitly, by giving them those permissions if they attempt to create or
+      modify a Role or ClusterRole with permissions they themselves have not
+      been granted, the API request will be forbidden.
+    - Or explicitly allow specifying any permission in a `Role` or `ClusterRole`
+      by giving them permission to perform the `escalate` verb on `roles` or
+      `clusterroles` resources in the `rbac.authorization.k8s.io` API group.
