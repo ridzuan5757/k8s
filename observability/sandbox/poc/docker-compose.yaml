@@ -6,7 +6,6 @@ networks:
     driver: bridge
 
 volumes:
-  portainer_data:
   opensearch-data1:
   opensearch-data2:
 
@@ -38,8 +37,7 @@ services:
       - 8888:8888
       - 8889:8889
       - 55670:55679
-      - 55681
-        #      - 54527:54527
+      - 55681:55681
     networks:
       - observer-network
  
@@ -54,7 +52,7 @@ services:
       - observer-network
 
   opensearch-node1:
-    image: opensearchstaging/opensearch:2.14.0.9820
+    image: opensearchproject/opensearch:2.14.0
     container_name: opensearch-node1
     environment:
       - cluster.name=opensearch-cluster
@@ -80,7 +78,7 @@ services:
       - observer-network
 
   opensearch-node2:
-    image: opensearchstaging/opensearch:2.14.0.9820
+    image: opensearchproject/opensearch:2.14.0
     container_name: opensearch-node2
     environment:
       - cluster.name=opensearch-cluster
@@ -103,12 +101,10 @@ services:
       - observer-network
 
   dashboards:
-    image: opensearchstaging/opensearch-dashboards:2.14.0.7635
+    image: opensearchproject/opensearch-dashboards:2.14.0
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
-    expose:
-      - "5601"
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]'
     depends_on:
@@ -116,26 +112,26 @@ services:
     networks:
       - observer-network
   
-  dataprepper-logs:
-    image: opensearchproject/data-prepper:latest
-    container_name: dataprepper-logs
-    environment:
-      - AWS_REGION=${AWS_REGION}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    volumes:
-      - ./volume/logs-pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
-      - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
-    ports:
-      - 21892:21892
-    depends_on:
-      - opentelemetry-agent
-      - opensearch-node1
-    networks:
-      - observer-network
+  # dataprepper-logs:
+  #   image: opensearchproject/data-prepper:latest
+  #   container_name: dataprepper-logs
+  #   environment:
+  #     - AWS_REGION=${AWS_REGION}
+  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  #   volumes:
+  #     - ./volume/logs-pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+  #     - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+  #   ports:
+  #     - 21892:21892
+  #   depends_on:
+  #     - opentelemetry-agent
+  #     - opensearch-node1
+  #   networks:
+  #     - observer-network
 
   dataprepper-metrics:
-    image: opensearchproject/data-prepper:latest
+    image: opensearchproject/data-prepper:2.8.0
     container_name: dataprepper-metrics
     environment:
       - AWS_REGION=${AWS_REGION}
@@ -145,6 +141,7 @@ services:
       - ./volume/metrics-pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
     ports:
+      - 21890:21890
       - 21891:21891
     depends_on:
       - opentelemetry-agent

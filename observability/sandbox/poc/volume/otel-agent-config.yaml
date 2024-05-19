@@ -27,29 +27,14 @@ receivers:
       - /var/log/system.log
 
 exporters:
-  otlp/jaeger:
-    endpoint: jaeger:4317
-    tls:
-      insecure: true
   otlp/gateway:
     endpoint: 192.168.10.204:32001
-    tls:
-      insecure: true
   otlp/dataprepper-traces:
     endpoint: data-prepper:21890
-    tls:
-      insecure: true
-      insecure_skip_verify: true
   otlp/dataprepper-metrics:
     endpoint: dataprepper-metrics:21891
-    tls:
-      insecure: true
-      insecure_skip_verify: true
   otlp/dataprepper-logs:
     endpoint: dataprepper-logs:21892
-    tls:
-      insecure: true
-      insecure_skip_verify: true
   prometheus:
     endpoint: 0.0.0.0:8889
   debug:
@@ -116,7 +101,6 @@ service:
     #     - awss3/traces
     metrics:
       receivers:
-        - otlp
         - hostmetrics
       processors:
         - memory_limiter
@@ -127,7 +111,6 @@ service:
         - otlp/dataprepper-metrics
     logs:
       receivers:
-        - syslog
         - filelog
       processors:
         - memory_limiter
