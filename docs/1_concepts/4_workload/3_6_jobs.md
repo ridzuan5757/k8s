@@ -607,4 +607,113 @@ the series, separated by hyphen.
 > policy, the Job controller respects the terminating policy and ignores the
 > success policy.
 
+## Job termination and cleanup
 
+When a Job completes, no more Pods are created, but the Pods are usually not
+deleted either. Keeping them around allows us to still view the logs of
+completed pods to check for errors, warnings, or other diagnostic output. The
+job object also remains after it is compelted so that we can view its status. It
+is up to the user to delete old jobs after noting their status. Delete the job
+with `kubectl` (`kubectl delete jobs/pi` or `kubectl delete -f job.yaml`). When
+we delete job using `kubectl`, all the pods it created are deleted too.
+
+By default, a Job will run uninterrupted unless a Pod fails 
+`restartPolicy=Never` or a container exits in error `restartPolicy=OnFailure`,
+at which point the Job defers to the `.spec.backoffLimit` described above. Once
+`.spec.backoffLimit` has been reached the Job will be marked as failed and any
+runnign Pods will be terminated.
+
+Another way to terminate a Job is by setting an active deadline. Do this by
+setting `.spec.activeDeadlineSeconds` field of the Job to a number of seconds.
+The `activeDeadlineSeconds` applies to the duration of the job, no matter how
+many pods are created. Once a Job reaches `activeDeadlineSeconds`, all of its
+running Pods are terminated and the Job status will become `type: Failed` with
+`reason: DeadlineExceeded`.
+
+Note the a Job's `.spec.activeDeadlineSeconds` takes precendence over its
+`.spec.backoffLimit`. Therefore, aJob that is retrying one or more failed Pods
+will not deploy additional Pods once it reaches the time limit specified by
+`activeDeadlineSeconds`, even if the `backoffLimit` is not yet reached. For
+example:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: pi-with-timeout
+spec:
+    backoffLimit: 5
+    activeDeadlineSeconds: 100
+    template:
+        spec:
+            containers:
+            - name: pi
+              image: perl:5.34.0
+              command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+            restartPolicy: Never
+```
+
+Note that both the Job spec and the Pod template spec within the Job have an
+`activeDeadlineSeconds` field. Ensure that we set this field at the proper
+level.
+
+Keep in mind that the `restartPolicy` applies to the Pod, and not to the Job
+itself. There is no automatic Job restart once the Job status is `type: Failed`.
+That is, the Job termination mechanisms activated with 
+`.spec.activeDeadlineSeconds` and `.spec.backoffLimit` result in a permanent Job
+failure that requires manual intervention to resolve.
+
+## Clean up finished jobs automatically
+
+Finished Jobs are usually no longer needed in the system. Keeping them around in
+the system will put pressure on the API server. If the Jobs are managed directly
+by a higher level controller, such as CronJobs, the Jobs can be cleaned up by
+CronJobs based on the specified capacity-based cleanup policy.
+
+### Time To Live TTL mechanism for finished Jobs
+
+Another way to clean up finished Jobs either `Complete` or `Failed`
+automatically is to use a TTL mechanism provided by a TTL controller for
+finished resources, by specifying the `.spec.ttlSecondsAfterFinished` field of
+the Job.
+
+When the TTL controller cleans up the Job, it will delete the Job cascadingly,
+i.e. delete its dependent objects, such as Pods, together with the Job. Note
+that when the Job is deleted, its lifecycle guarantees, such as finalizers, will
+be honored. For example:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-with-ttl
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl:5.34.0
+        command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+```
+
+The Job `pi-with-ttl` will be eligible to be automatically deleted, 100 seconds
+after it finishes. If the field is set to 0, the Job will be eligible to be
+automatically deleted immediately after it finishes. If the field is unset, this
+Job would not be cleaned up by the TTL controller after it fisnishes.
+
+> [!NOTE]
+> It is recommended to set `ttlSecondsAfterFinished` field because unmanaged
+> jobs (Jobs that we created directly, and not indirectly through other workload
+> APIs such as CronJob) have a default deletion policy of `orphanDependents`
+> causing Pods created by an unmanaged Job to be left around after that Job is
+> fully deleted.
+>
+> Even though the control plane eventually garbage collects the Pods from a
+> deleted Job after they either fail or complete, sometimes those lingering pods
+> may cause cluster performance degradation or in worst case cause the cluster
+> to go offline due to this degradation.
+>
+> We can use LimitRanges and ResourceQuotas to place a cap on the amount of
+> resources that a particular namespace can consume.
