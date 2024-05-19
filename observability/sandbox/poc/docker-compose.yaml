@@ -11,17 +11,6 @@ volumes:
   opensearch-data2:
 
 services:
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    ports:
-      - 8000:8000
-      - 9443:9443
-      - 9000:9000
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-  
   opentelemetry-agent:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: opentelemetry-agent
@@ -54,16 +43,6 @@ services:
     networks:
       - observer-network
  
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: jaeger
-    ports:
-      - 16686:16686
-      - 14268
-      - 14250
-    networks:
-      - observer-network
-  
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -137,20 +116,36 @@ services:
     networks:
       - observer-network
   
-  data-prepper:
+  dataprepper-logs:
     image: opensearchproject/data-prepper:latest
-    container_name: data-prepper
+    container_name: dataprepper-logs
     environment:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
-      - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./volume/logs-pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
     ports:
-      - 21890:21890
-      - 21891:21891
       - 21892:21892
+    depends_on:
+      - opentelemetry-agent
+      - opensearch-node1
+    networks:
+      - observer-network
+
+  dataprepper-metrics:
+    image: opensearchproject/data-prepper:latest
+    container_name: dataprepper-metrics
+    environment:
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./volume/metrics-pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+    ports:
+      - 21891:21891
     depends_on:
       - opentelemetry-agent
       - opensearch-node1

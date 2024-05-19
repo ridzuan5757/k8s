@@ -41,12 +41,12 @@ exporters:
       insecure: true
       insecure_skip_verify: true
   otlp/dataprepper-metrics:
-    endpoint: data-prepper:21891
+    endpoint: dataprepper-metrics:21891
     tls:
       insecure: true
       insecure_skip_verify: true
   otlp/dataprepper-logs:
-    endpoint: data-prepper:21892
+    endpoint: dataprepper-logs:21892
     tls:
       insecure: true
       insecure_skip_verify: true
