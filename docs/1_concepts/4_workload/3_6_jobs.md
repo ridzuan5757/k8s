@@ -745,3 +745,27 @@ strengths and weaknesses. The tradeoffs are:
   application.
 - When the Job is associated with a headless Service, we can enable the Pods
   within a Job to communicate with each other to collaborate in a computation.
+
+## Advanced Usage
+
+### Suspending a Job
+
+When a Job is created, the Job controller will immediately begin creating Pods
+to satisfy the Job's requirements and will continue to do so until the Job is
+complete. However, we may want to temporarily suspend a Job's execution and
+resume it later, or starts Jobs in suspended state and have a custom controller
+decide later when to start them.
+
+To suspend a Job, we can update the `.spec.suspend` field of the Job to true;
+later, when we want to resume it again, update it to false. Creating aJob with
+`.spec.suspend` set to true will create it in the suspended state.
+
+When a Job is resumed from suspension, its `.status.startTime` field will be
+reset to the current time. This means that the `.spec.activeDeadlineSeconds`
+timer will be stopped and reset when a Job is suspended and resumed.
+
+When we suspend a Job, any running Pods that do not have a status of `Completed`
+will be terminated with a SIGTERM signal. The Pod's graceful termination period
+will be honored and the Pod must handle this signal in this period. This may
+involve saving progress for later or undoing changes. Pods terminated this way
+will not count towards the Job's `completions` count.
