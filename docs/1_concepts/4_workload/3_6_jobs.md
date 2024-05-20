@@ -717,3 +717,31 @@ Job would not be cleaned up by the TTL controller after it fisnishes.
 >
 > We can use LimitRanges and ResourceQuotas to place a cap on the amount of
 > resources that a particular namespace can consume.
+
+## Job Patterns
+
+The Job object can be used to process a set of independent but related work
+items. These might be emails to be sent, frames to be rendered, files to be
+transcoded, ranges of keys in a NoSQL database to scan and so on.
+
+In a complex system, there may be multiple different sets of work items. Here we
+are just considering one set of work items that the user wants to manage
+together - a batch job.
+
+There are several different patterns for parallel computation, each with
+strengths and weaknesses. The tradeoffs are:
+- One Job object for each work item, versus a single Job object for all work
+  items. One Job per work item creates some overhead for the user and for the
+  system to manage large numbers of Job objects. A single Job for all work items
+  is better for large numbers of items.
+- Number of Pods created equals number of work items, versus each Pod can
+  process multiple work items. When the number of Pods equals the number of work
+  item, the Pods typically requires less modification to existing code and
+  containers. Having each Pod process multiple work items is better for large
+  numbers of items.
+- Several approaches use a work queue. This requires running a queue service,
+  and modifications to the existing program or container to make it use the work
+  queue. Other approaches are easier to adapt to an existing containerised
+  application.
+- When the Job is associated with a headless Service, we can enable the Pods
+  within a Job to communicate with each other to collaborate in a computation.
