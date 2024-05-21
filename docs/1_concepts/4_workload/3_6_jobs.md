@@ -768,4 +768,83 @@ When we suspend a Job, any running Pods that do not have a status of `Completed`
 will be terminated with a SIGTERM signal. The Pod's graceful termination period
 will be honored and the Pod must handle this signal in this period. This may
 involve saving progress for later or undoing changes. Pods terminated this way
-will not count towards the Job's `completions` count.
+will not count towards the Job's `completions` count. An example Job definition
+in the suspended state can be like so:
+
+```bash
+kubectl get job myjob -o yaml
+```
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: myjob
+spec:
+    suspend: true
+    parallelism: 1
+    completions: 5
+    template:
+        spec:
+```
+
+We can also toggle Job suspension by patching th eJob using the command line. To
+suspend an active Job:
+
+```bash
+kubectl patch jpb/myjob --type=strategic --patch '{"spec":{"suspend":true}}'
+```
+Resume a suspended Job:
+
+```bash
+kubectl patch job/myjob --type=strategic --patch '{"spec":{"suspend":false}}'
+```
+
+The Job status can be used to determine if a Job is suspended or has been
+suspended in the past:
+
+```bash
+kubectl get jobs/myjobs -o yaml
+```
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+# .metadata and .spec omitted
+status:
+  conditions:
+  - lastProbeTime: "2021-02-05T13:14:33Z"
+    lastTransitionTime: "2021-02-05T13:14:33Z"
+    status: "True"
+    type: Suspended
+  startTime: "2021-02-05T13:13:48Z"
+```
+
+The Job condition of type "Suspended" with status "True" means the Job is
+suspended; the `lastTransitionTime` field can be used to determine how long th
+eJob has been suspended for. If the status of that condition is "False", then
+the Job was previously suspended and is now running. If such a condition does
+not exist in the Job's status, the Job has never been stopped. Events are also
+created when the Job is suspended and resumed:
+
+```bash
+kubectl describe job/myjob
+```
+
+```bash
+Name:           myjob
+...
+Events:
+  Type    Reason            Age   From            Message
+  ----    ------            ----  ----            -------
+  Normal  SuccessfulCreate  12m   job-controller  Created pod: myjob-hlrpl
+  Normal  SuccessfulDelete  11m   job-controller  Deleted pod: myjob-hlrpl
+  Normal  Suspended         11m   job-controller  Job suspended
+  Normal  SuccessfulCreate  3s    job-controller  Created pod: myjob-jvb44
+  Normal  Resumed           3s    job-controller  Job resumed
+```
+
+The last four events, particularly the "Suspended" and "Resumed" events, are
+directly a result of toggling the `.spec.suspend` field. In the time between
+these two events, we see that no Pods were created, but Pod creation restarted
+as soon as the Job was resumed.
