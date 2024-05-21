@@ -1,4 +1,4 @@
-version: '3.9'
+version: '4.30'
 
 networks:
   observer-network:
@@ -145,7 +145,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
-      - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./volume/metrics-pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
     ports:
       - 21890:21890

@@ -1,0 +1,43 @@
+metrics-pipeline:
+  workers: 2
+  source:
+    otel_metrics_source:
+      ssl: false
+      port: 21891
+  sink:
+    - s3:
+        aws:
+          region: ap-southeast-1
+        max_retries: 5
+        bucket: proactive-monitoring-bucket
+        object_key:
+          path_prefix: metrics/%{yyyy}/%{MM}/%{dd}/
+        threshold:
+          event_count: 10000
+          maximum_size: 50mb
+          event_collect_timeout: 15s
+        codec:
+          json:
+        buffer_type: in_memory
+    
+s3-metrics-pipeline:
+  workers: 2
+  source:
+    s3:
+      notification_type: sqs
+      codec:
+        json:
+      sqs:
+        queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/proactive-monitoring-queue-metrics
+        visibility_timeout: 2m
+      aws:
+        region: ap-southeast-1
+  processor:
+    - otel_metrics:
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch-node1:9200"]
+        insecure: true
+        username: admin
+        password: zmgf-x19a/M12
+        index: otlp_metrics

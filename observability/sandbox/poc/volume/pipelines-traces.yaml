@@ -1,0 +1,58 @@
+otel-trace-pipeline:
+  workers: 2
+  source:
+    otel_trace_source:
+      ssl: false
+      authentication:
+        unauthenticated: null
+  buffer:
+    bounded_blocking:
+      buffer_size: 25600
+      batch_size: 400
+  sink:
+    - pipeline:
+        name: raw-pipeline
+    - pipeline:
+        name: service-map-pipeline
+
+raw-pipeline:
+  workers: 2
+  source:
+    pipeline:
+      name: otel-trace-pipeline
+  buffer:
+    bounded_blocking:
+      buffer_size: 25600
+      batch_size: 3200
+  processor:
+    - otel_traces: null
+    - otel_trace_group:
+        hosts:
+          - https://opensearch-node1:9200
+        insecure: true
+        username: admin
+        password: zmgf-x19a/M12
+  sink:
+    - opensearch:
+        hosts:
+          - https://opensearch-node1:9200
+        index_type: trace-analytics-raw
+        insecure: true
+        username: admin
+        password: zmgf-x19a/M12
+
+service-map-pipeline:
+  delay: "100"
+  source:
+    pipeline:
+      name: otel-trace-pipeline
+  processor:
+    - service_map_stateful: null
+  sink:
+    - opensearch:
+        hosts:
+          - https://opensearch-node1:9200
+        index_type: trace-analytics-service-map
+        insecure: true
+        username: admin
+        password: zmgf-x19a/M12
