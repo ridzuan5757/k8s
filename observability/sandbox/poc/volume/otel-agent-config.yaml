@@ -7,10 +7,10 @@ receivers:
     # root_path: /hostfs
     collection_interval: 1s
     scrapers:
-      # cpu:
+      cpu:
       load:
       memory:
-      # disk:
+      disk:
       filesystem:
       network:
   syslog:
@@ -28,17 +28,17 @@ receivers:
 
 exporters:
   otlp/dataprepper-traces:
-    endpoint: dataprepper-traces:21890
+    endpoint: http://dataprepper:21890
     tls:
         insecure: true
         insecure_skip_verify: true
   otlp/dataprepper-metrics:
-    endpoint: dataprepper-metrics:21891
+    endpoint: http://dataprepper:21891
     tls:
         insecure: true
         insecure_skip_verify: true
   otlp/dataprepper-logs:
-    endpoint: dataprepper:21892
+    endpoint: http://dataprepper:21892
     tls:
         insecure: true
         insecure_skip_verify: true
@@ -92,10 +92,10 @@ service:
       exporters:
         - prometheus
         - otlp/dataprepper-metrics
-    # logs:
-    #   receivers:
-    #     - filelog
-    #   processors:
-    #     - attributes/station
-    #   exporters:
-    #     - otlp/dataprepper-logs
+    logs:
+      receivers:
+        - filelog
+      processors:
+        - attributes/station
+      exporters:
+        - otlp/dataprepper-logs

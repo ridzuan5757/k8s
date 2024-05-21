@@ -29,7 +29,7 @@ s3-metrics-pipeline:
         json:
       sqs:
         queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/proactive-monitoring-queue-metrics
-        visibility_timeout: 2m
+        visibility_timeout: 120s
       aws:
         region: ap-southeast-1
   processor:

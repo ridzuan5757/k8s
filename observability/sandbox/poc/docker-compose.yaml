@@ -6,8 +6,20 @@ networks:
 volumes:
   opensearch-data1:
   opensearch-data2:
+  portainer-data:
 
 services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - 8000:8000
+      - 9443:9443
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+
   opentelemetry-agent:
     image: otel/opentelemetry-collector-contrib:0.100.0
     container_name: opentelemetry-agent
@@ -18,7 +30,7 @@ services:
       ]
     volumes:
       - ./volume/otel-agent-config.yaml:/etc/otelcol-contrib/otel-agent-config.yaml
-        #- /:/hostfs
+      # - /:/hostfs
       - /var/log/system.log:/var/log/system.log
     environment:
       - SERVICE_NAME=${SERVICE_NAME}
@@ -111,82 +123,84 @@ services:
     networks:
       - observer-network
 
-  dataprepper-traces:
+  dataprepper:
     image: opensearchproject/data-prepper:2.8.0
-    container_name: dataprepper-traces
+    container_name: dataprepper
     restart: always
     environment:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
-      - ./volume/pipelines-traces.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
     ulimits:
       core: -1
     ports:
       - 21890:21890
-    depends_on:
-      - opentelemetry-agent
-      - opensearch-node1
-    networks:
-      - observer-network
-
-  dataprepper-metrics:
-    image: opensearchproject/data-prepper:2.8.0
-    container_name: dataprepper-metrics
-    restart: always
-    ulimits:
-      core: -1
-    environment:
-      - AWS_REGION=${AWS_REGION}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    volumes:
-      - ./volume/pipelines-metrics.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
-      - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
-    ports:
       - 21891:21891
+      - 21892:21892
     depends_on:
       - opentelemetry-agent
       - opensearch-node1
     networks:
       - observer-network
 
-  # mysql:
-  #   container_name: mysql
-  #   image: mysql:latest
-  #   ports:
-  #     - 3306:3306
+  # dataprepper-metrics:
+  #   image: opensearchproject/data-prepper:2.8.0
+  #   container_name: dataprepper-metrics
+  #   restart: always
+  #   ulimits:
+  #     core: -1
   #   environment:
-  #     - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-  #   networks:
-  #     - observer-network
-
-  # sample-app:
-  #   container_name: sample-app
-  #   build:
-  #     context: sample-app
-  #     dockerfile: Dockerfile
+  #     - AWS_REGION=${AWS_REGION}
+  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  #   volumes:
+  #     - ./volume/pipelines-metrics.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+  #     - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
   #   ports:
-  #     - '8082:8082' # inventory
-  #     - '8083:8083' # database
-  #     - '8084:8084' # payment
-  #     - '8085:8085' # auth
-  #     - '8086:8086' # recommendation
-  #     - '8087:8087' # analytics-service
-  #     - '8088:8088' # order
-  #     - '8089:8089' # client-dashboard
-  #   environment:
-  #     - OTEL_EXPORTER=otlp
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-agent:4317
-  #     - OTEL_RESOURCE_ATTRIBUTES=service.name=sample-app-analytics-service
-  #     - OTLP=opentelemetry-agent
-  #     - MYSQL_HOST=mysql
-  #     - MYSQL_PORT=3306
-  #     - WAIT_HOSTS=opentelemetry-agent:4317, mysql:3306
+  #     - 21891:21891
   #   depends_on:
   #     - opentelemetry-agent
-  #     - mysql
+  #     - opensearch-node1
   #   networks:
   #     - observer-network
+
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - observer-network
+
+  sample-app:
+    container_name: sample-app
+    build:
+      context: sample-app
+      dockerfile: Dockerfile
+    ports:
+      - '8082:8082' # inventory
+      - '8083:8083' # database
+      - '8084:8084' # payment
+      - '8085:8085' # auth
+      - '8086:8086' # recommendation
+      - '8087:8087' # analytics-service
+      - '8088:8088' # order
+      - '8089:8089' # client-dashboard
+    environment:
+      - OTEL_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-agent:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=sample-app-analytics-service
+      - OTLP=opentelemetry-agent
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - WAIT_HOSTS=opentelemetry-agent:4317, mysql:3306
+    depends_on:
+      - opentelemetry-agent
+      - mysql
+    networks:
+      - observer-network
