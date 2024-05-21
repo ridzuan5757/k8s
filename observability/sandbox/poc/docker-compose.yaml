@@ -5,21 +5,9 @@ networks:
 
 volumes:
   opensearch-data1:
-  opensearch-data2:
   portainer-data:
 
 services:
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    ports:
-      - 8000:8000
-      - 9443:9443
-      - 9000:9000
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer-data:/data
-
   opentelemetry-agent:
     image: otel/opentelemetry-collector-contrib:0.100.0
     container_name: opentelemetry-agent
@@ -30,7 +18,7 @@ services:
       ]
     volumes:
       - ./volume/otel-agent-config.yaml:/etc/otelcol-contrib/otel-agent-config.yaml
-      # - /:/hostfs
+      - /:/hostfs
       - /var/log/system.log:/var/log/system.log
     environment:
       - SERVICE_NAME=${SERVICE_NAME}
@@ -66,10 +54,7 @@ services:
     image: opensearchproject/opensearch:2.14.0
     container_name: opensearch-node1
     environment:
-      - cluster.name=opensearch-cluster
-      - node.name=opensearch-node1
-      - discovery.seed_hosts=opensearch-node1, opensearch-node2
-      - cluster.initial_cluster_manager_nodes=opensearch-node1, opensearch-node2
+      - discovery.type=single-node
       - bootstrap.memory_lock=true
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
       - plugins.query.datasources.encryption.masterkey=${MASTER_KEY_SALT}
@@ -88,36 +73,13 @@ services:
     networks:
       - observer-network
 
-  opensearch-node2:
-    image: opensearchproject/opensearch:2.14.0
-    container_name: opensearch-node2
-    environment:
-      - cluster.name=opensearch-cluster
-      - node.name=opensearch-node2
-      - discovery.seed_hosts=opensearch-node1,opensearch-node2
-      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
-      - bootstrap.memory_lock=true
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
-      - plugins.query.datasources.encryption.masterkey=${MASTER_KEY_SALT}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - opensearch-data2:/usr/share/opensearch/data
-    networks:
-      - observer-network
-
   dashboards:
     image: opensearchproject/opensearch-dashboards:2.14.0
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
     environment:
-      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]'
+      OPENSEARCH_HOSTS: '["https://opensearch-node1:9200"]'
     depends_on:
       - opensearch-node1
     networks:
@@ -126,7 +88,7 @@ services:
   dataprepper:
     image: opensearchproject/data-prepper:2.8.0
     container_name: dataprepper
-    restart: always
+    # restart: always
     environment:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -134,6 +96,7 @@ services:
     volumes:
       - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
       - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+      - ./metrics-hs_err_pid1.log:/usr/share/data-prepper/hs_err_pid1.log
     ulimits:
       core: -1
     ports:
@@ -145,27 +108,6 @@ services:
       - opensearch-node1
     networks:
       - observer-network
-
-  # dataprepper-metrics:
-  #   image: opensearchproject/data-prepper:2.8.0
-  #   container_name: dataprepper-metrics
-  #   restart: always
-  #   ulimits:
-  #     core: -1
-  #   environment:
-  #     - AWS_REGION=${AWS_REGION}
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #   volumes:
-  #     - ./volume/pipelines-metrics.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
-  #     - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
-  #   ports:
-  #     - 21891:21891
-  #   depends_on:
-  #     - opentelemetry-agent
-  #     - opensearch-node1
-  #   networks:
-  #     - observer-network
 
   mysql:
     container_name: mysql
