@@ -848,3 +848,24 @@ The last four events, particularly the "Suspended" and "Resumed" events, are
 directly a result of toggling the `.spec.suspend` field. In the time between
 these two events, we see that no Pods were created, but Pod creation restarted
 as soon as the Job was resumed.
+
+## Mutable Scheduling Directives
+
+In most cases, a parallel job will want the pods to run with constraints, like
+all in the same zone, or all either on GPU model x or y but not a mix of both.
+
+The suspend field is the first step towards achieving those semantics. Suspend
+allows a custom queue controller to decide when a job should start. However,
+once a job is unsuspended, a custom queue controller has no influence on where
+the pods of a job will actually land.
+
+This feature allows updating a Job's scheduling directives before it starts,
+which gives custom queue controllers the ability to influence pod placement
+while at the same time offloading actual pod-to-node assignbment to
+kube-scheduler. This is allowed only for suspended Jobs that have never been
+unsuspended before.
+
+The fields in a Job's pod template that can be updated are node affinity, node
+selector, tolerations, labels, annotations and shceduling gates.
+
+
