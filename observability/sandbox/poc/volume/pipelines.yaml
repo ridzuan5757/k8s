@@ -51,103 +51,103 @@ s3-metrics-pipeline:
         password: zmgf-x19a/M12
         index: otlp_metrics
 
-# otel-trace-pipeline:
-#   source:
-#     otel_trace_source:
-#       ssl: false
-#       authentication:
-#         unauthenticated:
-#   buffer:
-#     bounded_blocking:
-#       buffer_size: 25600
-#       batch_size: 400
-#   sink:
-#     - pipeline:
-#         name: "raw-pipeline"
-#     - pipeline:
-#         name: "service-map-pipeline"
+otel-trace-pipeline:
+  source:
+    otel_trace_source:
+      ssl: false
+      authentication:
+        unauthenticated:
+  buffer:
+    bounded_blocking:
+      buffer_size: 25600
+      batch_size: 400
+  sink:
+    - pipeline:
+        name: "raw-pipeline"
+    - pipeline:
+        name: "service-map-pipeline"
 
-# raw-pipeline:
-#   source:
-#     pipeline:
-#       name: "otel-trace-pipeline"
-#   buffer:
-#     bounded_blocking:
-#       buffer_size: 25600
-#       batch_size: 3200
-#   processor:
-#     - otel_traces:
-#     - otel_trace_group:
-#         hosts: ["https://opensearch-node1:9200"]
-#         insecure: true
-#         username: "admin"
-#         password: "zmgf-x19a/M12"
-#   sink:
-#     - opensearch:
-#         hosts: ["https://opensearch-node1:9200"]
-#         index_type: trace-analytics-raw
-#         insecure: true
-#         username: "admin"
-#         password: "zmgf-x19a/M12"
+raw-pipeline:
+  source:
+    pipeline:
+      name: "otel-trace-pipeline"
+  buffer:
+    bounded_blocking:
+      buffer_size: 25600
+      batch_size: 3200
+  processor:
+    - otel_traces:
+    - otel_trace_group:
+        hosts: ["https://opensearch-node1:9200"]
+        insecure: true
+        username: "admin"
+        password: "zmgf-x19a/M12"
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch-node1:9200"]
+        index_type: trace-analytics-raw
+        insecure: true
+        username: "admin"
+        password: "zmgf-x19a/M12"
 
-# service-map-pipeline:
-#   delay: "100"
-#   source:
-#     pipeline:
-#       name: "otel-trace-pipeline"
-#   processor:
-#     - service_map_stateful:
-#   sink:
-#     - opensearch:
-#         hosts: ["https://opensearch-node1:9200"]
-#         index_type: trace-analytics-service-map
-#         insecure: true
-#         username: "admin"
-#         password: "zmgf-x19a/M12"
+service-map-pipeline:
+  delay: "100"
+  source:
+    pipeline:
+      name: "otel-trace-pipeline"
+  processor:
+    - service_map_stateful:
+  sink:
+    - opensearch:
+        hosts: ["https://opensearch-node1:9200"]
+        index_type: trace-analytics-service-map
+        insecure: true
+        username: "admin"
+        password: "zmgf-x19a/M12"
 
-# log-pipeline:
-#   workers: 2
-#   source:
-#     otel_logs_source:
-#       ssl: false
-#       port: 21892
-#   processor:
-#     - grok:
-#         match:
-#           log:
-#             - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
-#   sink:
-#     - stdout:
-#     - s3:
-#         aws:
-#           region: ap-southeast-1
-#         max_retries: 5
-#         bucket: proactive-monitoring-bucket
-#         object_key:
-#           path_prefix: logs/%{yyyy}/%{MM}/%{dd}/
-#         threshold:
-#           event_count: 1
-#           event_collect_timeout: 15s
-#         codec:
-#           json:
-#         buffer_type: in_memory
+log-pipeline:
+  workers: 2
+  source:
+    otel_logs_source:
+      ssl: false
+      port: 21892
+  processor:
+    - grok:
+        match:
+          log:
+            - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
+  sink:
+    - stdout:
+    - s3:
+        aws:
+          region: ap-southeast-1
+        max_retries: 5
+        bucket: proactive-monitoring-bucket
+        object_key:
+          path_prefix: logs/%{yyyy}/%{MM}/%{dd}/
+        threshold:
+          event_count: 1
+          event_collect_timeout: 15s
+        codec:
+          json:
+        buffer_type: in_memory
 
-# s3-logs-pipeline:
-#   workers: 2
-#   source:
-#     s3:
-#       notification_type: sqs
-#       codec:
-#         json:
-#       sqs:
-#         queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/proactive-monitoring-queue-logs
-#       aws:
-#         region: ap-southeast-1
-#   sink:
-#     - stdout:
-#     - opensearch:
-#         hosts: ["https://opensearch-node1:9200"]
-#         insecure: true
-#         username: admin
-#         password: zmgf-x19a/M12
-#         index: otlp_logs
+s3-logs-pipeline:
+  workers: 2
+  source:
+    s3:
+      notification_type: sqs
+      codec:
+        json:
+      sqs:
+        queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/proactive-monitoring-queue-logs
+      aws:
+        region: ap-southeast-1
+  sink:
+    - stdout:
+    - opensearch:
+        hosts: ["https://opensearch-node1:9200"]
+        insecure: true
+        username: admin
+        password: zmgf-x19a/M12
+        index: otlp_logs

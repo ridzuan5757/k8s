@@ -16,10 +16,10 @@ Agenda:
 
 - Finalize unclear requirements on POS instrumentation:
     - Proposed metrics for POS & CDS (final):
-        - Battery level `GAUGE | device.battery.level | float | 0.00 - 1.00` 
-        - RAM Memory usage (byte) `GAUGE | device.memory.utilization | float | 0.00 - 1.00`
+        - Battery level (%) `GAUGE | device.battery.level | float | 0.00 - 1.00` 
+        - Average RAM Memory usage (%) `GAUGE | device.memory.utilization.avg | float | 0.00 - 1.00`
         - Available disk memory (byte) `GAUGE | device.disk.free | float | 0.00 - 1.00`
-        - CPU usage `GAUGE | device.cpu.utilization | float | 0.00 - 1.00`
+        - Average CPU usage `GAUGE | device.cpu.utilization.avg | float | 0.00 - 1.00`
     - Resource information to be added on each metrics:
         - `site.id | int`
         - `device.id | int`

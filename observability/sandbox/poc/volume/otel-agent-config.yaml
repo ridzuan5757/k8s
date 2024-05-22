@@ -62,6 +62,9 @@ processors:
       - key: host_name
         value: ${HOST_NAME}
         action: upsert
+      - key: device_id
+        value: yam.gila
+        action: insert
   memory_limiter:
     check_interval: 1s
     limit_percentage: 50
