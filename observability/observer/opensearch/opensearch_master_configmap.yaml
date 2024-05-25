@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-config
+data:
+  opensearch.yml: |
+    cluster.name: os-cluster
+    network.host: 0.0.0.0
+    discovery.seed_hosts: opensearch
+    cluster.initial_master_nodes: opensearch-master-0
