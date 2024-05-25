@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: opensearch-master
   labels:
@@ -18,12 +18,13 @@ spec:
         app: opensearch
         role: master
     spec:
+      serviceAccountName: opensearch
       initContainers:
         - name: init-sysctl
           image: busybox:latest
           command:
             - sysctl
-            - w
+            - -w
             - vm.max_map_count=262144
           securityContext:
             privileged: true
@@ -42,6 +43,12 @@ spec:
                   fieldPath: metadata.namespace
             - name: ES_JAVA_OPTS
               value: -Xms512m -Xms512m
+            - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+              value: zmgf-x19a/M2
+            - name: node.master
+              value: "true"
+            - name: node.dataA
+              value: "false"
           ports:
             - containerPort: 9200
               name: http
@@ -50,18 +57,23 @@ spec:
           volumeMounts:
             - name: opensearch-data
               mountPath: /usr/share/opensearch/data
-            - name: config
+            - name: opensearch-config
               mountPath: /usr/share/opensearch/config/opensearch.yml
+              subPath: opensearch.yml
+              readOnly: true
       volumes:
-        - name: config
+        - name: opensearch-config
           configMap:
+            items:
+              - key: opensearch.yml
+                path: opensearch.yml
             name: opensearch-config
-    volumeClaimTemplates:
-      - metadata:
-          name: opensearch-data
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: opensearch-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
