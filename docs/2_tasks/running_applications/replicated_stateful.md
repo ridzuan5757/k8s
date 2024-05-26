@@ -223,7 +223,41 @@ spec:
                 initialDelaySeconds: 5
                 periodSeconds: 2
                 timeoutSeconds: 1
-            - name
+            - name: xtrabackup
+              image: gcr.io/google-samples/xtrabackup:1.0
+              ports:
+              - name: xtrabackup
+                containerPort: 3307
+              command:
+              - bash
+              - -c
+              - |
+                set -ex
+                cd /var/lib/mysql
 
+                # determine binlog position of cloned data, if any
+                if [[ -f xtrabackup_slave_info && "x$(<xtrabackup_slave_info)" != "x" ]]; then
+                    
+                    # xtrabackup already generated a partial "CHANGE MASTER TO"
+                    # query
+                    # because we are cloning from existing replica
+                    # (Need to remote the tailing semicolon)
+                    cat xtrabackup_slave_info | sed -E 's/;$/g' > change_master_to.sql.in
+                    
+                    # ignore xtrabackup_binlog_info in this case
+                    # it is useless
+                    rm -f xtrabackup_slave_info xtrabackup_binlog_info
+
+                elif [[ -f xtrabackup_binlog_info ]]; then
+                    
+                    # we are cloning directly from primary
+                    # parse binlog position
+                    [[ `cat xtrabackup_binlog_info` =~ ^(.*?)[[:space:]]+(.*?)$ ]] || exit 1
+                    rm -f xtrabackup_binlog_info xtrabackup_slave_info
+                    echo "CHANGE MASTER TO MASTER_LOG_FILE='${BASH_REMATCH[1]}',\
+                        MASTER_LOG_POS=${BASH_REMATCH[2]}" > change_master_to.sql.in
+                fi
+
+                    
 ```
 
