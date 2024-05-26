@@ -108,3 +108,51 @@ there is only one primary MySQL server, clients should connect directly to the
 primary MySQL Pod through its DNS entries withing the headless `Service` to
 execute writes.
 
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: mysql
+spec:
+    selector:
+        matchLabels:
+            app: mysql
+            app.kubernetes.io/name: mysql
+    serviceName: mysql
+    replicas: 3
+    template:
+        metadata:
+            labels:
+                app: mysql
+                app.kubernetes.io/name: mysql
+        spec:
+            initContainers:
+            - name: init-mysql
+              image: mysql:5.7
+              command:
+              - bash
+              - -c
+              - |
+                set -ex
+                
+                # generage mysql server id from pod ordinal index
+                [[ $HOSTNAME =~ -([0-9]+)$ ]] || exit 1
+                ordinal=${BASH_REMATCH[1]}
+                echo [mysqld] > /mnt/conf.d/server-id.cnf
+                
+                # add an offset to avoid reserved server-id=0 value
+                echo server-id=$((100 + ordinal)) >> /mnt/conf.d/server-id.cnf
+
+                # copy appropiate conf.d files from config-map to empty dir
+                if [[ $ordinal -eq 0]]; then
+                    cp /mnt/config-map/primary.cnf /mnt/conf.d/
+                else
+                    cp /mnt/config-map/replica.cnf /mnt/conf.d/
+                fi
+              volumeMounts:
+              - name: conf
+                mountPath: /mnt/conf.d
+              - name: config-map
+                mountPath: /mnt/config-map
+```
+
