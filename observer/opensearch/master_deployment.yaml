@@ -12,13 +12,13 @@ spec:
     matchLabels:
       app: opensearch
       role: master
+  serviceName: opensearch
   template:
     metadata:
       labels:
         app: opensearch
         role: master
     spec:
-      serviceAccountName: opensearch
       initContainers:
         - name: init-sysctl
           image: busybox:latest
@@ -47,7 +47,7 @@ spec:
               value: zmgf-x19a/M2
             - name: node.master
               value: "true"
-            - name: node.dataA
+            - name: node.data
               value: "false"
           ports:
             - containerPort: 9200
@@ -76,4 +76,4 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 1Gi
+            storage: 2Gi
