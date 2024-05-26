@@ -42,5 +42,14 @@ data:
 kubectl apply -f configmap.yaml
 ```
 
+This `ConfigMap` provides `my.cnf` overrides that let us independently control
+configuration on the primary MySQL server and its replicas. In this case, we
+want the primary server to be able to serve replication logs to replicas and we
+want replicas to reject any writes that do not come via replication.
+
+There is nothing special about the `ConfigMap` itself that causes different
+portions to apply to different `Pods`. Each `Pod` decides which portion to look
+at as it is initializing, based on information provided by the `StatefulSet`
+controller.
 
 
