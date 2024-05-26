@@ -107,6 +107,12 @@ kubectl proxy
 `kubectl` will make the Dashboard available at:
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy
 
+or can be port forwarded via:
+
+```bash
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+```
+
 > [!NOTE]
 > The `kubeconfig` authentication method does not support external identity
 > providers or X.509 certificate based authentication.
