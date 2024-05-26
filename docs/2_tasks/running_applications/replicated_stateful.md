@@ -154,5 +154,76 @@ spec:
                 mountPath: /mnt/conf.d
               - name: config-map
                 mountPath: /mnt/config-map
+            
+            - name: clone-mysql
+              image: gcr.io/google-samples/xtrabackup:1.0
+              command:
+              - bash
+              - -c
+              - |
+                set -ex
+                
+                # skip the clone if data already exists
+                [[ -d /var/lib/mysql/mysql ]] && exit 0
+
+                # skip the clone on primary (ordinal index 0)
+                [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
+                ordinal=${BASH_REMATCH[1]}
+                [[ $ORDINAL -eq 0 ]] && exit 0
+
+                # clone data from previous peer
+                ncat --recv-only mysql-$(($ordinal-1)).mysql 3307 | xbstream -x
+                -C /var/lib/mysql
+
+                # prepare the backup
+                xtrabackup --prepare --target-der=/var/lib/mysql
+
+              volumeMounts:
+              - name: data
+                mountPath: /var/lib/mysql
+                subPath: mysql
+              - name: conf
+                mountPath: /etc/mysql/conf.d
+
+            containers:
+            - name: mysql
+              image: mysql:5.7
+              env:
+              - name: MYSQL_ALLOW_EMPTY_PASSWORD
+                value: "1"
+              ports:
+              - name: mysql
+                containerPort: 3306
+              volumeMounts:
+              - name: data
+                mountPath: /var/lib/mysql
+                subPath: mysql
+              - name: conf
+                mountPath: /etc/mysql/conf.d
+              resources:
+                requests:
+                    cpu: 500m
+                    memory: 1Gi
+              livenessProbe:
+                exec:
+                    command: ["mysqladmin", "ping"]
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 5
+              readinessProbe:
+                exec:
+                    # check we can execute queries over TCP
+                    # skip networking is off
+                    command:
+                    - mysql
+                    - -h
+                    - 127.0.0.1
+                    - -e
+                    - SELECT 1
+                initialDelaySeconds: 5
+                periodSeconds: 2
+                timeoutSeconds: 1
+            - name
+
 ```
 
