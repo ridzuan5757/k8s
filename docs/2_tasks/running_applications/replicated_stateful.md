@@ -281,7 +281,50 @@ spec:
                     -c "xtrabackup --backup --slave-info --stream=xbstram 
                     --host=127.0.0.1 --user=root"
             volumeMounts:
-
-
+            - name: data
+              mountPath: /var/lib/mysql
+              subPath: mysql
+            - name: conf
+              mountPath: /etc/mysql/conf.d
+            resources:
+                requests:
+                    cpu: 100m
+                    memory: 100Mi
+            volumes:
+            - name: conf
+              emptyDir: {}
+            - name: config-map
+              configMap:
+                name: mysql
+    volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+            - ReadWriteOnce
+        requests:
+            storage: 10Gi
 ```
 
+```bash
+kubectl apply -f deployment.yaml
+```
+
+You can watch the startup progress by running:
+
+```bash
+kubectl get pods -l app=mysql --watch
+```
+
+After a while, we should see all 3 Pods become `Running`:
+
+```bash
+NAME      READY     STATUS    RESTARTS   AGE
+mysql-0   2/2       Running   0          2m
+mysql-1   2/2       Running   0          1m
+mysql-2   2/2       Running   0          1m
+```
+
+> [!NOTE]
+> If we do not see any progress, make sure we have a dynamic `PersistentVolume`
+> provisioner enabled, as mentioned in the prerequisites.
