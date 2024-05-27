@@ -257,7 +257,31 @@ spec:
                     echo "CHANGE MASTER TO MASTER_LOG_FILE='${BASH_REMATCH[1]}',\
                         MASTER_LOG_POS=${BASH_REMATCH[2]}" > change_master_to.sql.in
                 fi
+                
+                # check if we need to complete a clone by starting replication
+                if [[ -f change_master_to.sql.in ]]; then
+                    echo "Waiting for mysqld to be ready"
+                    until mysql -h 127.0.0.1 -e "SELECT 1"; do sleep 1; done
 
-                    
+                    echo "Initializing replication from clone position"
+                    mysql -h 127.0.0.1 \
+                          -e "$(<change_master_to.sql.in), \
+                                MASTER_HOST='mysql-0.mysql', \
+                                MASTER_USER='root', \
+                                MASTER_PASSWORD='', \
+                                MASTER_CONNECT_RETRY=10; \
+                            START SLAVE;" || exit 1
+
+                    # in case of container restart, attempt this at most once
+                    mv change_master_to.sql.in change_master_to.sql.orig 
+                fi
+
+                # start a server to send backups when requested by peers
+                exec ncat --listen --keep-open --send-only --max-conns=1 3307 \
+                    -c "xtrabackup --backup --slave-info --stream=xbstram 
+                    --host=127.0.0.1 --user=root"
+            volumeMounts:
+
+
 ```
 
