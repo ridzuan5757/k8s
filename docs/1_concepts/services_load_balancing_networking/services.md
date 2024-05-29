@@ -24,4 +24,35 @@ backend part of the worklod?
 
 ## Services in k8s
 
+The Service API, part of k8s is an abstraction to help us expose groups of Pods
+over a network. Each Service object defines a logical set of endpoints, usually
+these endpoints are Pods along with a policy about how to make those pods
+accessible. 
 
+For example, consider a stateless image processing backend which is running with
+3 replicas. Those replicas are fungible - frontends do not care that backend
+they use. While the actual Pods that compose backend set may change, the
+frontend clients should not need to be aware of that, nor should they need to
+keep track of the set of backend themselves.
+
+The Service abstraction enables this decoupling.
+
+The set of Pods targeted by a Service is usually determined by a selector that
+we define.
+
+If the workload speaks HTTP, we might choose to use an Ingress to control how
+web traffic reaches that workload. Ingress is not a Service type, but it acts as
+the entry point for the cluster. An Ingress lets us consolidate the routing
+rules into a single resource, so that we can expose multiple components of the
+workload, running separately in the cluster, behind a single listener.
+
+The Gateway APi for k9s provides extra capabilities beyond Ingress and Service.
+We can add Gateway to the cluster - it is a family extension of APIs,
+implemented using `CustomResourceDefinitions` and then use these to configure
+access to network services that are running in the cluster.
+
+## Cloud-native service discovery
+
+If we are able to use k8s APIs for service discovery in the applicaiton, we can
+query the API server for matching `EndpointSlices`. K8s updates the 
+`EndpointSlices` for a Service whenever the set of Pods in a Service changes.
