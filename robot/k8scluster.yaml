@@ -5,38 +5,79 @@
     join_command: ""
   tasks:
     - name: Initialize kubeadm
-      ansible.builtin.command: kubeadm init --apiserver-advertise-address=172.16.16.100 --pod-network-cidr=192.168.0.0/16
-    
-    - name: Create join command
-      ansible.builtin.command: kubeadm token create --print-join-command
-      register: join_command_output
+      ansible.builtin.shell: kubeadm init --apiserver-advertise-address=192.168.241.136 --pod-network-cidr=192.168.0.0/16 --v=5
 
+    # - name: Update config file permission
+    #   ansible.builtin.shell: chmod 777 /etc/kubernetes/admin.conf
+    
     - name: Create .kube config directory
+      become: yes
+      become_user: "{{ ansible_user }}"
       ansible.builtin.file:
         path: "$HOME/.kube"
         state: directory
         mode: "0755"
 
-    - name: Update config file permission
-      ansible.builtin.shell: chmod 777 /etc/kubernetes/admin.conf
-        
-
-    - name: Copy kube config
+    - name: copy admin.conf to user's kube config
+      become: yes
       ansible.builtin.copy:
         src: /etc/kubernetes/admin.conf
-        dest: "$HOME/.kube/config"
+        dest: /home/{{ ansible_user }}/.kube/config
         remote_src: yes
-
-    - name: Change config ownership
-      ansible.builtin.file:
-        path: "$HOME/.kube/config"
         owner: "{{ ansible_user }}"
-        group: "{{ ansible_user}}"
+
+    # - name: "Copy config file"
+    #   fetch:
+    #     src: /etc/kubernetes/admin.conf 
+    #     dest: "{{ lookup('env', 'HOME') }}/admin.conf"
+    #     flat: yes
+    #   run_once: yes
+    #   ignore_errors: yes
+
+    # - name: Copy kubelet.conf to kubeconfig
+    #   copy:
+    #     src: /etc/kubernetes/kubelet.conf
+    #     dest: /home/{{ ansible_user }}/.kube/config
+    #     owner: "{{ ansible_user }}"
+    #     group: "{{ ansible_user }}"
+    #     mode: '0644'
+    #     remote_src: yes
+    #   become: yes
+
+    # - name: copy pem file
+    #   copy: src=BCPSG.pem dest=/etc/ssl/certs
+
+    # - name: Update cert index
+    #   shell: /usr/sbin/update-ca-certificates 
+
+    # - name: Set up kubeconfig for the user
+    #   shell: |
+    #     mkdir -p $HOME/.kube
+    #     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    #     sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    #   environment:
+    #     HOME: /home/{{ ansible_user }}
+
+    # - name: Copy kube config
+    #   ansible.builtin.copy:
+    #     src: /etc/kubernetes/admin.conf
+    #     dest: "$HOME/.kube/config"
+    #     remote_src: yes
+
+    # - name: Change config ownership
+    #   ansible.builtin.file:
+    #     path: "$HOME/.kube/config"
+    #     owner: "{{ ansible_user }}"
+    #     group: "{{ ansible_user}}"
 
     - name: Setup network configuration pod
-      ansible.builtin.command: |
-        kubectl apply -f
-        https://docs.projectcalico.org/manifests/calico.yaml
+      become: yes
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+    - name: Create join command
+      ansible.builtin.shell: kubeadm token create --print-join-command
+      register: join_command_output
 
     - name: Set join command output
       ansible.builtin.set_fact:
@@ -47,4 +88,4 @@
   become: true
   tasks:
     - name: Join nodes to cluster
-      ansible.builtin.shell: "{{ hostvars['masters'].join_command }}"
+      ansible.builtin.shell: "{{ hostvars[groups['masters'].0].join_command_output.stdout }}"
