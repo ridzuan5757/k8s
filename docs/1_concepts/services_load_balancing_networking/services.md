@@ -53,6 +53,14 @@ access to network services that are running in the cluster.
 
 ## Cloud-native service discovery
 
-If we are able to use k8s APIs for service discovery in the applicaiton, we can
+If we are able to use k8s APIs for service discovery in the application, we can
 query the API server for matching `EndpointSlices`. K8s updates the 
 `EndpointSlices` for a Service whenever the set of Pods in a Service changes.
+
+For non-native applications, k8s offers way to place network port or load
+balancer in between the application and the backend Pods.
+
+Either way, the workload can use these service discovery mechanism to find the
+trget it want to connect to.
+
+
