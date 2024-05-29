@@ -46,7 +46,7 @@ the entry point for the cluster. An Ingress lets us consolidate the routing
 rules into a single resource, so that we can expose multiple components of the
 workload, running separately in the cluster, behind a single listener.
 
-The Gateway APi for k9s provides extra capabilities beyond Ingress and Service.
+The Gateway API for k9s provides extra capabilities beyond Ingress and Service.
 We can add Gateway to the cluster - it is a family extension of APIs,
 implemented using `CustomResourceDefinitions` and then use these to configure
 access to network services that are running in the cluster.
@@ -61,6 +61,28 @@ For non-native applications, k8s offers way to place network port or load
 balancer in between the application and the backend Pods.
 
 Either way, the workload can use these service discovery mechanism to find the
-trget it want to connect to.
+target it wants to connect to.
 
+## Service Definition
 
+A Service is an object the same way that a Pod or ConfigMap is an object. We can
+create, view or modify Service definitions using the k8s API. Usually we use a
+tool such as `kubectl` to make those API calls for us.
+
+For example, suppose we have a set of Pods that each listen on TCP port 9376 and
+are albelled as `app.kubernetes.io/name=MyApp`. We can define a Service to
+publish that TCP listener.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: my-service
+spec:
+    selector:
+        app.kubernetes.io/name: MyApp
+    ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+```
