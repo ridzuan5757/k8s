@@ -86,3 +86,88 @@ spec:
       port: 80
       targetPort: 9376
 ```
+
+Applying this manifest creates a new Service named "my-service"m with the
+default ClusterIP service type. The Service targets TCP port 9376 on any Pod
+with the `app.kubernetes.io/name: MyApp` label.
+
+K8s assigns this Service an IP address (the cluster IP), that is used by the
+virtual IP address mechanism.
+
+The controller for that Service continuously scans for Pods that match its
+selector, and then makes any necessary updates to the set of EndPointSliaces for
+the Service.
+
+The name of a Service object must be a valid RFC 1035 label name.
+
+> [!NOTE]
+> A Service can map any incoming port to a targetPort. By default and for
+> convenience, the targetPort is set to the same value as the port field.
+
+## Port definitions
+
+Port definitions in Pods have names, and we can reference these names in the
+`targetPort` attribute of a Service. For example, we can bind the targetPort of
+the Service to the Pod port in the following way:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nginx
+    labels:
+        app.kubernetes.io/name: proxy
+spec:
+    containers:
+    - name: nginx
+      image: nginx:stable
+      ports:
+      - containerPort: 80
+        name: http-web-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-service
+spec:
+    selector:
+        app.kubernetes.io/name: proxy
+    ports:
+    - name: name-of-service-port
+      protocol: TCP
+      port: 80
+      targetPort: http-web-svc
+```
+
+This works even if there is a mixture of Pods in the Service using a single
+configured name, with the same network protocol available via different port
+numbers. This offers a lot of flexibility for deploying and evolving the
+Services. For example, we can change the port numbers that Pods expose in the
+next version of the backend software, without breaking clients.
+
+The default protocol for Services is TCP; we can also use any other supported
+protocol:
+- SCTP
+- TCP (default)
+- UDP
+
+Because many Services need to expose more than one port, k8s supports multiple
+port definitions for a single Service. Each port definition can have the same
+protocol, or a different one.
+
+## Services without selectors
+
+Services most commonly abstract access to k8s Pods thanks to the selector, but
+when used with a corresponding set of EndpointSlices objects and without a
+selector, the Servie can abstract other kinds of backends, including ones that
+run outside the cluster.
+
+For example:
+- We want to have an external database cluster in production, but in the test
+  environment we use our own databases.
+- We want to point the Service to a Service in a different Namespace or on
+  another cluster.
+- Migrating workload to k8s. While evaluating the approach, we might only run
+  portion of the backends in k8s.
+
+

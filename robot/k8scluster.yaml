@@ -83,9 +83,20 @@
       ansible.builtin.set_fact:
         join_command: "{{ join_command_output.stdout }}"
 
+    - name: test join command output
+      ansible.builtin.debug:
+        msg:
+          - "{{ join_command }}"
+
 - name: Link k8s cluster
   hosts: slaves
   become: true
   tasks:
+
+    - name: test hostvar data
+      ansible.builtin.debug:
+        msg:
+          - "{{ hostvars[groups['masters']] }}"
+
     - name: Join nodes to cluster
-      ansible.builtin.shell: "{{ hostvars[groups['masters'].0].join_command_output.stdout }}"
+      ansible.builtin.shell: "{{ hostvars[groups['masters']['master1']['join_command']] }}"
