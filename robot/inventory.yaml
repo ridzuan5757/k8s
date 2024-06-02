@@ -1,7 +1,7 @@
 masters:
   hosts:
     master1:
-      ansible_host: 192.168.241.136
+      ansible_host: 192.168.10.23
       ansible_user: master1
       ansible_password: silentmode
       ansible_become_pass: silentmode
@@ -9,7 +9,7 @@ masters:
 slaves:
   hosts:
     slave1:
-      ansible_host: 192.168.241.161
+      ansible_host: 192.168.10.136
       ansible_user: slave1
       ansible_password: silentmode
       ansible_become_pass: silentmode

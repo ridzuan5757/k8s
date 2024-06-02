@@ -511,4 +511,65 @@ We can use facts in conditionals, and also in templates. We can also use facts
 to create dynamic groups of hosts that match particular criteria, see the
 `group_by` module documentation for details.
 
+> [!NOTE]
+> Because `ansible_date_time` is created and cached when Ansible gathers facts
+> before each playbook run, it can get state with long-running playbooks. If the
+> playbook takes a long time to run, use the `pipe` filter or `now()` with
+> Jinja2 tempalte isntead of `ansible_date_time`.
 
+### Package requirements
+
+On som distros, missing fact values or facts set to default values because the
+packages that support gathering those facts are not installed by default. We can
+install the necessary packages on remote hosts using the OS package manager.
+Known dependencies include:
+- Linux Network fact gathering - depends on `ip` binary, commonly included in
+  the `iproute2` package.
+
+### Caching facts
+
+Like registered variables, facts are stored in memory by default. However,
+unlike registered variables, facts can be gathered independently and cached for
+repeated use. With cached facts, we can refer to facts from one system when
+configuring a second system, even if Ansible executes the current play on the
+second system first. For example:
+
+```bash
+{{ hostvars['asdf.example.com']['ansible_facts']['os_family'] }}
+```
+
+Caching is controlled by the cache plugins. By default, Ansible uses the memory
+cache plugin, which stores facts in memory for the duration of the current
+playbook run. To retain Ansible facts for repeated use, select a different
+cache plugin.
+
+Fact caching can improve performance. If we manage thousands of hosts, we can
+configure fact caching to run nightly, and then manage configuration on a
+smaller set of servers periodically throughout the day. With cached facts, we
+have access to variables and information about all hosts even when we are only
+managing a small number of servers.
+
+### Disabling facts
+
+By default, Ansible gathers facts at the beginning of each play. If we do not
+need to gather facts ( for example, if we know everything about your systems
+centrally), we can turn off fact gathering at the play level to improve
+scalability. Disabling facts may paricularly improve performance in push mode
+with very large numbers of systems, or if we are using Ansible on experimental
+platforms. To disable fact gathering:
+
+```yaml
+- hosts: whatever
+    gather_facts: false
+```
+
+### Adding custom facts
+
+The setup module in Ansible automatically discovers a standard set of facts
+about each host. If we want to add custom values to the facts, we can write a
+custom facts module, set temporary facts with a `ansible.builtin.set_fact` task,
+or provide permanent custom facts using the facts.d directory.
+
+#### facts.d or local facts
+
+We can add static custom facts by adding static files to fact       
