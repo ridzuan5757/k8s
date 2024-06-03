@@ -1,0 +1,18 @@
+- name: Clear known hosts entries
+  hosts: localhost
+  gather_facts: false
+  become: yes
+  tasks:
+
+    - name: read inventory file
+      ansible.builtin.shell: cat inventory.yaml
+      register: inventory_content
+
+    - name: parse inventory file
+      ansible.builtin.set_fact:
+        inventory_hosts: "{{ inventory_content.stdout_lines | reject('match', '^#') | reject('match', '^\\[') | map('regex_replace', '\\s.*', '') | list }}"
+
+    - name: host check
+      ansible.builtin.debug:
+        msg: "Host: {{ item}}"
+      loop: "{{ inventory_hosts }}"
