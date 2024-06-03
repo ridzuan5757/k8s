@@ -15,9 +15,42 @@
   become: yes
   tasks:
 
-    - name: install high availability
+    - name: install keepalived
       ansible.builtin.package:
-        name:
-            - keepalived
-            - haproxy
+        name: keepalived
         state: latest
+      notify: restart keepalived
+
+    - name: check default network interface
+      ansible.builtin.debug:
+        var: "Interface: {{ ansible_default_ipv4.interface }}"
+
+    - name: keepalived configuration
+      ansible.builtin.template:
+        src: ./template/keepalived.conf.jinja
+        dest: /etc/keepalived/keepalived.conf
+      notify: restart keepalived
+
+    - name: start keepalived
+      ansible.builtin.service:
+        name: keepalived
+        state: started
+        enabled: yes
+
+    - name: install haproxy
+      ansible.builtin.package:
+        name: haproxy
+        state: latest
+      notify: restart haproxy
+
+    - name: keepalived configuration
+      ansible.builtin.template:
+        src: ./template/haproxy.cfg.jinja
+        dest: /etc/haproxy/haproxy.cfg
+      notify: restart haproxy
+
+    - name: start haproxy
+      ansible.builtin.service:
+        name: haproxy
+        state: started
+        enabled: yes
