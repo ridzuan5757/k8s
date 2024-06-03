@@ -22,10 +22,17 @@
         remote_src: yes
         owner: "{{ ansible_user }}"
 
+    - name: save config to localhost
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: $HOME/.kube/config
+        flat: yes
+
     - name: Setup network configuration pod
       become: yes
       become_user: "{{ ansible_user }}"
       ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      ignore_errors: true
 
     - name: Create join command
       ansible.builtin.shell: kubeadm token create --print-join-command
@@ -41,6 +48,7 @@
           - "{{ join_command }}"
 
     - name: save fact to a file
+      become_user: root
       ansible.builtin.copy:
         content: "{{ join_command }}"
         dest: "./join_command.txt"
@@ -48,7 +56,7 @@
       delegate_to: localhost
 
 - name: Link k8s cluster
-  hosts: slaves
+  hosts: controlplanes:loadbalancers:slaves
   become: yes
   tasks:
 

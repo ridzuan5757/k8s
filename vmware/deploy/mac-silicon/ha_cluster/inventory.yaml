@@ -1,3 +1,6 @@
+all:vars:
+  ansible_become_pass: zmgf-X20A
+
 masters:
   hosts:
     master1:
@@ -51,5 +54,5 @@ slaves:
       ansible_become_pass: silentmode
 
 
- 
- 
+
+
