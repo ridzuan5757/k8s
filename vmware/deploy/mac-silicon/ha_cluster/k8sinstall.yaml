@@ -1,0 +1,23 @@
+- name: masters install
+  hosts: masters
+  become: yes
+  tasks:
+
+    - name: install network configuration pod
+      become: yes
+      become_user: "{{ ansible_user }}"
+      ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      run_once: true
+      ignore_errors: true
+
+- name: loadbalancers install
+  hosts: loadbalancers
+  become: yes
+  tasks:
+
+    - name: install high availability
+      ansible.builtin.package:
+        name:
+            - keepalived
+            - haproxy
+        state: latest

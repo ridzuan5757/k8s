@@ -5,6 +5,7 @@
   tasks:
     - name: Initialize kubeadm
       ansible.builtin.shell: kubeadm init --apiserver-advertise-address={{ ansible_ssh_host }} --pod-network-cidr=192.168.0.0/16 --v=5
+      run_once: true
     
     - name: Create .kube config directory
       become: yes
@@ -27,12 +28,6 @@
         src: /etc/kubernetes/admin.conf
         dest: $HOME/.kube/config
         flat: yes
-
-    - name: Setup network configuration pod
-      become: yes
-      become_user: "{{ ansible_user }}"
-      ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-      ignore_errors: true
 
     - name: Create join command
       ansible.builtin.shell: kubeadm token create --print-join-command
