@@ -2,17 +2,15 @@
   hosts: loadbalancers
   become: yes
   tasks:
-
-   
  
-    - name: Task 1 | Get all the network interfaces with IPAddresses and MAC 
+    - name: Get all the network interfaces with IP Addresses
       ansible.builtin.debug:
-        msg: "interface {{ item }}'s IPAddress is {{ ansible_facts[item]['ipv4']['address']|default(None) }} and MAC is {{ ansible_facts[item]['macaddress']|default(None) }}"
+        msg: "interface {{ item }}'s IPAddress is {{ ansible_facts[item]['ipv4']['address']|default(None) }}"
       with_items:
       - "{{ ansible_interfaces }}"
 
-    - name: Find the interface with IP "{{ ansible_ssh_host }}"
-      set_fact:
+    - name: Find the interface with SSH IP
+      ansible.builtin.set_fact:
         interface_with_ip: "{{ item }}"
       when: "(ansible_facts[item]['ipv4'] is defined and (ansible_facts[item]['ipv4'].address == ansible_ssh_host))"
       loop: "{{ ansible_interfaces }}"

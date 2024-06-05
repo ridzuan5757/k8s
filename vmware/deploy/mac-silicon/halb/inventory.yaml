@@ -26,11 +26,11 @@ loadbalancers:
       ansible_user: root
       ansible_password: silentmode
       ansible_become_pass: silentmode
-    # loadbalancer2test:
-    #   ansible_host: 172.16.16.52
-    #   ansible_user: root
-    #   ansible_password: silentmode
-    #   ansible_become_pass: silentmode
+    loadbalancer2test:
+      ansible_host: 172.16.16.52
+      ansible_user: root
+      ansible_password: silentmode
+      ansible_become_pass: silentmode
 
 slaves:
   hosts:
