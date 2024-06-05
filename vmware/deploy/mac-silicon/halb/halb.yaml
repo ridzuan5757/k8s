@@ -17,32 +17,19 @@
       loop_control:
         label: "{{ item }}"
 
-    # - name: Ensure interface_with_ip is defined
-    #   set_fact:
-    #     interface_with_ip: "Not found\"
-    #   when: interface_with_ip is not defined
-
-    - name: Write the interface name to a file
+    - name: Network interface check
       ansible.builtin.debug:
         var: "{{ interface_with_ip }}"
 
-       # - name: Find the interface with IP "{{ ansible_ssh_host }}"
-    #   set_fact:
-    #     interface_with_ip: "{{ item.key }}"
-    #   when: "(item.value.ipv4 | selectattr('address', 'equalto', '{{ ansible_ssh_host}}') | list) | length > 0"
-    #   with_dict: "{{ ansible_interfaces }}"
-    #   loop_control:
-    #     label: "{{ item.key }}"
-    
-    # - name: Display the interface name
-    #   debug:
-    #     var: interface_with_ip
+    - name: Install keepalived
+      ansible.builtin.package:
+        name: keepalived
+        state: present
 
-    # - name: keepalived configuration
-    #   ansible.builtin.template:
-    #     src: ./template/keepalived.conf.jinja
-    #     dest: /etc/keepalived/keepalived.conf
-    #   notify: restart keepalived
+    - name: Keepalived configuration
+      ansible.builtin.template:
+        src: ./template/keepalived.conf.jinja
+        dest: /etc/keepalived/keepalived.conf
 
     # - name: start keepalived
     #   ansible.builtin.service:
