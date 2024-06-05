@@ -1,0 +1,71 @@
+- name: high availability config
+  hosts: loadbalancers
+  become: yes
+  tasks:
+
+   
+ 
+    - name: Task 1 | Get all the network interfaces with IPAddresses and MAC 
+      ansible.builtin.debug:
+        msg: "interface {{ item }}'s IPAddress is {{ ansible_facts[item]['ipv4']['address']|default(None) }} and MAC is {{ ansible_facts[item]['macaddress']|default(None) }}"
+      with_items:
+      - "{{ ansible_interfaces }}"
+
+    - name: Find the interface with IP "{{ ansible_ssh_host }}"
+      set_fact:
+        interface_with_ip: "{{ item }}"
+      when: "(ansible_facts[item]['ipv4'] is defined and (ansible_facts[item]['ipv4'].address == ansible_ssh_host))"
+      loop: "{{ ansible_interfaces }}"
+      loop_control:
+        label: "{{ item }}"
+
+    # - name: Ensure interface_with_ip is defined
+    #   set_fact:
+    #     interface_with_ip: "Not found\"
+    #   when: interface_with_ip is not defined
+
+    - name: Write the interface name to a file
+      ansible.builtin.debug:
+        var: "{{ interface_with_ip }}"
+
+       # - name: Find the interface with IP "{{ ansible_ssh_host }}"
+    #   set_fact:
+    #     interface_with_ip: "{{ item.key }}"
+    #   when: "(item.value.ipv4 | selectattr('address', 'equalto', '{{ ansible_ssh_host}}') | list) | length > 0"
+    #   with_dict: "{{ ansible_interfaces }}"
+    #   loop_control:
+    #     label: "{{ item.key }}"
+    
+    # - name: Display the interface name
+    #   debug:
+    #     var: interface_with_ip
+
+    # - name: keepalived configuration
+    #   ansible.builtin.template:
+    #     src: ./template/keepalived.conf.jinja
+    #     dest: /etc/keepalived/keepalived.conf
+    #   notify: restart keepalived
+
+    # - name: start keepalived
+    #   ansible.builtin.service:
+    #     name: keepalived
+    #     state: started
+    #     enabled: yes
+
+    # - name: install haproxy
+    #   ansible.builtin.package:
+    #     name: haproxy
+    #     state: latest
+    #   notify: restart haproxy
+
+    # - name: keepalived configuration
+    #   ansible.builtin.template:
+    #     src: ./template/haproxy.cfg.jinja
+    #     dest: /etc/haproxy/haproxy.cfg
+    #   notify: restart haproxy
+
+    # - name: start haproxy
+    #   ansible.builtin.service:
+    #     name: haproxy
+    #     state: started
+    #     enabled: yes

@@ -16,11 +16,11 @@ vm:
 #   ip: 172.16.16.103
 #   memory: 2048
 #   cpus: 2
-- name: loadbalancer1test
+- name: loadbalancer1
   ip: 172.16.16.51
   memory: 512
   cpu: 1
-- name: loadbalancer2test
+- name: loadbalancer2
   ip: 172.16.16.52
   memory: 512
   cpu: 1

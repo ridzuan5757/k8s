@@ -21,16 +21,16 @@ controlplanes:
 
 loadbalancers:
   hosts:
-    loadbalancer1:
+    loadbalancer1test:
       ansible_host: 172.16.16.51
       ansible_user: root
       ansible_password: silentmode
       ansible_become_pass: silentmode
-    loadbalancer2:
-      ansible_host: 172.16.16.52
-      ansible_user: root
-      ansible_password: silentmode
-      ansible_become_pass: silentmode
+    # loadbalancer2test:
+    #   ansible_host: 172.16.16.52
+    #   ansible_user: root
+    #   ansible_password: silentmode
+    #   ansible_become_pass: silentmode
 
 slaves:
   hosts:
