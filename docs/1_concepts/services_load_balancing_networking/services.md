@@ -158,16 +158,40 @@ protocol, or a different one.
 ## Services without selectors
 
 Services most commonly abstract access to k8s Pods thanks to the selector, but
-when used with a corresponding set of EndpointSlices objects and without a
-selector, the Servie can abstract other kinds of backends, including ones that
+when used with a corresponding set of `EndpointSlices` objects and without a
+selector, the `Service` can abstract other kinds of backends, including ones that
 run outside the cluster.
 
 For example:
 - We want to have an external database cluster in production, but in the test
   environment we use our own databases.
-- We want to point the Service to a Service in a different Namespace or on
+- We want to point the `Service` to a `Service` in a different `Namespace` or on
   another cluster.
 - Migrating workload to k8s. While evaluating the approach, we might only run
   portion of the backends in k8s.
 
+In any of these scenarios, we can define a `Service` without specifying a
+selector to match Pods.
 
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: my-service
+spec:
+    ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 9376
+```
+
+Because this `Service` has no selector, the corresponding `EndpointSlice` and
+legacy `Endpoints` objects are not created automatically. We can map the
+`Service` to the network address and port where it is running by adding a
+`EndpointSlice` object manually. 
+
+```yaml
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+```
