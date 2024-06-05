@@ -26,31 +26,29 @@
         name: keepalived
         state: present
 
-    - name: Keepalived configuration
+    - name: keepalived configuration
       ansible.builtin.template:
         src: ./template/keepalived.conf.jinja
         dest: /etc/keepalived/keepalived.conf
 
-    # - name: start keepalived
-    #   ansible.builtin.service:
-    #     name: keepalived
-    #     state: started
-    #     enabled: yes
+    - name: Start keepalived
+      ansible.builtin.service:
+        name: keepalived
+        state: restarted
+        enabled: true
 
-    # - name: install haproxy
-    #   ansible.builtin.package:
-    #     name: haproxy
-    #     state: latest
-    #   notify: restart haproxy
+    - name: install haproxy
+      ansible.builtin.package:
+        name: haproxy
+        state: present
 
-    # - name: keepalived configuration
-    #   ansible.builtin.template:
-    #     src: ./template/haproxy.cfg.jinja
-    #     dest: /etc/haproxy/haproxy.cfg
-    #   notify: restart haproxy
-
-    # - name: start haproxy
-    #   ansible.builtin.service:
-    #     name: haproxy
-    #     state: started
-    #     enabled: yes
+    - name: haproxy configuration
+      ansible.builtin.template:
+        src: ./template/haproxy.cfg.jinja
+        dest: /etc/haproxy/haproxy.cfg
+    
+    - name: start haproxy
+      ansible.builtin.service:
+        name: haproxy
+        state: restarted
+        enabled: true

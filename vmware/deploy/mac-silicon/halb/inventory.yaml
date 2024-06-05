@@ -1,6 +1,6 @@
 masters:
   hosts:
-    master1:
+    kmaster1:
       ansible_host: 172.16.16.101
       ansible_user: root
       ansible_password: silentmode
@@ -8,12 +8,12 @@ masters:
 
 controlplanes:
   hosts:
-    master2:
+    kmaster2:
       ansible_host: 172.16.16.102
       ansible_user: root
       ansible_password: silentmode
       ansible_become_pass: silentmode
-    master3:
+    kmaster3:
       ansible_host: 172.16.16.103
       ansible_user: root
       ansible_password: silentmode
@@ -21,12 +21,12 @@ controlplanes:
 
 loadbalancers:
   hosts:
-    loadbalancer1test:
+    kloadbalancer1test:
       ansible_host: 172.16.16.51
       ansible_user: root
       ansible_password: silentmode
       ansible_become_pass: silentmode
-    loadbalancer2test:
+    kloadbalancer2test:
       ansible_host: 172.16.16.52
       ansible_user: root
       ansible_password: silentmode
@@ -34,17 +34,17 @@ loadbalancers:
 
 slaves:
   hosts:
-    slave1:
+    kslave1:
       ansible_host: 172.16.16.201
       ansible_user: root
       ansible_password: silentmode
       ansible_become_pass: silentmode
-    slave2:
+    kslave2:
       ansible_host: 172.16.16.202
       ansible_user: root
       ansible_password: silentmode
       ansible_become_pass: silentmode
-    slave3:
+    kslave3:
       ansible_host: 172.16.16.203
       ansible_user: root
       ansible_password: silentmode
