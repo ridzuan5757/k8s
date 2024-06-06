@@ -3,9 +3,9 @@
   become: yes
   gather_facts: yes
   tasks:
-    - name: Initialize kubeadm
-      #ansible.builtin.shell: kubeadm init --control-plane-endpoint=172.16.16.100:6443 --apiserver-advertise-address={{ ansible_ssh_host }} --pod-network-cidr=192.168.0.0/16 --v=5
-      ansible.builtin.shell: kubeadm init --apiserver-advertise-address={{ ansible_ssh_host }} --pod-network-cidr=192.168.0.0/16 --v=5
+    #- name: Initialize kubeadm
+    #  #ansible.builtin.shell: kubeadm init --control-plane-endpoint=172.16.16.100:6443 --apiserver-advertise-address={{ ansible_ssh_host }} --pod-network-cidr=192.168.0.0/16 --v=5
+    #  ansible.builtin.shell: kubeadm init --apiserver-advertise-address={{ ansible_ssh_host }} --pod-network-cidr=192.168.0.0/16 --v=5
     
     - name: Create .kube config directory
       become: yes
@@ -15,27 +15,33 @@
         state: directory
         mode: "0755"
 
-    - name: install overlay network
+    - name: Install overlay network
       become: yes
       become_user: "{{ ansible_user }}"
       ansible.builtin.shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
       run_once: true
       ignore_errors: true
 
+    # - name: Copy admin.conf to user's kube config
+    #   become: yes
+    #   ansible.builtin.copy:
+    #     src: /etc/kubernetes/admin.conf
+    #     dest: $HOME/.kube/config
+    #     remote_src: yes
+    #     owner: "{{ ansible_user }}"
 
-    - name: copy admin.conf to user's kube config
-      become: yes
-      ansible.builtin.copy:
-        src: /etc/kubernetes/admin.conf
-        dest: $HOME/.kube/config
-        remote_src: yes
-        owner: "{{ ansible_user }}"
-
-    - name: save config to localhost
+    - name: Save config to localhost
       ansible.builtin.fetch:
         src: /etc/kubernetes/admin.conf
-        dest: ~/$HOME/.kube/config
+        dest: /tmp/kubernetes/
         flat: yes
+        fail_on_missing: true
+
+    - name: Move kube config to local directory
+      local_action:
+        module: ansible.builtin.command
+        args:
+          cmd: "mv /tmp/kubernetes/admin.conf {{ lookup('env', 'HOME') }}/.kube/config"
 
     - name: Create join command
       ansible.builtin.shell: kubeadm token create --print-join-command
