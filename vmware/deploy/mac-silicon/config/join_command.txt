@@ -1,0 +1,1 @@
+kubeadm join 172.16.16.101:6443 --token lzswnv.7ijfklt9kuh3og4a --discovery-token-ca-cert-hash sha256:01673cf7e7c9bd2e6ae2d29b139de670f142a59780ebc173187ec19fed8c0d17 

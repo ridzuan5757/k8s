@@ -1,0 +1,36 @@
+- name: create message
+  hosts: masters
+  tasks:
+
+    - name: save echo message
+      ansible.builtin.set_fact:
+        echo_message: "hello from {{ inventory_hostname }}"
+
+    - name: save fact to a temp file
+      ansible.builtin.copy:
+        content: "{{ echo_message }}"
+        dest: "./echo_message.txt"
+        follow: yes
+      delegate_to: localhost
+
+
+- name: fetch message
+  hosts: slaves
+  tasks:
+
+    - name: read the echo message from file
+      ansible.builtin.slurp:
+        src: ./echo_message.txt
+      delegate_to: localhost
+      register: echo_message_file
+
+    - name: set echo message as fact
+      ansible.builtin.set_fact:
+        echo_message: "{{ echo_message_file['content'] | b64decode }}"
+
+    - name: use the gathered echo message
+      ansible.builtin.debug:
+        msg: "Echo message from source host: {{ echo_message }}"
+
+
+
