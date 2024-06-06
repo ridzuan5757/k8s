@@ -1,0 +1,59 @@
+- name: Enable SSH password authentication and set root password
+  hosts: all
+  become: yes
+  tasks:
+    - name: Enable SSH password authentication
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication yes"
+      notify:
+        - Reload SSH service
+
+    - name: Add PermitRootLogin yes
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        line: "PermitRootLogin yes"
+      notify:
+        - Reload SSH service
+
+    - name: Set root password
+      become: yes
+      ansible.builtin.user:
+        name: root
+        password: "{{ 'silentmode' | password_hash('sha512' )}}"
+
+    - name: Add entries to /etc/hosts file
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item }}"
+        insertafter: EOF
+      with_items:
+        - "172.16.16.100   kmaster.silentmode.com     kmaster"
+        - "172.16.16.101   kworker1.silentmode.com    kworker1"
+        - "172.16.16.102   kworker2.silentmode.com    kworker2"
+
+  handlers:
+    - name: Reload SSH service
+      become: yes
+      ansible.builtin.service:
+        name: sshd
+        state: reloaded
+
+- name: Get OS version and codename
+  hosts: all
+  tasks:
+    - name: OS distribution
+      ansible.builtin.debug:
+        msg: "Operating distribution: {{ ansible_distribution }}"
+
+    - name: OS distribution version
+      ansible.builtin.debug:
+        msg: "OS distribution version: {{ ansible_distribution_version }}"
+
+    - name: debug check
+      ansible.builtin.debug:
+        var: "{{ ansible_distribution_release }}"
+

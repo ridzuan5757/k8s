@@ -1,0 +1,31 @@
+- name: Clear known hosts entries
+  hosts: localhost
+  gather_facts: false
+  become: yes
+  tasks:
+
+    - name: gather list of all hosts
+      ansible.builtin.set_fact:
+        all_hosts: "{{ groups['all'] }}"
+
+    - name: host check
+      ansible.builtin.debug:
+        msg: "Host: {{ hostvars[item].ansible_host }}"
+      loop: "{{ all_hosts }}"
+
+    - name: remove each host from known_hosts
+      ansible.builtin.shell: "ssh-keygen -R {{ hostvars[item].ansible_host }}"
+      loop: "{{ all_hosts }}"
+      ignore_errors: true
+
+    - name: Attempt SSH to each host
+      ansible.builtin.shell: "ssh -o StrictHostKeyChecking=no -o BatchMode=yes {{ hostvars[item].ansible_host | default(item) }} 'echo SSH to {{ hostvars[item].ansible_host | default(item) }} successful'"
+      loop: "{{ all_hosts }}"
+      ignore_errors: true
+      register: ssh_attempt
+
+    - name: Display SSH attempt results
+      ansible.builtin.debug:
+        msg: "{{ item.stdout }}"
+      loop: "{{ ssh_attempt.results }}"
+      when: item.rc == 0

@@ -1,0 +1,38 @@
+# settings.yaml
+# box_name: "sloopstash/ubuntu-22-04"
+#box_name: "bento/ubuntu-22.04"
+box_name: "dylanrhysscott/debian-12-arm64"
+# box_version: "2.1.1"
+vm:
+# - name: kmaster1
+#   ip: 172.16.16.101
+#   memory: 2048
+#   cpus: 2
+# - name: kmaster2
+#   ip: 172.16.16.102
+#   memory: 2048
+#   cpus: 2
+# - name: kmaster3
+#   ip: 172.16.16.103
+#   memory: 2048
+#   cpus: 2
+- name: loadbalancer1
+  ip: 172.16.16.51
+  memory: 512
+  cpu: 1
+- name: loadbalancer2
+  ip: 172.16.16.52
+  memory: 512
+  cpu: 1
+# - name: kworker1
+#   ip: 172.16.16.201
+#   memory: 2048
+#   cpu: 2
+# - name: kworker2
+#   ip: 172.16.16.202
+#   memory: 2048
+#   cpu: 2
+# - name: kworker3
+#   ip: 172.16.16.203
+#   memory: 2048
+#   cpu: 2
