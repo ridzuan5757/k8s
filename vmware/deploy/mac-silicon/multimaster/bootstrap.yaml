@@ -31,10 +31,14 @@
         line: "{{ item }}"
         insertafter: EOF
       with_items:
-        - "172.16.16.100   kmaster.silentmode.com     kmaster"
-        - "172.16.16.101   kworker1.silentmode.com    kworker1"
-        - "172.16.16.102   kworker2.silentmode.com    kworker2"
-
+        - "172.16.16.101   kmaster1.silentmode.com          kmaster1"
+        - "172.16.16.102   kmaster2.silentmode.com          kmaster2"
+        - "172.16.16.103   kmaster3.silentmode.com          kmaster3"
+        - "172.16.16.51    kloadbalancer1.silentmode.com    kloadbalancer1"
+        - "172.16.16.52    kloadbalancer2.silentmode.com    kloadbalancer2"
+        - "172.16.16.201   kslave1.silentmode.com           kslave1"
+        - "172.16.16.202   kslave2.silentmode.com           kslave2"
+        - "172.16.16.203   kslave3.silentmode.com           kslave3"
   handlers:
     - name: Reload SSH service
       become: yes

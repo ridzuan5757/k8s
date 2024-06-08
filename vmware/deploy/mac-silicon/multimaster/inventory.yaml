@@ -4,7 +4,7 @@ masters:
       ansible_host: 172.16.16.101
       ansible_user: root
       ansible_password: silentmode
-      ansible_become_pass: zmgf-X20A
+      ansible_become_pass: silentmode
 
 controlplanes:
   hosts:
