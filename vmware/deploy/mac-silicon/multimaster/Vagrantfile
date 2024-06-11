@@ -16,13 +16,32 @@ Vagrant.configure("2") do |config|
       vm.vm.provider "vmware_fusion" do |vb|
         vb.memory = vm_config['memory']
         vb.cpus = vm_config['cpus']
-        vb.gui = false
+        # vb.arch = "x86_64"
+        # vb.machine = "q35"
+        # vb.net_device = "virtio-net-pci"
       end
+
+      vm.vm.provision "shell", inline: <<-SHELL
+        apt update
+        apt upgrade -y
+        apt install -y wget vim net-tools gcc make tar git unzip sysstat tree
+      SHELL
 
       vm.vm.provision :ansible do |ansible|
         ansible.verbose = "vv"
         ansible.playbook = "bootstrap.yaml"
       end
+
+      vm.vm.provision :ansible do |ansible|
+        ansible.verbose = "vv"
+        ansible.playbook = "initial.yaml"
+      end
+
+      vm.vm.provision :ansible do |ansible|
+        ansible.verbose = "vv"
+        ansible.playbook = "dependencies.yaml"
+      end
+
     end
   end
 end
