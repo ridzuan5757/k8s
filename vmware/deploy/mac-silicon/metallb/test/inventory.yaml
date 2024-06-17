@@ -1,0 +1,17 @@
+masters:
+  hosts:
+    master1:
+      ansible_host: 172.16.16.100
+      ansible_user: root
+      ansible_password: silentmode
+      ansible_become_pass: silentmode
+
+slaves:
+  hosts:
+    slave1:
+      ansible_host: 172.16.16.101
+      ansible_user: root
+      ansible_password: silentmode
+      ansible_become_pass: silentmode
+
+ 
