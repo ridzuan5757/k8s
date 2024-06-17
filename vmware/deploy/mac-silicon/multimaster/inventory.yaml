@@ -1,11 +1,3 @@
-loadbalancers:
-  hosts:
-    loadbalancer2:
-      ansible_host: 192.168.10.155
-      ansible_user: loadbalancer2
-      ansible_password: silentmode
-      ansible_become_pass: silentmode
-
 masters:
   hosts:
     kmaster1:
