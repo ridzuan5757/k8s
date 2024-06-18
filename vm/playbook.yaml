@@ -1,7 +1,0 @@
-- name: Echo "lol"
-  hosts: all
-  become: true
-  tasks:
-    - name: Echo "lol"
-      ansible.builtin.command: echo "lol"
-
