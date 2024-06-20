@@ -13,7 +13,7 @@ vm:
   ip: 172.16.16.202
   memory: 2048
   cpu: 2
-- name: kloadbalancer1
-  ip: 172.16.16.51
+- name: kslave3
+  ip: 172.16.16.203
   memory: 2048
   cpu: 2
