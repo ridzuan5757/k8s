@@ -20,3 +20,10 @@
         path: /etc/fstab
         regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
         replace: '#\ 1'
+
+    - name: Set vm.max_map_count sysctl parameter
+      ansible.builtin.sysctl:
+        name: vm.max_map_count
+        value: 262144
+        state: present
+

@@ -1,0 +1,4 @@
+extraEnvs:
+  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+    value: zmgf-x19a/M2
+

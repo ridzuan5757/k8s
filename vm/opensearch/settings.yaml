@@ -7,13 +7,29 @@ vm:
   cpus: 2
 - name: kslave1
   ip: 172.16.16.201
-  memory: 2048
+  memory: 8192
   cpu: 2
 - name: kslave2
   ip: 172.16.16.202
-  memory: 2048
+  memory: 8192
   cpu: 2
 - name: kslave3
   ip: 172.16.16.203
+  memory: 8192
+  cpu: 2
+# - name: kslave4
+#   ip: 172.16.16.204
+#   memory: 2048
+#   cpu: 2
+# - name: kslave5
+#   ip: 172.16.16.205
+#   memory: 2048
+#   cpu: 2
+# - name: kslave6
+#   ip: 172.16.16.206
+#   memory: 2048
+#   cpu: 2
+- name: kloadbalancer1
+  ip: 172.16.16.51
   memory: 2048
   cpu: 2
