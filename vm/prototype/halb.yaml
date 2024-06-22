@@ -1,0 +1,54 @@
+- name: high availability config
+  hosts: loadbalancers
+  become: yes
+  tasks:
+ 
+    - name: Get all the network interfaces with IP Addresses
+      ansible.builtin.debug:
+        msg: "interface {{ item }}'s IPAddress is {{ ansible_facts[item]['ipv4']['address']|default(None) }}"
+      with_items:
+      - "{{ ansible_interfaces }}"
+
+    - name: Find the interface with SSH IP
+      ansible.builtin.set_fact:
+        interface_with_ip: "{{ item }}"
+      when: "(ansible_facts[item]['ipv4'] is defined and (ansible_facts[item]['ipv4'].address == ansible_ssh_host))"
+      loop: "{{ ansible_interfaces }}"
+      loop_control:
+        label: "{{ item }}"
+
+    - name: Network interface check
+      ansible.builtin.debug:
+        var: "{{ interface_with_ip }}"
+
+    - name: Install keepalived
+      ansible.builtin.package:
+        name: keepalived
+        state: present
+
+    - name: keepalived configuration
+      ansible.builtin.template:
+        src: ./template/keepalived.conf.jinja
+        dest: /etc/keepalived/keepalived.conf
+
+    - name: Start keepalived
+      ansible.builtin.service:
+        name: keepalived
+        state: restarted
+        enabled: true
+
+    - name: install haproxy
+      ansible.builtin.package:
+        name: haproxy
+        state: present
+
+    - name: haproxy configuration
+      ansible.builtin.template:
+        src: ./template/haproxy.cfg.jinja
+        dest: /etc/haproxy/haproxy.cfg
+    
+    - name: start haproxy
+      ansible.builtin.service:
+        name: haproxy
+        state: restarted
+        enabled: true
