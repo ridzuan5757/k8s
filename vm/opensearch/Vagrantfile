@@ -20,6 +20,7 @@ Vagrant.configure("2") do |config|
         
         vb.memory = vm_config['memory']
         # vb.cpus = vm_config['cpus']
+        vb.machine_virtual_size = 200
         
         # vb.numa_nodes = [
         # 	{:cpus => vm_config['vcpus'], :memory => vm_config['memory']}
