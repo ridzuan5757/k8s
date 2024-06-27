@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: opentelemetrycollector
-  namespace: observer
 spec:
   replicas: 1
   selector:

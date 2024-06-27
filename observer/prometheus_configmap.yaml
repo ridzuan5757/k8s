@@ -4,7 +4,6 @@ metadata:
   name: prometheus-conf
   labels:
     name: prometheus-conf
-  namespace: observer
 data:
   prometheus.yml: |-
     global:
@@ -13,5 +12,5 @@ data:
     - job_name: opentelemetrycollector-gateway
       static_configs:
         - targets:
-          - opentelemetrycollector.observer.svc.cluster.local:8888
-          - opentelemetrycollector.observer.svc.cluster.local:8889
+          - opentelemetrycollector.default.svc.cluster.local:8888
+          - opentelemetrycollector.default.svc.cluster.local:8889
