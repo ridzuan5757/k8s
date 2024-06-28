@@ -25,6 +25,8 @@ data:
           queue_size: 100
         retry_on_failure:
           enabled: true
+      prometheus:
+        endpoint: :8889
     processors:
       batch:
       memory_limiter:
@@ -41,7 +43,7 @@ data:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [otlp]
+          exporters: [otlp, prometheus]
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -78,6 +80,7 @@ spec:
         - containerPort: 55679 # ZPages endpoint.
         - containerPort: 4317 # Default OpenTelemetry receiver port.
         - containerPort: 8888  # Metrics.
+        - containerPort: 8889
         env:
           - name: MY_POD_IP
             valueFrom:
@@ -124,6 +127,8 @@ data:
     extensions:
       zpages: {}
     exporters:
+      prometheus:
+        endpoint: :8889
       otlp:
         endpoint: "http://someotlp.target.com:4317" # Replace with a real endpoint.
         tls:
@@ -134,7 +139,7 @@ data:
         traces/1:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [otlp]
+          exporters: [otlp, prometheus]
 ---
 apiVersion: v1
 kind: Service
@@ -155,6 +160,10 @@ spec:
     targetPort: 4318
   - name: metrics # Default endpoint for querying metrics.
     port: 8888
+  - name: prometheus
+    protocol: TCP
+    port: 8889
+    targetPort: 8889
   selector:
     component: otel-collector
 ---
@@ -199,6 +208,7 @@ spec:
         - containerPort: 14268 # Default endpoint for Jaeger HTTP receiver.
         - containerPort: 9411 # Default endpoint for Zipkin receiver.
         - containerPort: 8888  # Default endpoint for querying metrics.
+        - containerPort: 8889
         env:
           - name: MY_POD_IP
             valueFrom:
