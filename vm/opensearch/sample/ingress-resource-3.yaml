@@ -7,27 +7,20 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: nginx.example.com
+  - host: aab0fb8373da347b2bbec19c27622548-ed034f803fa8b4ac.elb.ap-southeast-1.amazonaws.com
     http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-deploy-main
-            port:
-              number: 80
-      - path: /blue
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-deploy-blue
-            port:
-              number: 80
-      - path: /green
+      - path: /blue/
         pathType: Prefix
         backend:
           service:
             name: nginx-deploy-green
+            port:
+              number: 80
+      - path: /green/
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-deploy-main
             port:
               number: 80
