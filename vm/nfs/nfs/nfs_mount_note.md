@@ -1,3 +1,8 @@
+# package install
+```
+sudo apt install nfs-common
+```
+
 # note on mounting nfs on worker nodes
 
 ```
