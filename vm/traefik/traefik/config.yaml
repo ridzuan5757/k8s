@@ -1,0 +1,9 @@
+service:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+
+deployment:
+  hostAliases:
+    - ip: "127.0.0.1"
+      hostnames:
+        - nginx.example.com
