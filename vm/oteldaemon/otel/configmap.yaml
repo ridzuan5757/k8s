@@ -42,6 +42,10 @@ data:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
           exporters: [otlp, prometheus]
 
 ---
@@ -83,6 +87,10 @@ data:
       extensions: [zpages]
       pipelines:
         traces/1:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp, prometheus]
+        metrics/1:
           receivers: [otlp]
           processors: [memory_limiter, batch]
           exporters: [otlp, prometheus]

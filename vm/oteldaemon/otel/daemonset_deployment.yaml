@@ -17,10 +17,9 @@ spec:
         component: otel-agent
     spec:
       containers:
-      - command:
-          - "/otelcol"
+      - args:
           - "--config=/conf/otel-agent-config.yaml"
-        image: otel/opentelemetry-collector:latest
+        image: otel/opentelemetry-collector-contrib:latest
         name: otel-agent
         resources:
           limits:
