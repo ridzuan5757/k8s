@@ -1,24 +1,12 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  annotations:
-    deprecated.daemonset.template.generation: "1"
-    meta.helm.sh/release-name: daemonset-collector-dev
-    meta.helm.sh/release-namespace: default
-  creationTimestamp: "2024-07-03T21:31:24Z"
-  generation: 1
   labels:
     app.kubernetes.io/instance: daemonset-collector-dev
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: opentelemetry-collector
-    app.kubernetes.io/version: 0.103.1
-    helm.sh/chart: opentelemetry-collector-0.96.0
   name: daemonset-collector-dev-opentelemetry-collector-agent
   namespace: default
-  resourceVersion: "1040"
-  uid: 5bd681f0-d187-44bd-8f54-8e185baeb985
 spec:
-  revisionHistoryLimit: 10
   selector:
     matchLabels:
       app.kubernetes.io/instance: daemonset-collector-dev
@@ -26,9 +14,6 @@ spec:
       component: agent-collector
   template:
     metadata:
-      annotations:
-        checksum/config: e476810b2c84d2dd54659c526a558164477ecceb00b5f9a77eff882b80fa9856
-      creationTimestamp: null
       labels:
         app.kubernetes.io/instance: daemonset-collector-dev
         app.kubernetes.io/name: opentelemetry-collector
@@ -123,11 +108,3 @@ spec:
       maxSurge: 0
       maxUnavailable: 1
     type: RollingUpdate
-status:
-  currentNumberScheduled: 5
-  desiredNumberScheduled: 5
-  numberMisscheduled: 0
-  numberReady: 0
-  numberUnavailable: 5
-  observedGeneration: 1
-  updatedNumberScheduled: 5
