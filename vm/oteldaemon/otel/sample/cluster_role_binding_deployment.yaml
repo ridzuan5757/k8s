@@ -1,0 +1,14 @@
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: deployment-collector-dev
+    app.kubernetes.io/name: opentelemetry-collector
+  name: deployment-collector-dev-opentelemetry-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: deployment-collector-dev-opentelemetry-collector
+subjects:
+- kind: ServiceAccount
+  name: deployment-collector-dev-opentelemetry-collector
+  namespace: default
