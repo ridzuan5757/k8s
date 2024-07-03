@@ -14,3 +14,5 @@ data:
         - targets:
           - otel-collector.default.svc.cluster.local:8888
           - otel-collector.default.svc.cluster.local:8889
+          - opentelemetry-collector-lb.default.svc.cluster.local:8888
+          - opentelemetry-collector-lb.default.svc.cluster.local:8889

@@ -2,8 +2,8 @@ extraEnvs:
   - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
     value: zmgf-x19a/M2
 
-persistence:
-  enabled: false
+# persistence:
+#   enabled: false
 
 # config:
 #   opensearch.yml: |

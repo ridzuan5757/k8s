@@ -15,6 +15,16 @@ data:
             endpoint: ${env:MY_POD_IP}:4317
           http:
             endpoint: ${env:MY_POD_IP}:4318
+      hostmetrics:
+        root_path: /hostfs
+        collection_interval: 1s
+        scrapers:
+          cpu:
+          load:
+          memory:
+          disk:
+          filesystem:
+          network:
     exporters:
       otlp:
         endpoint: "otel-collector.default:4317"
@@ -43,7 +53,11 @@ data:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [otlp, prometheus]
+          exporters: [otlp]
+        metrics:
+          receivers: [hostmetrics, otlp]
+          processors: []
+          exporters: [prometheus]
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -64,10 +78,9 @@ spec:
         component: otel-agent
     spec:
       containers:
-      - command:
-          - "/otelcol"
+      - args:
           - "--config=/conf/otel-agent-config.yaml"
-        image: otel/opentelemetry-collector:latest
+        image: otel/opentelemetry-collector-contrib:latest
         name: otel-agent
         resources:
           limits:
@@ -92,13 +105,21 @@ spec:
         volumeMounts:
         - name: otel-agent-config-vol
           mountPath: /conf
+        - name: hostfs
+          mountPath: /hostfs
+          readOnly: true
+          mountPropagation: HostToContainer
       volumes:
-        - configMap:
+        - name: otel-agent-config-vol
+          configMap:
             name: otel-agent-conf
             items:
               - key: otel-agent-config
                 path: otel-agent-config.yaml
-          name: otel-agent-config-vol
+        - name: hostfs
+          hostPath:
+            path: /
+          
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -139,6 +160,10 @@ data:
         traces/1:
           receivers: [otlp]
           processors: [memory_limiter, batch]
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          processors: []
           exporters: [otlp, prometheus]
 ---
 apiVersion: v1
@@ -161,9 +186,9 @@ spec:
   - name: metrics # Default endpoint for querying metrics.
     port: 8888
   - name: prometheus
-    protocol: TCP
     port: 8889
     targetPort: 8889
+    protocol: TCP
   selector:
     component: otel-collector
 ---
@@ -189,10 +214,9 @@ spec:
         component: otel-collector
     spec:
       containers:
-      - command:
-          - "/otelcol"
+      - args:
           - "--config=/conf/otel-collector-config.yaml"
-        image: otel/opentelemetry-collector:latest
+        image: otel/opentelemetry-collector-contrib:latest
         name: otel-collector
         resources:
           limits:

@@ -23,7 +23,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`ad9710633d5cd49fa99c717143b733b6-63c95d68eb4cc4c8.elb.ap-southeast-1.amazonaws.com`)
+  - match: Host(`a1d0f1e8d5d9049a8a30f1db1052b479-baaf038ddcf8918c.elb.ap-southeast-1.amazonaws.com`)
     kind: Rule
     services:
     - name: nginx-wrr
