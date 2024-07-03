@@ -88,17 +88,8 @@ data:
           address: ${env:MY_POD_IP}:8888
 kind: ConfigMap
 metadata:
-  annotations:
-    meta.helm.sh/release-name: daemonset-collector-dev
-    meta.helm.sh/release-namespace: default
-  creationTimestamp: "2024-07-03T21:31:24Z"
   labels:
     app.kubernetes.io/instance: daemonset-collector-dev
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: opentelemetry-collector
-    app.kubernetes.io/version: 0.103.1
-    helm.sh/chart: opentelemetry-collector-0.96.0
   name: daemonset-collector-dev-opentelemetry-collector-agent
   namespace: default
-  resourceVersion: "1011"
-  uid: abc3faca-06c0-491c-917d-af6336d315c1
