@@ -12,7 +12,8 @@ data:
     - job_name: opentelemetrycollector-gateway
       static_configs:
         - targets:
-          - otel-collector.default.svc.cluster.local:8888
-          - otel-collector.default.svc.cluster.local:8889
-          - opentelemetry-collector-lb.default.svc.cluster.local:8888
-          - opentelemetry-collector-lb.default.svc.cluster.local:8889
+          # - otel-collector.default.svc.cluster.local:8888
+          # - otel-collector.default.svc.cluster.local:8889
+          # - opentelemetry-collector-lb.default.svc.cluster.local:8888
+          # - opentelemetry-collector-lb.default.svc.cluster.local:8889
+          - deployment-collector-dev-opentelemetry-collector.default.svc.cluster.local:8888

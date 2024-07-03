@@ -1,0 +1,93 @@
+apiVersion: v1
+data:
+  relay: |
+    exporters:
+      debug:
+        verbosity: detailed
+    extensions:
+      health_check:
+        endpoint: ${env:MY_POD_IP}:13133
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+    receivers:
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:14250
+          thrift_compact:
+            endpoint: ${env:MY_POD_IP}:6831
+          thrift_http:
+            endpoint: ${env:MY_POD_IP}:14268
+      k8s_cluster:
+        collection_interval: 10s
+        metrics:
+          k8s.container.cpu_limit:
+            enabled: false
+      otlp:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+          http:
+            endpoint: ${env:MY_POD_IP}:4318
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: opentelemetry-collector
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - ${env:MY_POD_IP}:8888
+      zipkin:
+        endpoint: ${env:MY_POD_IP}:9411
+    service:
+      extensions:
+      - health_check
+      pipelines:
+        logs:
+          exporters:
+          - debug
+          processors:
+          - memory_limiter
+          - batch
+          receivers:
+          - otlp
+        metrics:
+          exporters:
+          - debug
+          processors:
+          - batch
+          receivers:
+          - k8s_cluster
+        traces:
+          exporters:
+          - debug
+          processors:
+          - memory_limiter
+          - batch
+          receivers:
+          - otlp
+          - jaeger
+          - zipkin
+      telemetry:
+        metrics:
+          address: ${env:MY_POD_IP}:8888
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: deployment-collector-dev
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2024-07-03T21:31:31Z"
+  labels:
+    app.kubernetes.io/instance: deployment-collector-dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: opentelemetry-collector
+    app.kubernetes.io/version: 0.103.1
+    helm.sh/chart: opentelemetry-collector-0.96.0
+  name: deployment-collector-dev-opentelemetry-collector
+  namespace: default
+  resourceVersion: "1089"
+  uid: d25c4446-2c9b-4473-8d34-8b3e2b351805
