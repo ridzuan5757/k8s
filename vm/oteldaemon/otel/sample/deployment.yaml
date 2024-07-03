@@ -1,26 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "1"
-    meta.helm.sh/release-name: deployment-collector-dev
-    meta.helm.sh/release-namespace: default
-  creationTimestamp: "2024-07-03T21:31:31Z"
-  generation: 1
   labels:
     app.kubernetes.io/instance: deployment-collector-dev
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: opentelemetry-collector
-    app.kubernetes.io/version: 0.103.1
-    helm.sh/chart: opentelemetry-collector-0.96.0
   name: deployment-collector-dev-opentelemetry-collector
   namespace: default
-  resourceVersion: "2397"
-  uid: efe01a20-44b4-4f8a-9959-6b0c2f51c066
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
   selector:
     matchLabels:
       app.kubernetes.io/instance: deployment-collector-dev
@@ -33,9 +21,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-        checksum/config: 8d403f8b3d56c739681e2725f593c45b9a061dcb259d6063f32145224c53dd1a
-      creationTimestamp: null
       labels:
         app.kubernetes.io/instance: deployment-collector-dev
         app.kubernetes.io/name: opentelemetry-collector
@@ -119,22 +104,3 @@ spec:
             path: relay.yaml
           name: deployment-collector-dev-opentelemetry-collector
         name: opentelemetry-collector-configmap
-status:
-  conditions:
-  - lastTransitionTime: "2024-07-03T21:31:31Z"
-    lastUpdateTime: "2024-07-03T21:31:31Z"
-    message: Deployment does not have minimum availability.
-    reason: MinimumReplicasUnavailable
-    status: "False"
-    type: Available
-  - lastTransitionTime: "2024-07-03T21:41:32Z"
-    lastUpdateTime: "2024-07-03T21:41:32Z"
-    message: ReplicaSet "deployment-collector-dev-opentelemetry-collector-767648b968"
-      has timed out progressing.
-    reason: ProgressDeadlineExceeded
-    status: "False"
-    type: Progressing
-  observedGeneration: 1
-  replicas: 1
-  unavailableReplicas: 1
-  updatedReplicas: 1
