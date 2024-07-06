@@ -13,6 +13,7 @@ rules:
       - namespaces/status
       - nodes
       - nodes/spec
+      - nodes/stats
       - pods
       - pods/status
       - replicationcontrollers
@@ -47,6 +48,14 @@ rules:
       - autoscaling
     resources:
       - horizontalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: 
+      - extensions
+    resources:
+      - replicasets
     verbs:
       - get
       - list

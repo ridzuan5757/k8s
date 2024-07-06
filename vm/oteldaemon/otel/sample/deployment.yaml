@@ -29,8 +29,8 @@ spec:
       containers:
       - args:
         - --config=/conf/relay.yaml
-        command:
-        - /otelcontribcol
+        # command:
+        # - /otelcontribcol
         env:
         - name: MY_POD_IP
           valueFrom:
@@ -42,7 +42,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: otelcontribcol-dev:0.0.1
+        image: otel/opentelemetry-collector-contrib:latest
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3

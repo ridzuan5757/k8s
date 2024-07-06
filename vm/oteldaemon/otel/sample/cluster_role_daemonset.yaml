@@ -9,16 +9,37 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - nodes
+    - pods
+    - nodes
+    - nodes/stats
+    - nodes/proxy
+    - namespaces
   verbs:
-  - get
-  - list
-  - watch
+    - get
+    - list
+    - watch
 - apiGroups:
   - ""
   resources:
-  - nodes/stats
-  - nodes/proxy
+    - nodes/stats
+    - nodes/proxy
   verbs:
   - get
+- apiGroups:
+  - "apps"
+  resources:
+    - replicasets
+    - daemonsets
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+  - extensions
+  resources:
+    - replicasets
+    - daemonsets
+  verbs:
+    - get
+    - list
+    - watch

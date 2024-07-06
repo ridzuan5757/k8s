@@ -38,6 +38,10 @@ spec:
     port: 9411
     protocol: TCP
     targetPort: 9411
+  - name: prometheus
+    port: 8889
+    protocol: TCP
+    targetPort: 8889
   selector:
     app.kubernetes.io/instance: deployment-collector-dev
     app.kubernetes.io/name: opentelemetry-collector
