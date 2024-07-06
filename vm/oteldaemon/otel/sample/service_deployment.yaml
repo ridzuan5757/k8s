@@ -8,23 +8,12 @@ metadata:
   name: deployment-collector-dev-opentelemetry-collector
   namespace: default
 spec:
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: deployment-collector-dev
+    app.kubernetes.io/name: opentelemetry-collector
+    component: standalone-collector
   ports:
-  - name: jaeger-compact
-    port: 6831
-    protocol: UDP
-    targetPort: 6831
-  - name: jaeger-grpc
-    port: 14250
-    protocol: TCP
-    targetPort: 14250
-  - name: jaeger-thrift
-    port: 14268
-    protocol: TCP
-    targetPort: 14268
   - appProtocol: grpc
     name: otlp
     port: 4317
@@ -34,17 +23,7 @@ spec:
     port: 4318
     protocol: TCP
     targetPort: 4318
-  - name: zipkin
-    port: 9411
-    protocol: TCP
-    targetPort: 9411
   - name: prometheus
     port: 8889
     protocol: TCP
     targetPort: 8889
-  selector:
-    app.kubernetes.io/instance: deployment-collector-dev
-    app.kubernetes.io/name: opentelemetry-collector
-    component: standalone-collector
-  sessionAffinity: None
-  type: ClusterIP

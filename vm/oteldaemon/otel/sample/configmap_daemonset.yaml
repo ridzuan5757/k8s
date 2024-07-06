@@ -114,34 +114,34 @@ data:
       extensions:
       - health_check
       pipelines:
-        logs:
-          exporters:
-          - debug
-          processors:
-          - memory_limiter
-          - batch
-          - k8sattributes
-          receivers:
-          - otlp
-        metrics:
-          exporters:
-          - debug
-          processors:
-          - batch
-          - k8sattributes
-          receivers:
-          - kubeletstats
+        # logs:
+        #   exporters:
+        #   - debug
+        #   processors:
+        #   - memory_limiter
+        #   - batch
+        #   - k8sattributes
+        #   receivers:
+        #   - otlp
+        # metrics:
+        #   exporters:
+        #   - debug
+        #   processors:
+        #   - batch
+        #   - k8sattributes
+        #   receivers:
+        #   - kubeletstats
         traces:
           exporters:
           - debug
-          processors:
-          - memory_limiter
-          - batch
-          - k8sattributes
+          # processors:
+          # - memory_limiter
+          # - batch
+          # - k8sattributes
           receivers:
           - otlp
-          - jaeger
-          - zipkin
+          # - jaeger
+          # - zipkin
       telemetry:
         metrics:
           address: ${env:MY_POD_IP}:8888

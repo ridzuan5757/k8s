@@ -157,11 +157,11 @@ data:
           k8s.resourcequota.name:
             enabled: true
           k8s.statefulset.uid:
-            enabled: name
+            enabled: true
           k8s.statefulset.name:
-            enabled: name
+            enabled: true
           k8s.deployment.uid:
-            enabled: name
+            enabled: true
           k8s.deployment.name:
             enabled: true
           k8s.cronjob.uid:
@@ -272,38 +272,38 @@ data:
       extensions:
       - health_check
       pipelines:
-        logs:
-          exporters:
-          - debug
-          processors:
-          - memory_limiter
-          - batch
-          - k8sattributes
-          receivers:
-          - otlp
-          - k8s_cluster
-        metrics:
-          exporters:
-          - debug
-          - prometheus/export
-          processors:
-          - batch
-          - k8sattributes
-          receivers:
-          - k8s_cluster
-          - kubeletstats
+        # logs:
+        #   exporters:
+        #   - debug
+        #   processors:
+        #   - memory_limiter
+        #   - batch
+        #   - k8sattributes
+        #   receivers:
+        #   - otlp
+        #   - k8s_cluster
+        # metrics:
+        #   exporters:
+        #   - debug
+        #   - prometheus/export
+        #   processors:
+        #   - batch
+        #   - k8sattributes
+        #   receivers:
+        #   - k8s_cluster
+        #   - kubeletstats
         traces:
           exporters:
           - debug
-          processors:
-          - memory_limiter
-          - batch
-          - k8sattributes
+          # processors:
+          # - memory_limiter
+          # - batch
+          # - k8sattributes
           receivers:
           - otlp
-          - jaeger
-          - zipkin
-          - k8s_cluster
+          # - jaeger
+          # - zipkin
+          # - k8s_cluster
       telemetry:
         metrics:
           address: ${env:MY_POD_IP}:8888
