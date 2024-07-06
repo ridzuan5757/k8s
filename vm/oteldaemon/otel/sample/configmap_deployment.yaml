@@ -35,14 +35,6 @@ data:
           - sources:
               - from: connection
     receivers:
-      jaeger:
-        protocols:
-          grpc:
-            endpoint: ${env:MY_POD_IP}:14250
-          thrift_compact:
-            endpoint: ${env:MY_POD_IP}:6831
-          thrift_http:
-            endpoint: ${env:MY_POD_IP}:14268
       k8s_cluster:
         collection_interval: 10s
         metrics:
@@ -266,44 +258,40 @@ data:
             static_configs:
             - targets:
               - ${env:MY_POD_IP}:8888
-      zipkin:
-        endpoint: ${env:MY_POD_IP}:9411
     service:
       extensions:
       - health_check
       pipelines:
-        # logs:
-        #   exporters:
-        #   - debug
-        #   processors:
-        #   - memory_limiter
-        #   - batch
-        #   - k8sattributes
-        #   receivers:
-        #   - otlp
-        #   - k8s_cluster
-        # metrics:
-        #   exporters:
-        #   - debug
-        #   - prometheus/export
-        #   processors:
-        #   - batch
-        #   - k8sattributes
-        #   receivers:
-        #   - k8s_cluster
-        #   - kubeletstats
+        logs:
+          exporters:
+          - debug
+          processors:
+          - memory_limiter
+          - batch
+          - k8sattributes
+          receivers:
+          - otlp
+          - k8s_cluster
+        metrics:
+          exporters:
+          - debug
+          - prometheus/export
+          processors:
+          - batch
+          - k8sattributes
+          receivers:
+          - otlp
+          - k8s_cluster
+          - kubeletstats
         traces:
           exporters:
           - debug
-          # processors:
-          # - memory_limiter
-          # - batch
-          # - k8sattributes
+          processors:
+          - memory_limiter
+          - batch
+          - k8sattributes
           receivers:
           - otlp
-          # - jaeger
-          # - zipkin
-          # - k8s_cluster
       telemetry:
         metrics:
           address: ${env:MY_POD_IP}:8888
