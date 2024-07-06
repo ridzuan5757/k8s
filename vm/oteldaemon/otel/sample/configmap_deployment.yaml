@@ -10,6 +10,11 @@ data:
       health_check:
         endpoint: ${env:MY_POD_IP}:13133
     processors:
+      resource:
+        attributes:
+          - key: node.name
+            value: ${env:K8S_NODE_NAME}
+            action: insert
       batch: {}
       memory_limiter:
         check_interval: 5s
@@ -35,6 +40,16 @@ data:
           - sources:
               - from: connection
     receivers:
+      hostmetrics:
+        root_path: /hostfs
+        collection_interval: 10s
+        scrapers:
+          cpu:
+          load:
+          memory:
+          disk:
+          filesystem:
+          network:
       k8s_cluster:
         collection_interval: 10s
         metrics:
@@ -266,6 +281,7 @@ data:
           exporters:
           - debug
           processors:
+          - resource
           - memory_limiter
           - batch
           - k8sattributes
@@ -277,9 +293,11 @@ data:
           - debug
           - prometheus/export
           processors:
+          - resource
           - batch
           - k8sattributes
           receivers:
+          - hostmetrics
           - otlp
           - k8s_cluster
           - kubeletstats
@@ -287,6 +305,7 @@ data:
           exporters:
           - debug
           processors:
+          - resource
           - memory_limiter
           - batch
           - k8sattributes
