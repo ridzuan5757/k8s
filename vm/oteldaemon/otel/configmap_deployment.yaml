@@ -10,11 +10,6 @@ data:
       health_check:
         endpoint: ${env:MY_POD_IP}:13133
     processors:
-      resource:
-        attributes:
-          - key: node.name
-            value: ${env:K8S_NODE_NAME}
-            action: insert
       batch: {}
       memory_limiter:
         check_interval: 5s
@@ -40,16 +35,6 @@ data:
           - sources:
               - from: connection
     receivers:
-      hostmetrics:
-        root_path: /hostfs
-        collection_interval: 10s
-        scrapers:
-          cpu:
-          load:
-          memory:
-          disk:
-          filesystem:
-          network:
       k8s_cluster:
         collection_interval: 10s
         metrics:
@@ -277,40 +262,36 @@ data:
       extensions:
       - health_check
       pipelines:
-        # logs:
-        #   exporters:
-        #   - debug
-        #   processors:
-        #   - resource
-        #   - memory_limiter
-        #   - batch
-        #   - k8sattributes
-        #   receivers:
-        #   - otlp
-        #   - k8s_cluster
+        logs:
+          exporters:
+          - debug
+          processors:
+          - memory_limiter
+          - batch
+          - k8sattributes
+          receivers:
+          - otlp
+          - k8s_cluster
         metrics:
           exporters:
           - debug
           - prometheus/export
           processors:
-          - resource
           - batch
           - k8sattributes
           receivers:
-          # - hostmetrics
+          - k8s_cluster
+          - kubeletstats
           - otlp
-          # - k8s_cluster
-          # - kubeletstats
-        # traces:
-        #   exporters:
-        #   - debug
-        #   processors:
-        #   - resource
-        #   - memory_limiter
-        #   - batch
-        #   - k8sattributes
-        #   receivers:
-        #   - otlp
+        traces:
+          exporters:
+          - debug
+          processors:
+          - memory_limiter
+          - batch
+          - k8sattributes
+          receivers:
+          - otlp
       telemetry:
         metrics:
           address: ${env:MY_POD_IP}:8888
