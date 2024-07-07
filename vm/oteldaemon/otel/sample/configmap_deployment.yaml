@@ -277,17 +277,17 @@ data:
       extensions:
       - health_check
       pipelines:
-        logs:
-          exporters:
-          - debug
-          processors:
-          - resource
-          - memory_limiter
-          - batch
-          - k8sattributes
-          receivers:
-          - otlp
-          - k8s_cluster
+        # logs:
+        #   exporters:
+        #   - debug
+        #   processors:
+        #   - resource
+        #   - memory_limiter
+        #   - batch
+        #   - k8sattributes
+        #   receivers:
+        #   - otlp
+        #   - k8s_cluster
         metrics:
           exporters:
           - debug
@@ -297,20 +297,20 @@ data:
           - batch
           - k8sattributes
           receivers:
-          - hostmetrics
+          # - hostmetrics
           - otlp
-          - k8s_cluster
-          - kubeletstats
-        traces:
-          exporters:
-          - debug
-          processors:
-          - resource
-          - memory_limiter
-          - batch
-          - k8sattributes
-          receivers:
-          - otlp
+          # - k8s_cluster
+          # - kubeletstats
+        # traces:
+        #   exporters:
+        #   - debug
+        #   processors:
+        #   - resource
+        #   - memory_limiter
+        #   - batch
+        #   - k8sattributes
+        #   receivers:
+        #   - otlp
       telemetry:
         metrics:
           address: ${env:MY_POD_IP}:8888

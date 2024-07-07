@@ -4,10 +4,28 @@ data:
     exporters:
       debug:
         verbosity: detailed
+      otlp/deployment:
+        endpoint: deployment-collector-dev-opentelemetry-collector.default.svc.cluster.local:4317
+        tls:
+          insecure: true
     extensions:
       health_check:
         endpoint: ${env:MY_POD_IP}:13133
     processors:
+      metricstransform:
+        transforms:
+          include: (.*?)
+          match_type: regexp
+          action: update
+          operations:
+            - action: add_label
+              new_label: node.name
+              new_value: ${env:K8S_NODE_NAME}
+      resource:
+        attributes:
+          - key: node.name
+            value: ${env:K8S_NODE_NAME}
+            action: upsert
       batch: {}
       memory_limiter:
         check_interval: 5s
@@ -36,14 +54,16 @@ data:
           - sources:
             - from: connection
     receivers:
-      jaeger:
-        protocols:
-          grpc:
-            endpoint: ${env:MY_POD_IP}:14250
-          thrift_compact:
-            endpoint: ${env:MY_POD_IP}:6831
-          thrift_http:
-            endpoint: ${env:MY_POD_IP}:14268
+      hostmetrics:
+        root_path: /hostfs
+        collection_interval: 1s
+        scrapers:
+          cpu:
+          load:
+          memory:
+          disk:
+          filesystem:
+          network:
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s
@@ -93,7 +113,6 @@ data:
             enabled: true
           k8s.pod.uptime:
             enabled: true
-
       otlp:
         protocols:
           grpc:
@@ -108,40 +127,41 @@ data:
             static_configs:
             - targets:
               - ${env:MY_POD_IP}:8888
-      zipkin:
-        endpoint: ${env:MY_POD_IP}:9411
     service:
       extensions:
       - health_check
       pipelines:
-        # logs:
-        #   exporters:
-        #   - debug
-        #   processors:
-        #   - memory_limiter
-        #   - batch
-        #   - k8sattributes
-        #   receivers:
-        #   - otlp
-        # metrics:
-        #   exporters:
-        #   - debug
-        #   processors:
-        #   - batch
-        #   - k8sattributes
-        #   receivers:
-        #   - kubeletstats
+        logs:
+          exporters:
+          - debug
+          processors:
+          - resource
+          - memory_limiter
+          - batch
+          - k8sattributes
+          receivers:
+          - otlp
+        metrics:
+          exporters:
+          - debug
+          - otlp/deployment
+          processors:
+          - metricstransform
+          - resource
+          - batch
+          - k8sattributes
+          receivers:
+          - kubeletstats
+          - hostmetrics
         traces:
           exporters:
           - debug
-          # processors:
-          # - memory_limiter
-          # - batch
-          # - k8sattributes
+          processors:
+          - resource
+          - memory_limiter
+          - batch
           receivers:
           - otlp
-          # - jaeger
-          # - zipkin
       telemetry:
         metrics:
           address: ${env:MY_POD_IP}:8888
