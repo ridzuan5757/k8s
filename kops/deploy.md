@@ -5,15 +5,14 @@ edit:
 kops edit cluster proactivemonitoring.silentmode.com --state=s3://proactive-monitoring-state
 
 ```yaml
-spec:
-    cloudLabels:
-        silentmode:environment: ronpos-staging
-        silentmode:owner: engineering
-        silentmode:service: proactive-monitoring
-    awsLoadBalancerController:
-        enabled: true
-    certManager:
-        enabled: true
+cloudLabels:
+    silentmode:environment: ronpos-staging
+    silentmode:owner: engineering
+    silentmode:service: proactive-monitoring
+awsLoadBalancerController:
+    enabled: true
+certManager:
+    enabled: true
 ```
 
 add instance group:
