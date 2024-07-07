@@ -1,0 +1,4 @@
+clusterName: proactivemonitoring
+dnsZone: silentmode.com
+awsRegion: ap-southeast-1
+
