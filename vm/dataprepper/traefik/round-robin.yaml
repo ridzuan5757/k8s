@@ -1,0 +1,30 @@
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
+metadata:
+  name: nginx-wrr
+spec:
+  weighted:
+    services:
+      - name: nginx-deploy-main
+        port: 80
+        weight: 1
+      - name: nginx-deploy-blue
+        port: 80
+        weight: 1
+      - name: nginx-deploy-green
+        port: 80
+        weight: 1
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`a1d0f1e8d5d9049a8a30f1db1052b479-baaf038ddcf8918c.elb.ap-southeast-1.amazonaws.com`)
+    kind: Rule
+    services:
+    - name: nginx-wrr
+      kind: TraefikService
