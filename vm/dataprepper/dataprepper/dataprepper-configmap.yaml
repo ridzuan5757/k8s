@@ -14,11 +14,6 @@ data:
         otel_trace_source:
           health_check_service: true
           ssl: false
-      prepper:
-        - peer_forwarder:
-            discovery_mode: "dns"
-            domain_name: "data-prepper-headless"
-            ssl: false
       sink:
         - pipeline:
             name: "raw-pipeline"
@@ -28,8 +23,8 @@ data:
       source:
         pipeline:
           name: "entry-pipeline"
-      prepper:
-        - otel_trace_raw_prepper:
+      processor:
+        - otel_traces:
       sink:
         - stdout:
     service-map-pipeline:
@@ -37,9 +32,14 @@ data:
       source:
         pipeline:
           name: "entry-pipeline"
-      prepper:
+      processor:
         - service_map_stateful:
       sink:
         - stdout:
   data-prepper-config.yaml: |
     ssl: false
+    # peer_forwarder:
+    #   discovery_mode: "dns"
+    #   domain_name: "data-prepper-headless"
+    #   ssl: false
+

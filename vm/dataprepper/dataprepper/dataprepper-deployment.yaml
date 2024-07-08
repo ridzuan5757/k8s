@@ -28,11 +28,11 @@ spec:
           ports:
             - name: core-api
               containerPort: 4900
-            - name: otel-trace-source
+            - name: traces
               containerPort: 21890
-            - name: otel-metrics-source
+            - name: metrics
               containerPort: 21891
-            - name: otel-logs-source
+            - name: logs
               containerPort: 21892
           resources: {}
           volumeMounts:
