@@ -2,27 +2,38 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: data-prepper
+    app.kubernetes.io/instance: data-prepper
+    app.kubernetes.io/name: data-prepper
   name: data-prepper
+  namespace: default
 spec:
-  replicas: 1
+  progressDeadlineSeconds: 600
+  replicas: 3
   selector:
     matchLabels:
-      app: data-prepper
+      app.kubernetes.io/instance: data-prepper
+      app.kubernetes.io/name: data-prepper
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: data-prepper
+        app.kubernetes.io/instance: data-prepper
+        app.kubernetes.io/name: data-prepper
     spec:
       containers:
         - image: opensearchproject/data-prepper:latest
           name: data-prepper
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 21890
-            - containerPort: 21891
-            - containerPort: 21892
+            - name: core-api
+              containerPort: 4900
+            - name: otel-trace-source
+              containerPort: 21890
+            - name: otel-metrics-source
+              containerPort: 21891
+            - name: otel-logs-source
+              containerPort: 21892
           resources: {}
           volumeMounts:
             - name: data-prepper-config
