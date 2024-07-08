@@ -8,34 +8,88 @@ metadata:
   namespace: default
 data:
   pipelines.yaml: |
-    entry-pipeline:
-      delay: "100"
+    metrics-pipeline:
       source:
-        otel_trace_source:
-          health_check_service: true
+        otel_metrics_source:
           ssl: false
-      sink:
-        - pipeline:
-            name: "raw-pipeline"
-        - pipeline:
-            name: "service-map-pipeline"
-    raw-pipeline:
-      source:
-        pipeline:
-          name: "entry-pipeline"
+          port: 21891
       processor:
-        - otel_traces:
+        - otel_metrics:
       sink:
         - stdout:
+        - opensearch:
+            hosts: ["https://opensearch-cluster-master:9200"]
+            insecure: true
+            username: admin
+            password: zmgf-x19a/M2
+            index: otlp_metrics
+    logs-pipeline:
+      source:
+        otel_logs_source:
+          ssl: false
+          port: 21892
+      sink:
+        - stdout:
+        - opensearch:
+            hosts: ["https://opensearch-cluster-master:9200"]
+            insecure: true
+            username: admin
+            password: zmgf-x19a/M2
+            index: otlp_logs
+    otel-trace-pipeline:
+      workers: 2
+      source:
+        otel_trace_source:
+          ssl: false
+      buffer:
+        bounded_blocking:
+          buffer_size: 25600
+          batch_size: 400
+      sink:
+        - pipeline:
+            name: raw-pipeline
+        - pipeline:
+            name: service-map-pipeline
+    raw-pipeline:
+      workers: 2
+      source:
+        pipeline:
+          name: otel-trace-pipeline
+      buffer:
+        bounded_blocking:
+          buffer_size: 25600
+          batch_size: 3200
+      processor:
+        - otel_traces: null
+        - otel_trace_group:
+            hosts:
+              - https://opensearch-cluster-master:9200
+            insecure: true
+            username: admin
+            password: zmgf-x19a/M2
+      sink:
+        - opensearch:
+            hosts:
+              - https://opensearch-cluster-master:9200
+            index_type: trace-analytics-raw
+            insecure: true
+            username: admin
+            password: zmgf-x19a/M2
     service-map-pipeline:
       delay: "100"
       source:
         pipeline:
-          name: "entry-pipeline"
+          name: otel-trace-pipeline
       processor:
-        - service_map_stateful:
+        - service_map_stateful: null
       sink:
-        - stdout:
+        - opensearch:
+            hosts:
+              - https://opensearch-cluster-master:9200
+            index_type: trace-analytics-service-map
+            insecure: true
+            username: admin
+            password: zmgf-x19a/M2
   data-prepper-config.yaml: |
     ssl: false
     # peer_forwarder:
