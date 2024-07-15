@@ -28,6 +28,11 @@ data:
         otel_logs_source:
           ssl: false
           port: 21892
+      processor:
+        - grok:
+            match:
+              log:
+                - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
       sink:
         - stdout:
         - opensearch:
@@ -43,8 +48,8 @@ data:
           ssl: false
       buffer:
         bounded_blocking:
-          buffer_size: 25600
-          batch_size: 400
+          buffer_size: 10240
+          batch_size: 160
       sink:
         - pipeline:
             name: raw-pipeline
@@ -57,8 +62,8 @@ data:
           name: otel-trace-pipeline
       buffer:
         bounded_blocking:
-          buffer_size: 25600
-          batch_size: 3200
+          buffer_size: 10240
+          batch_size: 160
       processor:
         - otel_traces: null
         - otel_trace_group:
@@ -80,8 +85,12 @@ data:
       source:
         pipeline:
           name: otel-trace-pipeline
+      buffer:
+        bounded_blocking:
+          buffer_size: 10240
+          batch_size: 160
       processor:
-        - service_map_stateful: null
+        - service_map_stateful:
       sink:
         - opensearch:
             hosts:

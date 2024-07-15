@@ -72,6 +72,18 @@ spec:
           hostPort: 9411
           name: zipkin
           protocol: TCP
+        - containerPort: 21890
+          hostPort: 21890
+          name: dp-traces
+          protocol: TCP
+        - containerPort: 21891
+          hostPort: 21891
+          name: dp-metrics
+          protocol: TCP
+        - containerPort: 21892
+          hostPort: 21892
+          name: dp-logs
+          protocol: TCP
         readinessProbe:
           failureThreshold: 3
           httpGet:

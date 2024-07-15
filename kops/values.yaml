@@ -1,4 +1,9 @@
-clusterName: proactivemonitoring
-dnsZone: silentmode.com
-awsRegion: ap-southeast-1
+CLUSTER_NAME: proactivemonitoring
+DNS_ZONE: silentmode.com
+AWS_REGION: ap-southeast-1
 
+SILENTMODE_ENVIRONMENT: ronpos-staging
+SILENTMODE_OWNER: engineering
+SILENTMODE_SERVICE: proactive-monitoring
+
+STATE_MANAGER: proactive-monitoring-state

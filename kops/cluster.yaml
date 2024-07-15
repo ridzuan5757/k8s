@@ -1,23 +1,24 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
+  creationTimestamp: null
   name: proactivemonitoring.silentmode.com
 spec:
+  cloudLabels:
+    silentmode:environment: ronpos-staging
+    silentmode:owner: engineering
+    silentmode:service: proactive-monitoring
+  awsLoadBalancerController:
+    enabled: true
+  certManager:
+    enabled: true
   api:
     loadBalancer:
       class: Network
       type: Public
   authorization:
     rbac: {}
-  awsLoadBalancerController:
-    enabled: true
-  certManager:
-    enabled: true
   channel: stable
-  cloudLabels:
-    silentmode:environment: ronpos-staging
-    silentmode:owner: engineering
-    silentmode:service: proactive-monitoring
   cloudProvider: aws
   configBase: s3://proactive-monitoring-state/proactivemonitoring.silentmode.com
   etcdClusters:
@@ -30,8 +31,8 @@ spec:
       instanceGroup: control-plane-ap-southeast-1b-1
       name: b-1
     - encryptedVolume: true
-      instanceGroup: control-plane-ap-southeast-1a-2
-      name: a-2
+      instanceGroup: control-plane-ap-southeast-1c-1
+      name: c-1
     manager:
       backupRetentionDays: 90
     memoryRequest: 100Mi
@@ -45,8 +46,8 @@ spec:
       instanceGroup: control-plane-ap-southeast-1b-1
       name: b-1
     - encryptedVolume: true
-      instanceGroup: control-plane-ap-southeast-1a-2
-      name: a-2
+      instanceGroup: control-plane-ap-southeast-1c-1
+      name: c-1
     manager:
       backupRetentionDays: 90
     memoryRequest: 100Mi
@@ -71,14 +72,16 @@ spec:
   - 0.0.0.0/0
   - ::/0
   subnets:
-  - cidr: 172.20.0.0/17
-    name: ap-southeast-1a
+  - name: ap-southeast-1a
     type: Public
     zone: ap-southeast-1a
-  - cidr: 172.20.128.0/17
-    name: ap-southeast-1b
+  - name: ap-southeast-1b
     type: Public
     zone: ap-southeast-1b
+  - name: ap-southeast-1c
+    type: Public
+    zone: ap-southeast-1c
+
   topology:
     dns:
       type: None
@@ -88,6 +91,7 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: null
   labels:
     kops.k8s.io/cluster: proactivemonitoring.silentmode.com
   name: control-plane-ap-southeast-1a-1
@@ -105,23 +109,7 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
-  labels:
-    kops.k8s.io/cluster: proactivemonitoring.silentmode.com
-  name: control-plane-ap-southeast-1a-2
-spec:
-  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
-  machineType: t2.medium
-  maxSize: 1
-  minSize: 1
-  role: Master
-  subnets:
-  - ap-southeast-1a
-
----
-
-apiVersion: kops.k8s.io/v1alpha2
-kind: InstanceGroup
-metadata:
+  creationTimestamp: null
   labels:
     kops.k8s.io/cluster: proactivemonitoring.silentmode.com
   name: control-plane-ap-southeast-1b-1
@@ -139,14 +127,55 @@ spec:
 apiVersion: kops.k8s.io/v1alpha2
 kind: InstanceGroup
 metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: proactivemonitoring.silentmode.com
+  name: control-plane-ap-southeast-1c-1
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
+  machineType: t2.medium
+  maxSize: 1
+  minSize: 1
+  role: Master
+  subnets:
+  - ap-southeast-1c
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
   labels:
     kops.k8s.io/cluster: proactivemonitoring.silentmode.com
   name: nodes-ap-southeast-1a
 spec:
+  nodeLabels:
+    nodeType: misc
   image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
   machineType: t2.medium
   maxSize: 5
   minSize: 5
+  role: Node
+  subnets:
+  - ap-southeast-1a
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: proactivemonitoring.silentmode.com
+  name: nodes-opensearch-ap-southeast-1a
+spec:
+  nodeLabels:
+    nodeType: opensearch
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
+  machineType: t3.medium
+  maxSize: 3
+  minSize: 3
   role: Node
   subnets:
   - ap-southeast-1a

@@ -2,6 +2,22 @@ apiVersion: v1
 data:
   relay: |
     exporters:
+      otlp/dataprepper-traces:
+        endpoint: data-prepper:21890
+        tls:
+          insecure: true
+          insecure_skip_verify: true
+      otlp/dataprepper-metrics:
+        endpoint: data-prepper:21891
+        tls:
+          insecure: true
+          insecure_skip_verify: true
+      otlp/dataprepper-logs:
+        endpoint: data-prepper:21892
+        tls:
+          insecure: true
+          insecure_skip_verify: true
+
       debug:
         verbosity: detailed
       prometheus/export:
@@ -196,54 +212,6 @@ data:
           - memory
           - ephemeral-storage
           - storage
-      kubeletstats:
-        collection_interval: 10s
-        auth_type: serviceAccount
-        endpoint: ${env:K8S_NODE_NAME}:10250
-        node: ${env:K8S_NODE_NAME}
-        k8s_api_config:
-          auth_type: serviceAccount
-        extra_metadata_labels:
-          - container.id
-          - k8s.volume.type
-        metric_groups:
-          - container
-          - pod
-          - node
-          - volume
-        metrics:
-          container.cpu.usage:
-            enabled: true
-          container.uptime:
-            enabled: true
-          k8s.container.cpu.node.utilization:
-            enabled: true
-          k8s.container.cpu_limit_utilization:
-            enabled: true
-          k8s.container.cpu_request_utilization:
-            enabled: true
-          k8s.container.memory_limit_utilization:
-            enabled: true
-          k8s.container.memory_request_utilization:
-            enabled: true
-          k8s.node.cpu.usage:
-            enabled: true
-          k8s.node.uptime:
-            enabled: true
-          k8s.pod.cpu.node.utilization:
-            enabled: false
-          k8s.pod.cpu.usage:
-            enabled: true
-          k8s.pod.cpu_limit_utilization:
-            enabled: true
-          k8s.pod.cpu_request_utilization:
-            enabled: true
-          k8s.pod.memory_limit_utilization:
-            enabled: true
-          k8s.pod.memory_request_utilization:
-            enabled: true
-          k8s.pod.uptime:
-            enabled: true
       otlp:
         protocols:
           grpc:
@@ -264,32 +232,30 @@ data:
       pipelines:
         logs:
           exporters:
-          - debug
+          - otlp/dataprepper-logs
           processors:
           - memory_limiter
-          - batch
           - k8sattributes
+          - batch
           receivers:
           - otlp
           - k8s_cluster
         metrics:
           exporters:
-          - debug
+          - otlp/dataprepper-metrics
           - prometheus/export
           processors:
-          - batch
           - k8sattributes
           receivers:
           - k8s_cluster
-          - kubeletstats
           - otlp
         traces:
           exporters:
-          - debug
+          - otlp/dataprepper-traces
           processors:
           - memory_limiter
-          - batch
           - k8sattributes
+          - batch
           receivers:
           - otlp
       telemetry:
