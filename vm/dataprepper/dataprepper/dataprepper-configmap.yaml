@@ -9,40 +9,118 @@ metadata:
 data:
   pipelines.yaml: |
     metrics-pipeline:
+      workers: 4
+      delay: 3000
       source:
         otel_metrics_source:
           ssl: false
           port: 21891
+      buffer:
+        bounded_blocking:
+          buffer_size: 4096
+          batch_size: 1024
+      sink:
+        - s3:
+            aws:
+              region: ap-southeast-1
+            max_retries: 5
+            bucket: proactive-monitoring-dataprepper
+            object_key:
+              path_prefix: metrics/%{yyyy}/%{MM}/%{dd}/
+            threshold:
+              event_count: 10000
+              maximum_size: 50mb
+              event_collect_timeout: 15s
+            codec:
+              json:
+            buffer_type: in_memory
+            compression: gzip
+    
+    metrics-pipeline-2:
+      workers: 4
+      delay: 3000
+      source:
+        s3:
+          notification_type: sqs
+          codec:
+            json:
+          sqs:
+            queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/dataprepper-metrics-queue
+          aws:
+            region: ap-southeast-1
+          compression: gzip
+      buffer:
+        bounded_blocking:
+          buffer_size: 4096
+          batch_size: 1024
       processor:
         - otel_metrics:
+            calculate_histogram_buckets: true
+            calculate_exponential_histogram_buckets: true
+            exponential_histogram_max_allowed_scale: 10
+            flatten_attributes: false
       sink:
-        - stdout:
         - opensearch:
             hosts: ["https://opensearch-cluster-master:9200"]
             insecure: true
             username: admin
             password: zmgf-x19a/M2
             index: otlp_metrics
+    
     logs-pipeline:
+      workers: 4
+      delay: 3000
       source:
         otel_logs_source:
           ssl: false
           port: 21892
+      buffer:
+        bounded_blocking:
+      sink:
+        - s3:
+            aws:
+              region: ap-southeast-1
+            max_retries: 5
+            bucket: proactive-monitoring-dataprepper
+            object_key:
+              path_prefix: logs/%{yyyy}/%{MM}/%{dd}/
+            threshold:
+              event_count: 1
+              maximum_size: 50mb
+              event_collect_timeout: 15s
+            codec:
+              json:
+            buffer_type: in_memory
+            compression: gzip
+    
+    logs-pipeline-2:
+      workers: 4
+      delay: 3000
+      source:
+        s3:
+          notification_type: sqs
+          codec:
+            json:
+          sqs:
+            queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/dataprepper-logs-queue
+          aws:
+            region: ap-southeast-1
       processor:
         - grok:
             match:
               log:
                 - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
       sink:
-        - stdout:
         - opensearch:
             hosts: ["https://opensearch-cluster-master:9200"]
             insecure: true
             username: admin
             password: zmgf-x19a/M2
             index: otlp_logs
-    otel-trace-pipeline:
-      workers: 2
+    
+    trace-pipeline:
+      workers: 4
+      delay: 3000
       source:
         otel_trace_source:
           ssl: false
@@ -51,15 +129,47 @@ data:
           buffer_size: 10240
           batch_size: 160
       sink:
+        - s3:
+            aws:
+              region: ap-southeast-1
+            max_retries: 5
+            bucket: proactive-monitoring-dataprepper
+            object_key:
+              path_prefix: traces/%{yyyy}/%{MM}/%{dd}/
+            threshold:
+              event_count: 1
+              maximum_size: 50mb
+              event_collect_timeout: 15s
+            codec:
+              json:
+            buffer_type: in_memory
+            compression: gzip
+    
+    trace-pipeline-2:
+      workers: 4
+      delay: 3000
+      source:
+        s3:
+          notification_type: sqs
+          codec:
+            json:
+          sqs:
+            queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/dataprepper-trace-queue
+          aws:
+            region: ap-southeast-1
+          compression: gzip
+      sink:
         - pipeline:
             name: raw-pipeline
         - pipeline:
             name: service-map-pipeline
+    
     raw-pipeline:
-      workers: 2
+      workers: 4
+      delay: 3000
       source:
         pipeline:
-          name: otel-trace-pipeline
+          name: trace-pipeline-2
       buffer:
         bounded_blocking:
           buffer_size: 10240
@@ -80,11 +190,13 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
+    
     service-map-pipeline:
-      delay: "100"
+      workers: 4
+      delay: 3000
       source:
         pipeline:
-          name: otel-trace-pipeline
+          name: trace-pipeline-2
       buffer:
         bounded_blocking:
           buffer_size: 10240
@@ -99,10 +211,12 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
+            
   data-prepper-config.yaml: |
     ssl: false
-    # peer_forwarder:
-    #   discovery_mode: "dns"
-    #   domain_name: "data-prepper-headless"
-    #   ssl: false
-
+    circuit_breakers:
+      heap:
+        usage: 2gb
+        reset: 30s
+        check_interval: 5s
+ 

@@ -8,7 +8,7 @@ metadata:
   namespace: default
 spec:
   progressDeadlineSeconds: 600
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: data-prepper
@@ -44,6 +44,17 @@ spec:
             - name: data-prepper-config
               mountPath: /usr/share/data-prepper/config/data-prepper-config.yaml
               subPath: data-prepper-config.yaml
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-secret
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-secret
+                key: aws_secret_access_key
       restartPolicy: Always
       serviceAccountName: ""
       volumes:

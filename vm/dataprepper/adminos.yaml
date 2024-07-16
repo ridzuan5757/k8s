@@ -5,6 +5,8 @@ extraEnvs:
 persistence:
   enabled: false
 
+majorVersion: 2.15.0
+
 config:
   opensearch.yml: |
     plugins:

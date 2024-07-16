@@ -35,7 +35,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: data-prepper
     app.kubernetes.io/name: data-prepper
-  name: data-prepper-service
+  name: data-prepper
 spec:
   type: ClusterIP
   ports:
