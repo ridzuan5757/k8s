@@ -3,20 +3,21 @@ kind: Ingress
 metadata:
   name: ingress-resource
   annotations:
-    cert-manager.io/issuer: letsencrypt-staging
+    cert-manager.io/issuer: letsencrypt-prod
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - ab3e35aebc0464a61bc7ca0af1bdbc63-1541089571.ap-southeast-1.elb.amazonaws.com
-      secretName: letsencrypt-staging
+        - proactivemonitoring.staging.ronpos.com
+      secretName: proactivemonitoring
   rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx
-            port:
-              number: 80
+    - host: proactivemonitoring.staging.ronpos.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: opensearch-dashboards
+                port:
+                  number: 5601
