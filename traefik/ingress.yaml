@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-resource
+  annotations:
+    cert-manager.io/issuer: letsencrypt-staging
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ab3e35aebc0464a61bc7ca0af1bdbc63-1541089571.ap-southeast-1.elb.amazonaws.com
+      secretName: letsencrypt-staging
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 80

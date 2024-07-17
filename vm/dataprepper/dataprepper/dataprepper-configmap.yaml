@@ -10,7 +10,6 @@ data:
   pipelines.yaml: |
     metrics-pipeline:
       workers: 4
-      delay: 3000
       source:
         otel_metrics_source:
           ssl: false
@@ -19,6 +18,12 @@ data:
         bounded_blocking:
           buffer_size: 4096
           batch_size: 1024
+      processor:
+        - otel_metrics:
+            calculate_histogram_buckets: true
+            calculate_exponential_histogram_buckets: true
+            exponential_histogram_max_allowed_scale: 10
+            flatten_attributes: false
       sink:
         - s3:
             aws:
@@ -35,30 +40,18 @@ data:
               json:
             buffer_type: in_memory
             compression: gzip
-    
     metrics-pipeline-2:
       workers: 4
-      delay: 3000
       source:
         s3:
           notification_type: sqs
           codec:
             json:
+          compression: gzip
           sqs:
-            queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/dataprepper-metrics-queue
+            queue_url: "https://sqs.ap-southeast-1.amazonaws.com/530830676072/dataprepper-metrics-queue"
           aws:
             region: ap-southeast-1
-          compression: gzip
-      buffer:
-        bounded_blocking:
-          buffer_size: 4096
-          batch_size: 1024
-      processor:
-        - otel_metrics:
-            calculate_histogram_buckets: true
-            calculate_exponential_histogram_buckets: true
-            exponential_histogram_max_allowed_scale: 10
-            flatten_attributes: false
       sink:
         - opensearch:
             hosts: ["https://opensearch-cluster-master:9200"]
@@ -66,16 +59,19 @@ data:
             username: admin
             password: zmgf-x19a/M2
             index: otlp_metrics
-    
     logs-pipeline:
       workers: 4
-      delay: 3000
       source:
         otel_logs_source:
           ssl: false
           port: 21892
       buffer:
         bounded_blocking:
+      processor:
+        - grok:
+            match:
+              log:
+                - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
       sink:
         - s3:
             aws:
@@ -92,35 +88,28 @@ data:
               json:
             buffer_type: in_memory
             compression: gzip
-    
     logs-pipeline-2:
       workers: 4
-      delay: 3000
       source:
         s3:
           notification_type: sqs
           codec:
             json:
+          compression: gzip
           sqs:
             queue_url: https://sqs.ap-southeast-1.amazonaws.com/530830676072/dataprepper-logs-queue
           aws:
             region: ap-southeast-1
-      processor:
-        - grok:
-            match:
-              log:
-                - "%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:hostname} %{PROG:program}\\[%{NUMBER:pid}\\]: %{GREEDYDATA:message}"
       sink:
+        - stdout:
         - opensearch:
             hosts: ["https://opensearch-cluster-master:9200"]
             insecure: true
             username: admin
             password: zmgf-x19a/M2
             index: otlp_logs
-    
     trace-pipeline:
       workers: 4
-      delay: 3000
       source:
         otel_trace_source:
           ssl: false
@@ -144,10 +133,8 @@ data:
               json:
             buffer_type: in_memory
             compression: gzip
-    
     trace-pipeline-2:
       workers: 4
-      delay: 3000
       source:
         s3:
           notification_type: sqs
@@ -163,10 +150,8 @@ data:
             name: raw-pipeline
         - pipeline:
             name: service-map-pipeline
-    
     raw-pipeline:
       workers: 4
-      delay: 3000
       source:
         pipeline:
           name: trace-pipeline-2
@@ -190,10 +175,8 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-    
     service-map-pipeline:
       workers: 4
-      delay: 3000
       source:
         pipeline:
           name: trace-pipeline-2
@@ -211,7 +194,6 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            
   data-prepper-config.yaml: |
     ssl: false
     circuit_breakers:
