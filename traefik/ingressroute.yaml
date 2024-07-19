@@ -1,4 +1,15 @@
 apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirectscheme
+spec:
+  redirectScheme:
+    permanent: true
+    scheme: https
+
+---
+
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: main
@@ -10,11 +21,23 @@ spec:
     secretName: proactivemonitoring
     domains:
       - main: proactivemonitoring.staging.ronpos.com
+        sans:
+          - proactivemonitoring.opensearch.staging.ronpos.com
+          - proactivemonitoring.prometheus.staging.ronpos.com
   entryPoints:
     - websecure
   routes:
-    - match: Host(`proactivemonitoring.staging.ronpos.com`)
+    - match: Host(`proactivemonitoring.opensearch.staging.ronpos.com`)
       kind: Rule
       services:
         - name: opensearch-dashboards
           port: 5601 
+      middlewares:
+        - name: https-redirectscheme
+    - match: Host(`proactivemonitoring.prometheus.staging.ronpos.com`)
+      kind: Rule
+      services:
+        - name: prometheus-service
+          port: 9090
+      middlewares:
+        - name: https-redirectscheme
