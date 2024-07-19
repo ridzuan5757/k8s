@@ -62,4 +62,103 @@ inferred field types, send a request to the `_mapping` endpoint.
 GET /students/_mapping
 ```
 
+OpenSearch responds with the field `type` for each field
+
+```json
+{
+    "students": {
+        "mappings": {
+            "properties": {
+                "gpa": {
+                    "type": "float"
+                },
+                "grad_year": {
+                    "type": "long"
+                },
+                "name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "query": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+OpenSearch mapped:
+- Numeric fields to the `float` and `long` types.
+- `name` text is mapped to `text` and added `name.keyword` subfield mapped to
+  `keyword`.
+- `grad_year` is mapped to `long`.
+
+Fields mapped to `text` are analyzed (lowercased and split into terms) and can
+be used for full-text search. Fields mapped to `keyword` are used for exact term
+search.
+
+For `grad_year`, if we want to map it to the `date` type instead, we need to
+delete the index and recreated it, explicitly specifying the mappings.
+
+## Searching for documents
+
+To run a search for the document, specify the index that we are searching and
+query that will be used to match documents. The simplest query is the `match_all`
+query, which matches all documents in an index:
+
+```bash
+GET /students/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+```
+
+The resulting value would be:
+
+```json
+{
+    "took": 4,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 1.0,
+        "hits": [
+            {
+                "_index": "students",
+                "_id": "1",
+                "_score": 1.0,
+                "_source": {
+                    "name": "John Doe",
+                    "gpa": 3.89,
+                    "grad_year": 2022
+                }
+            }
+        ]
+    }
+}
+```
+
 
