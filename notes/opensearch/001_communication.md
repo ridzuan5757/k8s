@@ -161,4 +161,147 @@ The resulting value would be:
 }
 ```
 
+## Updating Documents
 
+In OpenSearch, documents are immutable. However, we can update a document by
+retrieving it, updating its information and reindexing it. We can update entire
+document using the Index Document API, providing values for all existing and
+added fields in the document.
+
+For example, to udpate the `gpa` field and add an `address` field to the
+previously indexed document, we can use the following request:
+
+```bash
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.91,
+  "grad_year": 2022,
+  "address": "123 Main St."
+}
+```
+
+Alternatively, we can update parts of a document by calling the Update Document
+API:
+
+```bash
+POST /students/_update/1/
+{
+  "doc": {
+    "gpa": 3.91,
+    "address": "123 Main St."
+  }
+}
+```
+
+The results would be:
+
+```json
+{
+    "_index": "students",
+    "_id": "1",
+    "_version": 4,
+    "result": "updated",
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "_seq_no": 3,
+    "_primary_term": 1
+}
+```
+
+## Deleting Document
+
+To delete document, use delete request and provide the document ID.
+
+```bash
+DELETE /students/_doc/1
+```
+
+The results would be:
+
+```json
+{
+    "_index": "students",
+    "_id": "1",
+    "_version": 5,
+    "result": "deleted",
+    "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+    },
+    "_seq_no": 4,
+    "_primary_term": 1
+}
+```
+
+## Deleting Index
+
+To delete an index, use the following request:
+
+```bash
+DELETE /students
+```
+
+The results would be:
+
+```bash
+{
+    "acknowledged": true
+}
+```
+
+## Index Mappings and Settings
+
+OpenSearch indexes are configured with mappings and settings:
+- `mapping` is a collection of fields and the types of those fields.
+- `settings` include index data like the index name, creation date and number of
+  shards.
+
+We can specify mapping and settings in one request. For example, the following
+request:
+- Specifies the number of index shards
+- Maps the `name` field to `text`
+- Maps the `grad_year` to `date`
+
+```bash
+PUT /students
+{
+  "settings": {
+    "index.number_of_shards": 1
+  }, 
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "grad_year": {
+        "type": "date"
+      }
+    }
+  }
+}
+```
+The response would be:
+
+```json
+{
+    "acknowledged": true,
+    "shards_acknowledged": true,
+    "index": "students"
+}
+```
+
+Now we can index the same document that we indexed in the previous section:
+
+```bash
+PUT /students/_doc/1
+{
+  "name": "John Doe",
+  "gpa": 3.89,
+  "grad_year": 2022
+}
+```
