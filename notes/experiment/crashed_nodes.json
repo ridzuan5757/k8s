@@ -1,0 +1,53 @@
+{
+  "index": "otlp_metrics",
+  "shard": 0,
+  "primary": true,
+  "current_state": "unassigned",
+  "unassigned_info": {
+    "reason": "NODE_LEFT",
+    "at": "2024-07-19T00:14:07.406Z",
+    "details": "node_left [5uujnC8uRuKGdYRPGAUVOA]",
+    "last_allocation_status": "no_valid_shard_copy"
+  },
+  "can_allocate": "no_valid_shard_copy",
+  "allocate_explanation": "cannot allocate because all found copies of the shard are either stale or corrupt",
+  "node_allocation_decisions": [
+    {
+      "node_id": "A7-PQUTHSLq8MCqj2hyv1A",
+      "node_name": "opensearch-cluster-master-2",
+      "transport_address": "100.96.4.101:9300",
+      "node_attributes": {
+        "shard_indexing_pressure_enabled": "true"
+      },
+      "node_decision": "no",
+      "store": {
+        "found": false
+      }
+    },
+    {
+      "node_id": "MkJrYzTpR4GJUFoXk4KQGA",
+      "node_name": "opensearch-cluster-master-1",
+      "transport_address": "100.96.5.125:9300",
+      "node_attributes": {
+        "shard_indexing_pressure_enabled": "true"
+      },
+      "node_decision": "no",
+      "store": {
+        "found": false
+      }
+    },
+    {
+      "node_id": "zyb2hgbbQ2mCC6aDfE0YBA",
+      "node_name": "opensearch-cluster-master-0",
+      "transport_address": "100.96.6.47:9300",
+      "node_attributes": {
+        "shard_indexing_pressure_enabled": "true"
+      },
+      "node_decision": "no",
+      "store": {
+        "in_sync": false,
+        "allocation_id": "cX1TDDS7Qg2qDkzu01JUZA"
+      }
+    }
+  ]
+}

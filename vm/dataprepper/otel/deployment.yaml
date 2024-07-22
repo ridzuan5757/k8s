@@ -42,7 +42,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: otel/opentelemetry-collector-contrib:latest
+        image: otel/opentelemetry-collector-contrib:0.105.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3

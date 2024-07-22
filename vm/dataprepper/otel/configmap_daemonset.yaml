@@ -29,13 +29,13 @@ data:
     processors:
       metricstransform:
         transforms:
-          include: (.*?)
-          match_type: regexp
-          action: update
-          operations:
-            - action: add_label
-              new_label: node.name
-              new_value: ${env:K8S_NODE_NAME}
+          - include: (.*?)
+            match_type: regexp
+            action: update
+            operations:
+              - action: add_label
+                new_label: node.name
+                new_value: ${env:K8S_NODE_NAME}
       resource:
         attributes:
           - key: node.name
@@ -151,11 +151,117 @@ data:
         collection_interval: 1s
         scrapers:
           cpu:
+            metrics:
+              system.cpu.time:
+                enabled: false
+              system.cpu.frequency:
+                enabled: false
+              system.cpu.logical.count:
+                enabled: false
+              system.cpu.physical.count:
+                enabled: false
+              system.cpu.utilization:
+                enabled: true
           load:
+            metrics:
+              system.cpu.load_average.15m:
+                enabled: true
+              system.cpu.load_average.1m:
+                enabled: false
+              system.cpu.load_average.5m:
+                enabled: false
           memory:
+            metrics:
+              system.memory.usage:
+                enabled: false
+              system.linux.memory.available:
+                enabled: true
+              system.memory.limit:
+                enabled: false
+              system.memory.utilization:
+                enabled: true
           disk:
+            metrics:
+              system.disk.io:
+                enabled: false
+              system.disk.io_time:
+                enabled: false
+              system.disk.merged:
+                enabled: false
+              system.disk.operation_time:
+                enabled: false
+              system.disk.operations:
+                enabled: false
+              system.disk.pending_operations:
+                enabled: false
+              system.disk.weighted_io_time:
+                enabled: false
           filesystem:
+            metrics:
+              system.filesystem.inodes.usage:
+                enabled: false
+              system.filesystem.usage:
+                enabled: true
+              system.filesystem.utilization:
+                enabled: true
           network:
+            metrics:
+              system.network.connections:
+                enabled: true
+              system.network.dropped:
+                enabled: true
+              system.network.errors:
+                enabled: true
+              system.network.io:
+                enabled: true
+              system.network.packets:
+                enabled: true
+              system.network.conntrack.count:
+                enabled: false
+              system.network.conntrack.max:
+                enabled: false
+          paging:
+            metrics:
+              system.paging.faults:
+                enabled: true
+              system.paging.operations:
+                enabled: false
+              system.paging.usage:
+                enabled: true
+              system.paging.utilization:
+                enabled: true
+          processes:
+            metrics:
+              system.processes.count:
+                enabled: false
+              system.processes.created:
+                enabled: false
+          process:
+            metrics:
+              process.cpu.time:
+                enabled: false
+              process.disk.io:
+                enabled: false
+              process.memory.usage:
+                enabled: true
+              process.memory.virtual:
+                enabled: false
+              process.context_switches:
+                enabled: false
+              process.cpu.utilization:
+                enabled: true
+              process.disk.operations:
+                enabled: false
+              process.handles:
+                enabled: false
+              process.memory.utilization:
+                enabled: true
+              process.paging.faults:
+                enabled: false
+              process.signals_pending:
+                enabled: false
+              process.threads:
+                enabled: false
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 10s
