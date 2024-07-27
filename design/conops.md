@@ -94,4 +94,58 @@ Operational constraints include the following:
 - A constraint on the computer hardware (must operate on computer X)
 - A constraint on the operational facilities, such as office space
 
+# Description of the current system
 
+Description of the current system, including the following, as appropriate:
+- Operational environment and its characteristics
+- Major system components and the interconnection among those components
+- Interfaces to external system / procedures.
+- Capabilities, functions, and features of the current system.
+- Charts and accompanying descriptions depicting:
+    - inputs
+    - outputs
+    - data flows
+    - control flows
+    - manual and automated process
+    - make it sufficient to understand the current system from user's point of
+      view.
+    - Cost of system operations
+    - Operational risk factors
+    - Performance characteristics such as speed, throughput, volume, frequency
+    - Quality attributes, such as:
+        - Availability
+        - Correctness
+        - Efficiency
+        - Expendability
+        - Flexibility
+        - Interoperability
+        - Maintainability
+        - Portability
+        - Reusability
+        - Supportability
+        - Usability
+    - Provisions for safety, security, privacy, integrity, and continuity of
+      operations in emergencies.
+
+Since the purpose for this chapter is:
+- To describe the current system and how it oeprates, it is appropriate to use
+  any tools or techniques that serve this purpose.
+- Important for the description to be simple enough and clear enough that all
+  intended readers of the document can fully understand it.
+- Write this document in term of user's terminology. Avoid terminology specific
+  to computers (computer jargons).
+
+Graphical tools should be used wherever possible.
+- This document should be understandable by several different types of readers.
+- Useful graphical tools:
+    - Work breakdown strcuture
+    - N2 charts
+    - Sequence or activity charts
+    - Functional flow block diagram
+    - Structure charts
+    - Allocation charts
+    - Data flow diagrams
+    - Object diagrams
+    - Context diagrams
+    - Storyboards
+    - Entity relationship diagram
