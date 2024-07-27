@@ -45,3 +45,31 @@ Provide:
 - Introduction to problem domain
 - Enable readers to better understand the reasons for the desired changes and
   improvement.
+
+# Background, Objectives and Scope
+
+- Overview of the current system or situation (include if applicable):
+    - Background
+    - Mission
+    - Objectives
+    - Scope
+
+When providing the background for the current system:
+- Provides a brief summary of the motivation for the current system
+    - Example:
+        - Automation of certain tasks
+        - Countering a certain threat situations
+- Define the goal of the current system:
+    - Strategies
+    - Solutions
+    - Tactics
+    - Methods
+    - Techniques used to accomplish the goal
+
+Define the scope of the proposed system (brief summary only as it will discussed
+in greater details in subsequent chapter):
+- Mode of operation
+- Class of users
+- Interfaces to the operational environment 
+
+
