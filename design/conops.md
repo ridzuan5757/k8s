@@ -72,4 +72,26 @@ in greater details in subsequent chapter):
 - Class of users
 - Interfaces to the operational environment 
 
+# Operational Policies and Constraints
+
+Operational policies and costraints that apply to the current system:
+- Watchtower
+- Sentry
+- CloudBOS DataDog
+- Hub Staging Uptrace
+
+Operational Policies are predetermined management decisions regarding the
+operations of the current system, normally in term of:
+- General statements or understanding that guide decision making activities
+
+Policies:
+- Limit the decision making freedom but do allow for some discretion
+
+Operational constraints include the following:
+- A constraint on the hours of operation of the system, perhaps limited by
+  access to secure terminals
+- A constraint on the number of personnel available to operate the system
+- A constraint on the computer hardware (must operate on computer X)
+- A constraint on the operational facilities, such as office space
+
 
