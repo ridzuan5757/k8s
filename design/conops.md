@@ -149,3 +149,27 @@ Graphical tools should be used wherever possible.
     - Context diagrams
     - Storyboards
     - Entity relationship diagram
+
+Description of the operational environment should: 
+- identify, as applicable:
+    - facilities
+    - equipment
+    - computing hardware
+    - software
+    - personnel
+    - operating procedures used to operate the existing system
+- the description should be detailed as necessary to give readers an
+  understanding of the:
+    - numbers
+    - versions
+    - capacity of the operational equipment being used
+    - for example:
+        - if the current system contain database:
+            - capacity of the storage unit should be described, provided the
+              information exerts an influence on the users' operational
+              capabilities.
+            - likewise, if the system uses communication links, the capacities
+              of the communication links should be specified if the exert
+              influence on factos such as user capabilities, response time or
+              throughput
+
