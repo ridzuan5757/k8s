@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 10ms
+  evaluation_interval: 10ms
+
+scrape_configs:
+  - job_name: opentelemetry-collector
+    static_configs:
+      - targets:
+          - opentelemetry-collector:8889
+          - opentelemetry-collector:8888
