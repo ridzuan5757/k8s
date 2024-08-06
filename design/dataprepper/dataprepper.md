@@ -177,7 +177,7 @@ For example, consider the following incoming event:
 ```
 
 Say, if we are using `add_entries` to add new `"key_three"` as the entries with
-format `"${key_one}-${key_two}"`, the processor will transorms it into an event
+format `"${key_one}-${key_two}"`, the processor will transforms it into an event
 with a new key `key_three`, which combines values of other keys in the original
 event:
 
@@ -191,4 +191,111 @@ event:
 
 ### Mutating strings
 
+We can change the way that a string appears by using mutate string processor.
+For example, we can use the `uppercase_string` processor to convert a string to
+uppercase, and we can use the `lowercase_string` processor to convert a string
+to lowercase. The following is a list of processors that allow us to mutate a
+string:
+- `substitute_string`
+- `split_string`
+- `uppercase_string`
+- `lowercase_string`
+- `trim_string`
+
+### Converting lists to maps
+
+The `list_to_map` processor, which is one of the mutate event processors,
+converts a list of objects in an event to a map. For example, consider the
+following processor configuration:
+
+```yaml
+processor:
+  - list_to_map:
+      key: "name"
+      source: "A-car-as-list"
+      target: "A-car-as-map"
+      value_key: "value"
+      flatten: true
+```
+
+This processor will convert an event that contains a list of objects to a map
+like this:
+
+```json
+{
+  "A-car-as-list": [
+    {
+      "name": "make",
+      "value": "tesla"
+    },
+    {
+      "name": "model",
+      "value": "model 3"
+    },
+    {
+      "name": "color",
+      "value": "white"
+    }
+  ]
+}
+```
+
+```json
+{
+  "A-car-as-map": {
+    "make": "tesla",
+    "model": "model 3",
+    "color": "white"
+  }
+}
+```
+
+### Processing incoming timestamps
+
+The `date` processor can be used to generate timestamp for incoming events if we
+specify `@timestamp` as the `destination` option. It is also capable to parses the 
+`timestamp` key from incoming events by converting it to ISO 8601 format. Say, if 
+the preceding pipeline processes the following event:
+
+```json
+{"timestamp": "10/Feb/2000:13:55:36"}
+```
+
+This processor can convert the event to the following format:
+
+```json
+{
+  "timestamp":"10/Feb/2000:13:55:36",
+  "@timestamp":"2000-02-10T15:55:36.000-06:00"
+}
+```
+
+## Data Sampling
+
+The following sampling capabilities is provided by Data Prepper:
+- Time sampling
+- Percentage sampling
+- Tail sampling
+
+### Time sampling
+
+`rate_limiter` can be used together with `aggregate` processor to limit the
+number of events that can be processed per second. We can choose to either drop
+excess events or carry them forward to the next time period.
+
+### Percentage sampling
+
+`percent_sampler` can be used with `aggregate` processor to limit the number of
+event that will be sent to the sink (OpenSearch). All excess events will be
+dropped.
+
+### Tail sampling
+
+`tail_sampler` with `aggregate` processor can be used to sample events based on
+a set of defined policies. This implementation waits an aggregation to complete
+across aggregation periods based on the configured wait period.
+
+When an aggregation is complete, and if it matches the speficic error condition,
+it is sent tot the sink. Otherwise, only a configured percentage of events is
+sent to the sink.
 
