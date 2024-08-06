@@ -1,0 +1,11 @@
+metrics-pipeline:
+  workers: 2
+  source:
+    otel_metrics_source:
+      ssl: false
+      port: 21891
+  processor:
+    - otel_metrics_raw_processor:
+  sink:
+    - stdout:
+

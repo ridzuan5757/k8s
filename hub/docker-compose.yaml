@@ -11,12 +11,15 @@ services:
       - --config=/etc/otelcol-contrib/otel-config.yaml
     volumes:
       - ./volume/otel-config.yaml:/etc/otelcol-contrib/otel-config.yaml
+      - /:/hostfs
     environment:
       - SITE_NAME=${site_name}
       - ROID=${roid}
+      - REGION=${region}
       - POSTCODE=${postcode}
       - CITY=${city}
       - STATE=${state}
+      - ENVIRONMENT=development
     ports:
       - 4317:4317
       - 8889:8889
@@ -30,5 +33,18 @@ services:
       - ./volume/prometheus-config.yaml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
+    networks:
+      - observer
+
+  dataprepper:
+    image: opensearchproject/data-prepper:latest
+    container_name: dataprepper
+    volumes:
+      - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+      - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+    ulimits:
+      core: -1
+    ports:
+      - 21891:21891
     networks:
       - observer

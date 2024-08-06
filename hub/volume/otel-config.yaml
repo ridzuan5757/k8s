@@ -1,4 +1,12 @@
 receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 1s
+    scrapers:
+      load:
+      memory:
+      filesystem:
+      network:
   otlp:
     protocols:
       grpc:
@@ -21,14 +29,72 @@ exporters:
     endpoint: 0.0.0.0:8889
   debug:
     verbosity: detailed
+  otlp:
+    endpoint: http://dataprepper:21891
+    tls:
+        insecure: true
+        insecure_skip_verify: true
    
 processors:
   batch:
-  resourcedetection/docker:
+  attributes:
+    actions:
+      - key: environment
+        value: ${env:ENVIRONMENT}
+        action: upsert
+  resource:
+    attributes:
+      - key: site.name
+        value: ${env:SITE_NAME}
+        action: upsert
+      - key: site.id
+        value: ${env:ROID}
+        action: upsert
+      - key: region
+        value: ${env:REGION}
+        action: upsert
+      - key: postcode
+        value: ${env:POSTCODE}
+        action: upsert
+      - key: city
+        value: ${env:CITY}
+        action: upsert
+      - key: state
+        value: ${env:STATE}
+        action: upsert
+  resourcedetection:
     detectors:
       - env
-      - docker
+      - system
     override: true
+    system:
+      resource_attributes:
+        host.arch:
+          enabled: true
+        host.name:
+          enabled: true
+        host.id:
+          enabled: true
+        host.ip:
+          enabled: true
+        host.mac:
+          enabled: true
+        host.cpu.vendor.id:
+          enabled: true
+        host.cpu.family:
+          enabled: true
+        host.cpu.model.id:
+          enabled: true
+        host.cpu.model.name:
+          enabled: true
+        host.cpu.stepping:
+          enabled: true
+        host.cpu.cache.l2.size:
+          enabled: true
+        os.description:
+          enabled: true
+        os.type:
+          enabled: true
   memory_limiter:
     check_interval: 1s
     limit_percentage: 50
@@ -43,19 +109,25 @@ service:
     logs:
       encoding: json
   pipelines:
-    traces:
-      receivers:
-        - otlp
-      exporters:
-        - debug
+    # traces:
+    #   receivers:
+    #     - otlp
+    #   exporters:
+    #     - debug
     metrics:
       receivers:
         - otlp
+        - hostmetrics
+      processors:
+        - resourcedetection
+        - resource
+        - attributes
       exporters:
         - prometheus
         - debug
-    logs:
-      receivers:
-        - filelog
-      exporters:
-        - debug
+        - otlp
+    # logs:
+    #   receivers:
+    #     - filelog
+    #   exporters:
+    #     - debug
