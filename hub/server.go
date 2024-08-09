@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"      // formatting and printing values to the console.
-	"log"      // logging messages to the console.
+	"fmt" // formatting and printing values to the console.
+	"log" // logging messages to the console.
+	"math/rand"
 	"net/http" // Used for build HTTP servers and clients.
 )
 
@@ -14,6 +15,12 @@ type Data struct {
 	POSTCODE  int    `json:"postcode"`
 	CITY      string `json:"city"`
 	STATE     string `json:"state"`
+}
+
+type Hub struct {
+	SIP       bool `json:"sip"`
+	CAPILLARY bool `json:"capillary"`
+	GHL       bool `json:"ghl"`
 }
 
 // Port we listen on.
@@ -34,11 +41,27 @@ func Station(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func randomBool() bool {
+	return rand.Intn(100) < 80
+}
+
+func HubStatus(w http.ResponseWriter, r *http.Request) {
+	response := Hub{
+		SIP:       randomBool(),
+		CAPILLARY: randomBool(),
+		GHL:       randomBool(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func main() {
 	log.Println("Starting our simple http server.")
 
 	// Registering our handler functions, and creating paths.
 	http.HandleFunc("/station", Station)
+	http.HandleFunc("/hub", HubStatus)
 
 	log.Println("Started on port", portNum)
 	fmt.Println("To close connection CTRL+C :-)")
