@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
@@ -23,16 +23,19 @@ func newResource() (*resource.Resource, error) {
 	)
 }
 
-func newMeterProvider(res *resource.Resource) (*metric.MeterProvider, error) {
+func newMeterProvider(ctx context.Context, res *resource.Resource) (*metric.MeterProvider, error) {
 
-	metricExporter, err := stdoutmetric.New()
+	otlpMetricsExporter, err := otlpmetricgrpc.New(
+		ctx,
+		otlpmetricgrpc.WithEndpoint("localhost:4317"),
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	meterProvider := metric.NewMeterProvider(
 		metric.WithResource(res),
-		metric.WithReader(metric.NewPeriodicReader(metricExporter,
+		metric.WithReader(metric.NewPeriodicReader(otlpMetricsExporter,
 			metric.WithInterval(time.Second))),
 	)
 
@@ -61,7 +64,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		return
 	}
 
-	meterProvider, err := newMeterProvider(resource)
+	meterProvider, err := newMeterProvider(ctx, resource)
 	if err != nil {
 		handlerErr(err)
 		return

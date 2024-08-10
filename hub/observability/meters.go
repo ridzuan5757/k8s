@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
@@ -33,7 +32,7 @@ func meterInit() error {
 		return err
 	}
 
-	reg, err := meter.RegisterCallback(
+	_, err = meter.RegisterCallback(
 		func(_ context.Context, o metric.Observer) error {
 			resp, err := getHub()
 			if err != nil {
@@ -64,8 +63,6 @@ func meterInit() error {
 		capillaryConn,
 		ghlConn,
 	)
-
-	fmt.Println(reg)
 
 	if err != nil {
 		return err
