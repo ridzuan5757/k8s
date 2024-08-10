@@ -8,9 +8,22 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-func newMeterProvider() (*metric.MeterProvider, error) {
+func newResource() (*resource.Resource, error) {
+	return resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("hub-monitoring"),
+			semconv.ServiceVersion("0.0.1"),
+		),
+	)
+}
+
+func newMeterProvider(res *resource.Resource) (*metric.MeterProvider, error) {
 
 	metricExporter, err := stdoutmetric.New()
 	if err != nil {
@@ -18,6 +31,7 @@ func newMeterProvider() (*metric.MeterProvider, error) {
 	}
 
 	meterProvider := metric.NewMeterProvider(
+		metric.WithResource(res),
 		metric.WithReader(metric.NewPeriodicReader(metricExporter,
 			metric.WithInterval(time.Second))),
 	)
@@ -41,7 +55,13 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		err = errors.Join(inErr, shutdown(ctx))
 	}
 
-	meterProvider, err := newMeterProvider()
+	resource, err := newResource()
+	if err != nil {
+		handlerErr(err)
+		return
+	}
+
+	meterProvider, err := newMeterProvider(resource)
 	if err != nil {
 		handlerErr(err)
 		return

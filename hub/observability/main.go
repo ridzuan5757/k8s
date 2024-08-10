@@ -1,6 +1,12 @@
 package main
 
-import "log"
+import (
+	"context"
+	"errors"
+	"log"
+	"os"
+	"os/signal"
+)
 
 func main() {
 	err := run()
@@ -10,5 +16,24 @@ func main() {
 }
 
 func run() (err error) {
-	return nil
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return
+	}
+	meterInit()
+
+	defer func() {
+		err = errors.Join(err, otelShutdown(context.Background()))
+	}()
+
+	select {
+	case <-ctx.Done():
+		stop()
+	}
+
+	return
 }
