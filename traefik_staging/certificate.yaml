@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: certificate
+spec:
+  commonName: proactivemonitoring.staging.ronpos.com
+  secretName: proactivemonitoring
+  dnsNames:
+    - proactivemonitoring.opensearch.staging.ronpos.com
+    - proactivemonitoring.prometheus.staging.ronpos.com
+    - proactivemonitoring.grpc.staging.ronpos.com
+    - proactivemonitoring.staging.ronpos.com
+  issuerRef:
+    kind: Issuer
+    name: letsencrypt-prod

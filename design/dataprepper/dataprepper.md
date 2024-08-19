@@ -177,7 +177,7 @@ For example, consider the following incoming event:
 ```
 
 Say, if we are using `add_entries` to add new `"key_three"` as the entries with
-format `"${key_one}-${key_two}"`, the processor will transforms it into an event
+format `"${key_one}-${key_two}"`, the processor will transform it into an event
 with a new key `key_three`, which combines values of other keys in the original
 event:
 
@@ -295,7 +295,9 @@ dropped.
 a set of defined policies. This implementation waits an aggregation to complete
 across aggregation periods based on the configured wait period.
 
-When an aggregation is complete, and if it matches the speficic error condition,
+When an aggregation is complete, and if it matches the specific error condition,
 it is sent tot the sink. Otherwise, only a configured percentage of events is
 sent to the sink.
+
+
 

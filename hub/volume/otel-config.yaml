@@ -10,6 +10,7 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
   syslog:
     tcp:
@@ -30,7 +31,7 @@ exporters:
   debug:
     verbosity: detailed
   otlp:
-    endpoint: http://dataprepper:21891
+    endpoint: proactivemonitoring.grpc.staging.ronpos.com:4317
     tls:
         insecure: true
         insecure_skip_verify: true
@@ -61,6 +62,9 @@ processors:
         action: upsert
       - key: state
         value: ${env:STATE}
+        action: upsert
+      - key: position
+        value: POINT (${env:LATITUDE} ${env:LONGITUDE})
         action: upsert
   resourcedetection:
     detectors:
@@ -124,7 +128,6 @@ service:
         - attributes
       exporters:
         - prometheus
-        - debug
         - otlp
     # logs:
     #   receivers:

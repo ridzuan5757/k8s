@@ -19,6 +19,8 @@ services:
       - POSTCODE=${postcode}
       - CITY=${city}
       - STATE=${state}
+      - LATITUDE=${latitude}
+      - LONGITUDE=${longitude}
       - ENVIRONMENT=development
     ports:
       - 4317:4317
@@ -36,15 +38,15 @@ services:
     networks:
       - observer
 
-  dataprepper:
-    image: opensearchproject/data-prepper:latest
-    container_name: dataprepper
-    volumes:
-      - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
-      - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
-    ulimits:
-      core: -1
-    ports:
-      - 21891:21891
-    networks:
-      - observer
+  # dataprepper:
+  #   image: opensearchproject/data-prepper:latest
+  #   container_name: dataprepper
+  #   volumes:
+  #     - ./volume/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml
+  #     - ./volume/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
+  #   ulimits:
+  #     core: -1
+  #   ports:
+  #     - 21891:21891
+  #   networks:
+  #     - observer

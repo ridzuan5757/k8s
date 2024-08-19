@@ -1,43 +1,42 @@
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: https-redirectscheme
-spec:
-  redirectScheme:
-    permanent: true
-    scheme: https
+# apiVersion: traefik.io/v1alpha1
+# kind: Middleware
+# metadata:
+#   name: https-redirectscheme
+# spec:
+#   redirectScheme:
+#     permanent: true
+#     scheme: https
 
----
+# ---
 
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: main
-  annotations:
-    cert-manager.io/issuer: letsencrypt-prod
+  name: host-routes
+  # annotations:
+  #   cert-manager.io/issuer: letsencrypt-prod
 spec:
-  tls:
-    certResolver: letsencrypt
-    secretName: proactivemonitoring
-    domains:
-      - main: proactivemonitoring.staging.ronpos.com
-        sans:
-          - proactivemonitoring.opensearch.staging.ronpos.com
-          - proactivemonitoring.prometheus.staging.ronpos.com
+  # tls:
+  #   certResolver: letsencrypt
+  #   secretName: proactivemonitoring
+    # domains:
+    #   - main: shell.canary.monitoring.ronpos.com
+    #     sans:
+    #       - prometheus.shell.canary.monitoring.ronpos.com
   entryPoints:
-    - websecure
+    - web
   routes:
-    - match: Host(`proactivemonitoring.opensearch.staging.ronpos.com`)
-      kind: Rule
-      services:
-        - name: opensearch-dashboards
-          port: 5601 
-      middlewares:
-        - name: https-redirectscheme
-    - match: Host(`proactivemonitoring.prometheus.staging.ronpos.com`)
+    # - match: Host(`proactivemonitoring.opensearch.staging.ronpos.com`)
+    #   kind: Rule
+    #   services:
+    #     - name: opensearch-dashboards
+    #       port: 5601 
+    #   middlewares:
+    #     - name: https-redirectscheme
+    - match: Host(`prometheus.shell.canary.monitoring.ronpos.com`)
       kind: Rule
       services:
         - name: prometheus-service
           port: 9090
-      middlewares:
-        - name: https-redirectscheme
+      # middlewares:
+      #   - name: https-redirectscheme

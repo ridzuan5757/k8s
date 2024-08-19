@@ -9,12 +9,14 @@ import (
 )
 
 type Data struct {
-	SITE_NAME string `json:"site_name"`
-	ROID      int    `json:"roid"`
-	REGION    string `json:"region"`
-	POSTCODE  int    `json:"postcode"`
-	CITY      string `json:"city"`
-	STATE     string `json:"state"`
+	SITE_NAME string  `json:"site_name"`
+	ROID      int     `json:"roid"`
+	REGION    string  `json:"region"`
+	POSTCODE  int     `json:"postcode"`
+	CITY      string  `json:"city"`
+	STATE     string  `json:"state"`
+	LATITUDE  float64 `json:"latitude"`
+	LONGITUDE float64 `json:"longitude"`
 }
 
 type Hub struct {
@@ -35,6 +37,8 @@ func Station(w http.ResponseWriter, r *http.Request) {
 		POSTCODE:  96000,
 		CITY:      "SIBU",
 		STATE:     "SARAWAK",
+		LATITUDE:  2.301458,
+		LONGITUDE: 111.880804,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
