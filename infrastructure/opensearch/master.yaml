@@ -1,0 +1,30 @@
+clusterName: opensearch-cluster
+
+nodeGroup: master
+
+masterService: opensearch-cluster-master
+
+roles:
+  - master
+
+replicas: 1
+
+extraEnvs:
+  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+    value: zmgf-x19a/M2
+
+persistence:
+  enabled: false
+
+majorVersion: 2.16.0
+
+config:
+  opensearch.yml: |
+    plugins:
+      query:
+        datasources:
+          encryption:
+            masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
+
+# nodeSelector:
+#   nodeType: opensearch
