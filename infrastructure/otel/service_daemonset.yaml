@@ -2,15 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app.kubernetes.io/instance: daemonset-collector-dev
+    app.kubernetes.io/instance: agent-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
     component: agent-collector
-  name: daemonset-collector-dev-opentelemetry-collector
+  name: agent-opentelemetry-collector-http
   namespace: default
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/instance: daemonset-collector-dev
+    app.kubernetes.io/instance: agent-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
     component: agent-collector
   ports:
@@ -24,15 +24,15 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app.kubernetes.io/instance: daemonset-collector-dev
+    app.kubernetes.io/instance: agent-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
     component: agent-collector
-  name: daemonset-collector-dev-opentelemetry-collector-grpc
+  name: agent-opentelemetry-collector-grpc
   namespace: default
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/instance: daemonset-collector-dev
+    app.kubernetes.io/instance: agent-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
     component: agent-collector
   ports:

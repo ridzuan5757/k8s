@@ -2,9 +2,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    app.kubernetes.io/instance: daemonset-collector-dev
+    app.kubernetes.io/instance: agent-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
-  name: daemonset-collector-dev-opentelemetry-collector
+  name: agent-opentelemetry-collector
 rules:
 - apiGroups:
   - ""

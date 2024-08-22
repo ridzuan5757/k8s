@@ -336,7 +336,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/instance: daemonset-collector-dev
+    app.kubernetes.io/instance: agent-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
-  name: daemonset-collector-dev-opentelemetry-collector-agent
+  name: agent-opentelemetry-collector
   namespace: default

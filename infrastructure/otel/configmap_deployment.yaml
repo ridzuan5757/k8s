@@ -264,7 +264,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app.kubernetes.io/instance: deployment-collector-dev
+    app.kubernetes.io/instance: gateway-opentelemetry-collector
     app.kubernetes.io/name: opentelemetry-collector
-  name: deployment-collector-dev-opentelemetry-collector
+  name: gateway-opentelemetry-collector
   namespace: default
