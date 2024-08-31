@@ -14,6 +14,8 @@ spec:
       labels:
         app: prometheus
     spec:
+      nodeSelector:
+        node: cluster-default
       containers:
         - name: prometheus
           image: quay.io/prometheus/prometheus:latest
