@@ -11,7 +11,7 @@ replicas: 1
 
 extraEnvs:
   - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-    value: zmgf-x19a/M2
+    value: zmgf/a-262PD-p
 
 persistence:
   enabled: false
@@ -26,5 +26,5 @@ config:
           encryption:
             masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
 
-# nodeSelector:
-#   nodeType: opensearch
+nodeSelector:
+  node: cluster-default

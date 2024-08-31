@@ -4,5 +4,5 @@ image:
   tag: "2.16.0"
   pullPolicy: "IfNotPresent"
 
-# nodeSelector:
-#   nodeType: misc
+nodeSelector:
+  node: cluster-default
