@@ -1,0 +1,5 @@
+image:
+  repository: "opensearchproject/opensearch-dashboards"
+  # override image tag, which is .Chart.AppVersion by default
+  tag: "2.16.0"
+  pullPolicy: "IfNotPresent"
