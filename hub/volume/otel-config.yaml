@@ -64,7 +64,7 @@ processors:
         value: ${env:STATE}
         action: upsert
       - key: position
-        value: POINT (${env:LATITUDE} ${env:LONGITUDE})
+        value: POINT (${env:LONGITUDE} ${env:LATITUDE})
         action: upsert
   resourcedetection:
     detectors:
@@ -127,6 +127,7 @@ service:
         - resource
         - attributes
       exporters:
+        - debug
         - prometheus
         - otlp
     # logs:

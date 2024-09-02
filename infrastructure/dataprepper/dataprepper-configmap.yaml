@@ -19,15 +19,19 @@ data:
           buffer_size: 4096
           batch_size: 1024
       processor:
-        - add_entries:
-            entries:
-              - key: position
-                value:  POINT (74.00 40.71)
         - otel_metrics:
             calculate_histogram_buckets: true
             calculate_exponential_histogram_buckets: true
             exponential_histogram_max_allowed_scale: 10
             flatten_attributes: false
+        - flatten:
+            source: attributes
+            target: ""
+            remove_processed_fields: true
+        - rename_keys:
+            entries:
+              - from_key: resource.attributes.position
+                to_key: position
       sink:
         - stdout:
         - s3:
@@ -63,7 +67,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp_metrics
+            index: otlp-metrics-%{yyyy-MM-dd-HH}
     logs-pipeline:
       workers: 4
       source:
@@ -112,7 +116,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp_logs
+            index: otlp-logs-%{yyyy-MM-dd-HH}
     trace-pipeline:
       workers: 4
       source:
@@ -206,4 +210,3 @@ data:
         usage: 2gb
         reset: 30s
         check_interval: 5s
- 
