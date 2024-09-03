@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -27,6 +28,11 @@ func meterInit() error {
 		metric.WithDescription("HUB connection status with GHL"),
 		metric.WithUnit("{bool}"),
 	)
+	apiConn, err := meter.Int64ObservableGauge(
+		"hub.shellapi.health",
+		metric.WithDescription("Shell API health status"),
+		metric.WithUnit("{count}"),
+	)
 
 	if err != nil {
 		return err
@@ -39,29 +45,44 @@ func meterInit() error {
 				return err
 			}
 
+			sipConnVal := 0
+			capillaryConnVal := 0
+			ghlConnVal := 0
+
 			if resp.SIP {
-				o.ObserveInt64(sipConn, int64(1))
-			} else {
-				o.ObserveInt64(sipConn, int64(0))
+				sipConnVal = 1
 			}
 
 			if resp.CAPILLARY {
-				o.ObserveInt64(capillaryConn, int64(1))
-			} else {
-				o.ObserveInt64(capillaryConn, int64(0))
+				capillaryConnVal = 1
 			}
 
 			if resp.GHL {
-				o.ObserveInt64(ghlConn, int64(1))
-			} else {
-				o.ObserveInt64(ghlConn, int64(0))
+				ghlConnVal = 1
 			}
+
+			o.ObserveInt64(sipConn, int64(sipConnVal))
+			o.ObserveInt64(capillaryConn, int64(capillaryConnVal))
+			o.ObserveInt64(ghlConn, int64(ghlConnVal))
+
+			attributes := []attribute.KeyValue{
+				attribute.Bool("sip.health", resp.SIP),
+				attribute.Bool("capillary.health", resp.CAPILLARY),
+				attribute.Bool("ghl.health", resp.GHL),
+			}
+			opts := make([]metric.ObserveOption, len(attributes))
+			for i, attr := range attributes {
+				opts[i] = metric.WithAttributes(attr)
+			}
+			apiConnVal := sipConnVal + capillaryConnVal + ghlConnVal
+			o.ObserveInt64(apiConn, int64(apiConnVal), opts...)
 
 			return nil
 		},
 		sipConn,
 		capillaryConn,
 		ghlConn,
+		apiConn,
 	)
 
 	if err != nil {
