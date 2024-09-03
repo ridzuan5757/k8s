@@ -32,6 +32,22 @@ data:
             entries:
               - from_key: resource.attributes.position
                 to_key: position
+              - from_key: resource.attributes.site@name
+                to_key: site-name
+              - from_key: resource.attributes.city
+                to_key: city
+              - from_key: resource.attributes.region
+                to_key: region
+              - from_key: resource.attributes.postcode
+                to_key: postcode
+              - from_key: resource.attributes.state
+                to_key: state
+              - from_key: metric.attributes.sip@health
+                to_key: sip-health
+              - from_key: metric.attributes.capillary@health
+                to_key: capillary-health
+              - from_key: metric.attributes.ghl@health
+                to_key: ghl-health
       sink:
         - stdout:
         - s3:
@@ -67,7 +83,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp-metrics-%{yyyy-MM-dd-HH}
+            index: otlp-metrics-%{yyyy-MM-dd-HH}-
     logs-pipeline:
       workers: 4
       source:
@@ -116,7 +132,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp-logs-%{yyyy-MM-dd-HH}
+            index: otlp-logs-%{yyyy-MM-dd-HH}-
     trace-pipeline:
       workers: 4
       source:
