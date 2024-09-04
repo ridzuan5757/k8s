@@ -83,7 +83,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp-metrics-%{yyyy-MM-dd-HH}-
+            index: otlp-metrics
     logs-pipeline:
       workers: 4
       source:
@@ -132,7 +132,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp-logs-%{yyyy-MM-dd-HH}-
+            index: otlp-logs-000001
     trace-pipeline:
       workers: 4
       source:
