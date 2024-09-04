@@ -13,15 +13,14 @@ services:
       - ./volume/otel-config.yaml:/etc/otelcol-contrib/otel-config.yaml
       - /:/hostfs
     environment:
-      - SITE_NAME=${site_name}
-      - ROID=${roid}
-      - REGION=${region}
-      - POSTCODE=${postcode}
-      - CITY=${city}
-      - STATE=${state}
-      - LATITUDE=${latitude}
-      - LONGITUDE=${longitude}
-      - ENVIRONMENT=development
+      - SITE_NAME=${OUTLET_NAME}
+      - ROID=${OUTLET_ID}
+      - REGION=${OUTLET_REGION}
+      - DISTRICT=${OUTLET_DISTRICT}
+      - STATE=${OUTLET_STATE}
+      - LATITUDE=${OUTLET_LATITUDE}
+      - LONGITUDE=${OUTLET_LONGITUDE}
+      - ENVIRONMENT=${ENV}
     ports:
       - 4317:4317
       - 8889:8889
