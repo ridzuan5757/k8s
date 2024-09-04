@@ -38,7 +38,7 @@ type Hub struct {
 }
 
 // Port we listen on.
-const portNum string = ":8080"
+const portNum string = ":3000"
 
 // Handler functions.
 func Station(w http.ResponseWriter, r *http.Request) {
