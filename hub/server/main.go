@@ -8,15 +8,27 @@ import (
 	"net/http" // Used for build HTTP servers and clients.
 )
 
+type OutletData struct {
+	Id          int     `json:"id"`
+	Name        string  `json:"name"`
+	Code        string  `json:"code"`
+	FranchiseId int     `json:"franchise_id"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	Region      string  `json:"region"`
+	District    string  `json:"district"`
+	State       string  `json:"state"`
+}
+
 type Data struct {
-	SITE_NAME string  `json:"site_name"`
-	ROID      int     `json:"roid"`
-	REGION    string  `json:"region"`
-	POSTCODE  int     `json:"postcode"`
-	CITY      string  `json:"city"`
-	STATE     string  `json:"state"`
-	LATITUDE  float64 `json:"latitude"`
-	LONGITUDE float64 `json:"longitude"`
+	Version     string     `json:"version"`
+	DateTime    string     `json:"datetime"`
+	AppEnv      string     `json:"app_env"`
+	Env         string     `json:"env"`
+	Timezone    string     `string:"timezone"`
+	Commit      string     `json:"commit"`
+	DelegateJob string     `json:"delegate_job"`
+	Outlet      OutletData `json:"outlet"`
 }
 
 type Hub struct {
@@ -30,15 +42,27 @@ const portNum string = ":8080"
 
 // Handler functions.
 func Station(w http.ResponseWriter, r *http.Request) {
+	outletData := OutletData{
+		Name:        "SH SEDUAN LAND DISTRICT SIBU",
+		Id:          3,
+		Code:        "1660",
+		FranchiseId: 5,
+		Latitude:    2.301458,
+		Longitude:   111.880804,
+		Region:      "BORNEO",
+		District:    "SIBU",
+		State:       "SARAWAK",
+	}
+
 	response := Data{
-		SITE_NAME: "SH SEDUAN LAND DISTRICT SIBU",
-		ROID:      1660,
-		REGION:    "BORNEO",
-		POSTCODE:  96000,
-		CITY:      "SIBU",
-		STATE:     "SARAWAK",
-		LATITUDE:  2.301458,
-		LONGITUDE: 111.880804,
+		Version:     "develop-20240903-0010975ce9",
+		DateTime:    "2024-09-03T07:46:42+08:00",
+		AppEnv:      "SHELL",
+		Env:         "staging",
+		Timezone:    "Asia/Kuala_Lumpur",
+		Commit:      "0010975ce9",
+		DelegateJob: "true",
+		Outlet:      outletData,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
