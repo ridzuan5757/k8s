@@ -17,7 +17,6 @@ data:
         tls:
           insecure: true
           insecure_skip_verify: true
-
       debug:
         verbosity: detailed
       prometheus/export:

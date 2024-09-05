@@ -11,8 +11,7 @@ PUT /_index_template/otlp-metrics-template
             "number_of_shards": 3,
             "number_of_replicas": 1,
             "codec": "best_compression",
-            "plugins.index_state_management.rollover_alias": "otlp-metrics",
-            "plugins.index_state_management.rollover_skip": true
+            "plugins.index_state_management.rollover_alias": "otlp-metrics"
         },
         "mappings": {
             "properties": {
@@ -36,29 +35,10 @@ PUT /_index_template/otlp-logs-template
             "number_of_shards": 3,
             "number_of_replicas": 1,
             "codec": "best_compression",
-            "plugins.index_state_management.rollover_alias": "otlp-logs",
-            "plugins.index_state_management.rollover_skip": true
+            "plugins.index_state_management.rollover_alias": "otlp-logs"
         }
     }
 }
 PUT /otlp-logs-000001
 POST /otlp-logs-000001/_alias/otlp-logs
-```
-
-geo - ip data
-
-```json
-PUT otlp-metrics
-{
-  "mappings": {
-    "properties": {
-      "attributes.resource.attributes.position": {
-        "type": "geo_point"
-      },
-      "position": {
-        "type": "geo_point"
-      }
-    }
-  }
-}
 ```

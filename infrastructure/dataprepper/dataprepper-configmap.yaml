@@ -132,7 +132,7 @@ data:
             insecure: true
             username: admin
             password: zmgf-x19a/M2
-            index: otlp-logs-000001
+            index: otlp-logs
     trace-pipeline:
       workers: 4
       source:
