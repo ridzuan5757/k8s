@@ -4,5 +4,10 @@ image:
   tag: "2.16.0"
   pullPolicy: "IfNotPresent"
 
-nodeSelector:
-  node: cluster-default
+# nodeSelector:
+#   node: cluster-default
+
+config:
+  opensearch_dashboards.yml:
+    opensearch_security.readonly_mode.roles:
+      - support_role
