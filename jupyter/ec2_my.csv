@@ -1,0 +1,237 @@
+﻿name,rate,vcpu,memory,storage,network
+t4g.nano,0.0048,2,0.5 GiB,EBS Only,Up to 5 Gigabit
+t4g.micro,0.0095,2,1 GiB,EBS Only,Up to 5 Gigabit
+t4g.small,0.0191,2,2 GiB,EBS Only,Up to 5 Gigabit
+t4g.medium,0.0382,2,4 GiB,EBS Only,Up to 5 Gigabit
+t4g.large,0.0763,2,8 GiB,EBS Only,Up to 5 Gigabit
+t4g.xlarge,0.1526,4,16 GiB,EBS Only,Up to 5 Gigabit
+t4g.2xlarge,0.3053,8,32 GiB,EBS Only,Up to 5 Gigabit
+t3.nano,0.0059,2,0.5 GiB,EBS Only,Up to 5 Gigabit
+t3.micro,0.0119,2,1 GiB,EBS Only,Up to 5 Gigabit
+t3.small,0.0238,2,2 GiB,EBS Only,Up to 5 Gigabit
+t3.medium,0.0475,2,4 GiB,EBS Only,Up to 5 Gigabit
+t3.large,0.0950,2,8 GiB,EBS Only,Up to 5 Gigabit
+t3.xlarge,0.1901,4,16 GiB,EBS Only,Up to 5 Gigabit
+t3.2xlarge,0.3802,8,32 GiB,EBS Only,Up to 5 Gigabit
+m7g.medium,0.0434,1,4 GiB,EBS Only,Up to 12500 Megabit
+m7g.large,0.0867,2,8 GiB,EBS Only,Up to 12500 Megabit
+m7g.xlarge,0.1734,4,16 GiB,EBS Only,Up to 12500 Megabit
+m7g.2xlarge,0.3468,8,32 GiB,EBS Only,Up to 15 Gigabit
+m7g.4xlarge,0.6936,16,64 GiB,EBS Only,Up to 15 Gigabit
+m7g.8xlarge,1.3872,32,128 GiB,EBS Only,15 Gigabit
+m7g.12xlarge,2.0808,48,192 GiB,EBS Only,22500 Megabit
+m7g.16xlarge,2.7744,64,256 GiB,EBS Only,30 Gigabit
+m7g.metal,2.7744,64,256 GiB,EBS Only,30 Gigabit
+m7gd.medium,0.0566,1,4 GiB,1 x 59 NVMe SSD,Up to 12500 Megabit
+m7gd.large,0.1133,2,8 GiB,1 x 118 NVMe SSD,Up to 12500 Megabit
+m7gd.xlarge,0.2265,4,16 GiB,1 x 237 NVMe SSD,Up to 12500 Megabit
+m7gd.2xlarge,0.4530,8,32 GiB,1 x 475 NVMe SSD,Up to 15 Gigabit
+m7gd.4xlarge,0.9061,16,64 GiB,1 x 950 NVMe SSD,Up to 15 Gigabit
+m7gd.8xlarge,1.8122,32,128 GiB,1 x 1900 NVMe SSD,15 Gigabit
+m7gd.12xlarge,2.7182,48,192 GiB,2 x 1425 NVMe SSD,22500 Megabit
+m7gd.16xlarge,3.6243,64,256 GiB,2 x 1900 NVMe SSD,30 Gigabit
+m7gd.metal,3.6243,64,256 GiB,2 x 1900 NVMe SSD,30 Gigabit
+m7i.large,0.1071,2,8 GiB,EBS Only,Up to 12500 Megabit
+m7i.xlarge,0.2142,4,16 GiB,EBS Only,Up to 12500 Megabit
+m7i.2xlarge,0.4284,8,32 GiB,EBS Only,Up to 12500 Megabit
+m7i.4xlarge,0.8568,16,64 GiB,EBS Only,Up to 12500 Megabit
+m7i.8xlarge,1.7136,32,128 GiB,EBS Only,12500 Megabit
+m7i.12xlarge,2.5704,48,192 GiB,EBS Only,18750 Megabit
+m7i.16xlarge,3.4272,64,256 GiB,EBS Only,25000 Megabit
+m7i.24xlarge,5.1408,96,384 GiB,EBS Only,37500 Megabit
+m7i.48xlarge,10.2816,192,768 GiB,EBS Only,50000 Megabit
+m7i.metal-24xl,5.1408,96,384 GiB,EBS Only,37500 Megabit
+m7i.metal-48xl,10.2816,192,768 GiB,EBS Only,50000 Megabit
+m6g.medium,0.0408,1,4 GiB,EBS Only,Up to 10 Gigabit
+m6g.large,0.0816,2,8 GiB,EBS Only,Up to 10 Gigabit
+m6g.xlarge,0.1632,4,16 GiB,EBS Only,Up to 10 Gigabit
+m6g.2xlarge,0.3264,8,32 GiB,EBS Only,Up to 10 Gigabit
+m6g.4xlarge,0.6528,16,64 GiB,EBS Only,Up to 10 Gigabit
+m6g.8xlarge,1.3056,32,128 GiB,EBS Only,12 Gigabit
+m6g.12xlarge,1.9584,48,192 GiB,EBS Only,20 Gigabit
+m6g.16xlarge,2.6112,64,256 GiB,EBS Only,25 Gigabit
+m6g.metal,2.6112,64,256 GiB,EBS Only,25 Gigabit
+m6gd.medium,0.0480,1,4 GiB,1 x 59 NVMe SSD,Up to 10 Gigabit
+m6gd.large,0.0960,2,8 GiB,1 x 118 NVMe SSD,Up to 10 Gigabit
+m6gd.xlarge,0.1921,4,16 GiB,1 x 237 NVMe SSD,Up to 10 Gigabit
+m6gd.2xlarge,0.3842,8,32 GiB,1 x 475 NVMe SSD,Up to 10 Gigabit
+m6gd.4xlarge,0.7683,16,64 GiB,1 x 950 NVMe SSD,Up to 10 Gigabit
+m6gd.8xlarge,1.5366,32,128 GiB,1 x 1900 NVMe SSD,12 Gigabit
+m6gd.12xlarge,2.3050,48,192 GiB,2 x 1425 NVMe SSD,20 Gigabit
+m6gd.16xlarge,3.0733,64,256 GiB,2 x 1900 NVMe SSD,
+m6gd.metal,3.0733,64,256 GiB,2 x 1900 NVMe SSD,25 Gigabit
+m6i.large,0.1020,2,8 GiB,EBS Only,Up to 12500 Megabit
+m6i.xlarge,0.2040,4,16 GiB,EBS Only,Up to 12500 Megabit
+m6i.2xlarge,0.4080,8,32 GiB,EBS Only,Up to 12500 Megabit
+m6i.4xlarge,0.8160,16,64 GiB,EBS Only,Up to 12500 Megabit
+m6i.8xlarge,1.6320,32,128 GiB,EBS Only,12500 Megabit
+m6i.12xlarge,2.4480,48,192 GiB,EBS Only,18750 Megabit
+m6i.16xlarge,3.2640,64,256 GiB,EBS Only,25000 Megabit
+m6i.24xlarge,4.8960,96,384 GiB,EBS Only,37500 Megabit
+m6i.32xlarge,6.5280,128,512 GiB,EBS Only,50000 Megabit
+m6i.metal,6.5280,128,512 GiB,EBS Only,50000 Megabit
+m6id.large,0.1258,2,8 GiB,1 x 118 NVMe SSD,Up to 12500 Megabit
+m6id.xlarge,0.2517,4,16 GiB,1 x 237 NVMe SSD,Up to 12500 Megabit
+m6id.2xlarge,0.5034,8,32 GiB,1 x 474 NVMe SSD,Up to 12500 Megabit
+m6id.4xlarge,1.0067,16,64 GiB,1 x 950 NVMe SSD,Up to 12500 Megabit
+m6id.8xlarge,2.0134,32,128 GiB,1 x 1900 NVMe SSD,12500 Megabit
+m6id.12xlarge,3.0202,48,192 GiB,2 x 1425 NVMe SSD,18750 Megabit
+m6id.16xlarge,4.0269,64,256 GiB,2 x 1900 NVMe SSD,25000 Megabit
+m6id.24xlarge,6.0403,96,384 GiB,4 x 1425 NVMe SSD,37500 Megabit
+m6id.32xlarge,8.0538,128,512 GiB,4 x 1900 NVMe SSD,
+m6id.metal,8.0538,128,512 GiB,4 x 1900 NVMe SSD,50000 Megabit
+c7g.medium,0.0354,1,2 GiB,EBS Only,Up to 12500 Megabit
+c7g.large,0.0708,2,4 GiB,EBS Only,Up to 12500 Megabit
+c7g.xlarge,0.1416,4,8 GiB,EBS Only,Up to 12500 Megabit
+c7g.2xlarge,0.2832,8,16 GiB,EBS Only,Up to 15 Gigabit
+c7g.4xlarge,0.5664,16,32 GiB,EBS Only,Up to 15 Gigabit
+c7g.8xlarge,1.1328,32,64 GiB,EBS Only,15 Gigabit
+c7g.12xlarge,1.6992,48,96 GiB,EBS Only,22500 Megabit
+c7g.16xlarge,2.2656,64,128 GiB,EBS Only,30 Gigabit
+c7g.metal,2.2656,64,128 GiB,EBS Only,30 Gigabit
+c7gd.medium,0.0450,1,2 GiB,1 x 59 NVMe SSD,Up to 12500 Megabit
+c7gd.large,0.0900,2,4 GiB,1 x 118 NVMe SSD,Up to 12500 Megabit
+c7gd.xlarge,0.1799,4,8 GiB,1 x 237 NVMe SSD,Up to 12500 Megabit
+c7gd.2xlarge,0.3598,8,16 GiB,1 x 475 NVMe SSD,Up to 15 Gigabit
+c7gd.4xlarge,0.7197,16,32 GiB,1 x 950 NVMe SSD,Up to 15 Gigabit
+c7gd.8xlarge,1.4394,32,64 GiB,1 x 1900 NVMe SSD,15 Gigabit
+c7gd.12xlarge,2.1590,48,96 GiB,2 x 1425 NVMe SSD,22500 Megabit
+c7gd.16xlarge,2.8787,64,128 GiB,2 x 1900 NVMe SSD,30 Gigabit
+c7gd.metal,2.8787,64,128 GiB,2 x 1900 NVMe SSD,30 Gigabit
+c7i.large,0.0875,2,4 GiB,EBS Only,
+c7i.xlarge,0.1749,4,8 GiB,EBS Only,Up to 12500 Megabit
+c7i.2xlarge,0.3499,8,16 GiB,EBS Only,Up to 12500 Megabit
+c7i.4xlarge,0.6998,16,32 GiB,EBS Only,Up to 12500 Megabit
+c7i.8xlarge,1.3995,32,64 GiB,EBS Only,12500 Megabit
+c7i.12xlarge,2.0993,48,96 GiB,EBS Only,18750 Megabit
+c7i.16xlarge,2.7990,64,128 GiB,EBS Only,25000 Megabit
+c7i.24xlarge,4.1986,96,192 GiB,EBS Only,37500 Megabit
+c7i.48xlarge,8.3971,192,384 GiB,EBS Only,50000 Megabit
+c7i.metal-24xl,4.1986,96,192 GiB,EBS Only,37500 Megabit
+c7i.metal-48xl,8.3971,192,384 GiB,EBS Only,50000 Megabit
+c6g.medium,0.0333,1,2 GiB,EBS Only,Up to 10 Gigabit
+c6g.large,0.0666,2,4 GiB,EBS Only,Up to 10 Gigabit
+c6g.xlarge,0.1333,4,8 GiB,EBS Only,Up to 10 Gigabit
+c6g.2xlarge,0.2666,8,16 GiB,EBS Only,Up to 10 Gigabit
+c6g.4xlarge,0.5331,16,32 GiB,EBS Only,Up to 10 Gigabit
+c6g.8xlarge,1.0662,32,64 GiB,EBS Only,12 Gigabit
+c6g.12xlarge,1.5994,48,96 GiB,EBS Only,20 Gigabit
+c6g.16xlarge,2.1325,64,128 GiB,EBS Only,25 Gigabit
+c6g.metal,2.1325,64,128 GiB,EBS Only,25 Gigabit
+c6gn.medium,0.0421,1,2 GiB,EBS Only,
+,,,,,
+c6gn.large,0.0842,2,4 GiB,EBS Only,Up to 25 Gigabit
+c6gn.xlarge,0.1683,4,8 GiB,EBS Only,Up to 25 Gigabit
+c6gn.2xlarge,0.3366,8,16 GiB,EBS Only,Up to 25 Gigabit
+c6gn.4xlarge,0.6733,16,32 GiB,EBS Only,25 Gigabit
+c6gn.8xlarge,1.3466,32,64 GiB,EBS Only,50 Gigabit
+c6gn.12xlarge,2.0198,48,96 GiB,EBS Only,75 Gigabit
+c6gn.16xlarge,2.6931,64,128 GiB,EBS Only,100 Gigabit
+c6i.large,0.0833,2,4 GiB,EBS Only,Up to 12500 Megabit
+c6i.xlarge,0.1666,4,8 GiB,EBS Only,Up to 12500 Megabit
+c6i.2xlarge,0.3332,8,16 GiB,EBS Only,Up to 12500 Megabit
+c6i.4xlarge,0.6664,16,32 GiB,EBS Only,Up to 12500 Megabit
+c6i.8xlarge,1.3328,32,64 GiB,EBS Only,12500 Megabit
+c6i.12xlarge,1.9992,48,96 GiB,EBS Only,18750 Megabit
+c6i.16xlarge,2.6656,64,128 GiB,EBS Only,25000 Megabit
+c6i.24xlarge,3.9984,96,192 GiB,EBS Only,37500 Megabit
+c6i.32xlarge,5.3312,128,256 GiB,EBS Only,50000 Megabit
+c6i.metal,5.3312,128,256 GiB,EBS Only,50000 Megabit
+c6id.large,0.1000,2,4 GiB,1 x 118 NVMe SSD,Up to 12500 Megabit
+c6id.xlarge,0.1999,4,8 GiB,1 x 237 NVMe SSD,Up to 12500 Megabit
+c6id.2xlarge,0.3998,8,16 GiB,1 x 474 NVMe SSD,
+c6id.4xlarge,0.7997,16,32 GiB,1 x 950 NVMe SSD,Up to 12500 Megabit
+c6id.8xlarge,1.5994,32,64 GiB,1 x 1900 NVMe SSD,12500 Megabit
+c6id.12xlarge,2.3990,48,96 GiB,2 x 1425 NVMe SSD,18750 Megabit
+c6id.16xlarge,3.1987,64,128 GiB,2 x 1900 NVMe SSD,25000 Megabit
+c6id.24xlarge,4.7981,96,192 GiB,4 x 1425 NVMe SSD,37500 Megabit
+c6id.32xlarge,6.3974,128,256 GiB,4 x 1900 NVMe SSD,50000 Megabit
+c6id.metal,6.3974,128,256 GiB,4 x 1900 NVMe SSD,50000 Megabit
+x2idn.16xlarge,8.7035,64,1024 GiB,1 x 1900 NVMe SSD,50 Gigabit
+x2idn.24xlarge,13.0552,96,1536 GiB,2 x 1425 NVMe SSD,75 Gigabit
+x2idn.32xlarge,17.4069,128,2048 GiB,2 x 1900 NVMe SSD,100 Gigabit
+x2idn.metal,17.4069,128,2048 GiB,2 x 1900 NVMe SSD,100 Gigabit
+x2iedn.xlarge,1.0879,4,128 GiB,1 x 118 NVMe SSD,Up to 25 Gigabit
+x2iedn.2xlarge,2.1759,8,256 GiB,1 x 237 NVMe SSD,Up to 25 Gigabit
+x2iedn.4xlarge,4.3517,16,512 GiB,1 x 475 NVMe SSD,Up to 25 Gigabit
+x2iedn.8xlarge,8.7035,32,1024 GiB,1 x 950 NVMe SSD,25 Gigabit
+x2iedn.16xlarge,17.4069,64,2048 GiB,1 x 1900 NVMe SSD,50 Gigabit
+x2iedn.24xlarge,26.1104,96,3072 GiB,2 x 1425 NVMe SSD,75 Gigabit
+x2iedn.32xlarge,34.8138,128,4096 GiB,2 x 1900 NVMe SSD,100 Gigabit
+x2iedn.metal,34.8138,128,4096 GiB,2 x 1900 NVMe SSD,100 Gigabit
+r7g.medium,0.0549,1,8 GiB,EBS Only,
+r7g.large,0.1098,2,16 GiB,EBS Only,Up to 12500 Megabit
+r7g.xlarge,0.2196,4,32 GiB,EBS Only,Up to 12500 Megabit
+r7g.2xlarge,0.4393,8,64 GiB,EBS Only,Up to 15 Gigabit
+r7g.4xlarge,0.8786,16,128 GiB,EBS Only,Up to 15 Gigabit
+r7g.8xlarge,1.7571,32,256 GiB,EBS Only,15 Gigabit
+r7g.12xlarge,2.6357,48,384 GiB,EBS Only,22500 Megabit
+r7g.16xlarge,3.5142,64,512 GiB,EBS Only,30 Gigabit
+r7g.metal,3.5142,64,512 GiB,EBS Only,30 Gigabit
+r7gd.medium,0.0699,1,8 GiB,1 x 59 NVMe SSD,Up to 12500 Megabit
+r7gd.large,0.1398,2,16 GiB,1 x 118 NVMe SSD,Up to 12500 Megabit
+r7gd.xlarge,0.2795,4,32 GiB,1 x 237 NVMe SSD,Up to 12500 Megabit
+r7gd.2xlarge,0.5590,8,64 GiB,1 x 475 NVMe SSD,Up to 15 Gigabit
+r7gd.4xlarge,1.1181,16,128 GiB,1 x 950 NVMe SSD,Up to 15 Gigabit
+r7gd.8xlarge,2.2362,32,256 GiB,1 x 1900 NVMe SSD,15 Gigabit
+r7gd.12xlarge,3.3542,48,384 GiB,2 x 1425 NVMe SSD,22500 Megabit
+r7gd.16xlarge,4.4723,64,512 GiB,2 x 1900 NVMe SSD,30 Gigabit
+r7gd.metal,4.4723,64,512 GiB,2 x 1900 NVMe SSD,30 Gigabit
+r7i.large,0.1357,2,16 GiB,EBS Only,Up to 12500 Megabit
+r7i.xlarge,0.2713,4,32 GiB,EBS Only,Up to 12500 Megabit
+r7i.2xlarge,0.5426,8,64 GiB,EBS Only,
+r7i.4xlarge,1.0853,16,128 GiB,EBS Only,Up to 12500 Megabit
+r7i.8xlarge,2.1706,32,256 GiB,EBS Only,12500 Megabit
+r7i.12xlarge,3.2558,48,384 GiB,EBS Only,18750 Megabit
+r7i.16xlarge,4.3411,64,512 GiB,EBS Only,25000 Megabit
+r7i.24xlarge,6.5117,96,768 GiB,EBS Only,37500 Megabit
+r7i.48xlarge,13.0234,192,1536 GiB,EBS Only,50000 Megabit
+r7i.metal-24xl,6.5117,96,768 GiB,EBS Only,37500 Megabit
+r7i.metal-48xl,13.0234,192,1536 GiB,EBS Only,50000 Megabit
+r6g.medium,0.0517,1,8 GiB,EBS Only,Up to 10 Gigabit
+r6g.large,0.1034,2,16 GiB,EBS Only,Up to 10 Gigabit
+r6g.xlarge,0.2067,4,32 GiB,EBS Only,Up to 10 Gigabit
+r6g.2xlarge,0.4134,8,64 GiB,EBS Only,Up to 10 Gigabit
+r6g.4xlarge,0.8269,16,128 GiB,EBS Only,Up to 10 Gigabit
+r6g.8xlarge,1.6538,32,256 GiB,EBS Only,12 Gigabit
+r6g.12xlarge,2.4806,48,384 GiB,EBS Only,20 Gigabit
+r6g.16xlarge,3.3075,64,512 GiB,EBS Only,25 Gigabit
+r6g.metal,3.3075,64,512 GiB,EBS Only,25 Gigabit
+r6i.large,0.1292,2,16 GiB,EBS Only,Up to 12500 Megabit
+r6i.xlarge,0.2584,4,32 GiB,EBS Only,Up to 12500 Megabit
+r6i.2xlarge,0.5168,8,64 GiB,EBS Only,
+r6i.4xlarge,1.0336,16,128 GiB,EBS Only,Up to 12500 Megabit
+r6i.8xlarge,2.0672,32,256 GiB,EBS Only,12500 Megabit
+r6i.12xlarge,3.1008,48,384 GiB,EBS Only,18750 Megabit
+r6i.16xlarge,4.1344,64,512 GiB,EBS Only,25000 Megabit
+r6i.24xlarge,6.2016,96,768 GiB,EBS Only,37500 Megabit
+r6i.32xlarge,8.2688,128,1024 GiB,EBS Only,50000 Megabit
+r6i.metal,8.2688,128,1024 GiB,EBS Only,50000 Megabit
+r6id.large,0.1553,2,16 GiB,1 x 118 NVMe SSD,Up to 12500 Megabit
+r6id.xlarge,0.3106,4,32 GiB,1 x 237 NVMe SSD,Up to 12500 Megabit
+r6id.2xlarge,0.6212,8,64 GiB,1 x 474 NVMe SSD,Up to 12500 Megabit
+r6id.4xlarge,1.2423,16,128 GiB,1 x 950 NVMe SSD,Up to 12500 Megabit
+r6id.8xlarge,2.4846,32,256 GiB,1 x 1900 NVMe SSD,12500 Megabit
+r6id.12xlarge,3.7270,48,384 GiB,2 x 1425 NVMe SSD,18750 Megabit
+r6id.16xlarge,4.9693,64,512 GiB,2 x 1900 NVMe SSD,25000 Megabit
+r6id.24xlarge,7.4539,96,768 GiB,4 x 1425 NVMe SSD,37500 Megabit
+r6id.32xlarge,9.9386,128,1024 GiB,4 x 1900 NVMe SSD,50000 Megabit
+r6id.metal,9.9386,128,1024 GiB,4 x 1900 NVMe SSD,50000 Megabit
+i4i.large,0.1850,2,16 GiB,1 x 468 NVMe SSD,Up to 10 Gigabit
+i4i.xlarge,0.3700,4,32 GiB,1 x 937 NVMe SSD,Up to 10 Gigabit
+i4i.2xlarge,0.7410,8,64 GiB,1 x 1875 NVMe SSD,
+i4i.4xlarge,1.4810,16,128 GiB,1 x 3750 NVMe SSD,Up to 25 Gigabit
+i4i.8xlarge,2.9620,32,256 GiB,2 x 3750 NVMe SSD,18750 Megabit
+i4i.12xlarge,4.4430,48,384 GiB,3 x 3750 NVMe SSD,28125 Megabit
+i4i.16xlarge,5.9240,64,512 GiB,4 x 3750 NVMe SSD,35000 Megabit
+i4i.24xlarge,8.8862,96,768 GiB,6 x 3750 NVMe SSD,56250 Megabit
+i4i.32xlarge,11.8483,128,1024 GiB,8 x 3750 SSD,75000 Megabit
+i4i.metal,11.8480,128,1024 GiB,8 x 3750 NVMe SSD,75000 Megabit
+i3en.large,0.2440,2,16 GiB,1 x 1250 NVMe SSD,Up to 25 Gigabit
+i3en.xlarge,0.4880,4,32 GiB,1 x 2500 NVMe SSD,Up to 25 Gigabit
+i3en.2xlarge,0.9760,8,64 GiB,2 x 2500 NVMe SSD,Up to 25 Gigabit
+i3en.3xlarge,1.4630,12,96 GiB,1 x 7500 NVMe SSD,Up to 25 Gigabit
+i3en.6xlarge,2.9270,24,192 GiB,2 x 7500 NVMe SSD,25 Gigabit
+i3en.12xlarge,5.8540,48,384 GiB,4 x 7500 NVMe SSD,50 Gigabit
+i3en.24xlarge,11.7070,96,768 GiB,8 x 7500 NVMe SSD,100 Gigabit
+i3en.metal,11.7070,96,768 GiB,8 x 7500 NVMe SSD,100 Gigabit
