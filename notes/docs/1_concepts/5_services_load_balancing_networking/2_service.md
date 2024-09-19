@@ -267,4 +267,14 @@ manifest.
 > to this constraint. This prevents the Kubernetes API server from being used as
 > a proxy to endpoints the caller may not be authorized to access.
 
+# EndpointSlices
 
+EndpointSlices are objects that represent a subset (a slice) of the backing
+entwork endpoints for a Service.
+
+The Kubernetes cluster tracks how many endpoints each EndpointSlice represents.
+If there are so many endpoint for a Service that a threshold is reached, then
+Kubernetes addres another empty EndpointSlice and stores new endpoint
+information there. By default, Kubernetes makes a new EndpointSlice once the
+existing EndpointSlices all cotnain at least 100 endpoints. Kuberentes does not
+make the new EndpointSlice until an extra endpoint needs to be added. 
