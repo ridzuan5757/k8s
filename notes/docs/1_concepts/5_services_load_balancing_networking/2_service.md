@@ -304,3 +304,24 @@ backing endpoints.
 
 The same API limit means that we cannot manually update an Endpoints to have
 more than 1000 endpoints.
+
+# Application Protocol
+
+The `appProtocol` field provides a way to specify an application protocol for
+each Service port. This is used as a hint for implementations to offer richer
+behaviour for protocols that they understand. The value of this field is
+mirrored by the corresponding Endpoints and EndpointSlice objects.
+
+This field follows standard Kubernetes label syntax. Valid values are one of:
+- IANA standard service names.
+- Implementation-defined prefixed names such as
+  `mycompany.com/my-custom-protocol`.
+- Kubernetes-defined prefixed names:
+
+|**Protocol**|**Description**|
+|---|---|
+|`kubernetes.io/h2c`|HTTP/2 over cleartext as described in RFC 7540|
+|`kubernetes.io/ws`|WebSocket over cleartext as described in RFC 6455|
+|`kubernetes.io/wss`|WebSocket over TLS as described in RFC 6455|
+
+
