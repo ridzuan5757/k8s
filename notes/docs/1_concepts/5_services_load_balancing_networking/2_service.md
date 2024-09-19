@@ -324,4 +324,38 @@ This field follows standard Kubernetes label syntax. Valid values are one of:
 |`kubernetes.io/ws`|WebSocket over cleartext as described in RFC 6455|
 |`kubernetes.io/wss`|WebSocket over TLS as described in RFC 6455|
 
+# Multi-port Services
+
+For some services, we need to expose more than one port. Kubernetes lets us
+configure multiple port definitions on a Service object. When usingmultiple
+ports for a Service, we must give all of the ports name so that these are
+unambiguous. For example:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: my-service
+spec:
+    selector:
+        app.kubernetes.io/name: MyApp
+    ports:
+        - name: http
+          protocol: TCP
+          port: 80
+          targetPort: 9376
+        - name: https
+          protocol: TCP
+          port: 443
+          targetPort: 9377
+```
+
+> [!NOTE]
+> As with Kubernetes names in general, names for ports must only contain
+> lowercase alphanumeric characters and `-`. Port names must also start and end
+> with an alphanumeric character.
+>
+> For example, the names `123-abc` and `web` are valid, but `123_abc` and `-web`
+> are not.
+
 
