@@ -358,4 +358,37 @@ spec:
 > For example, the names `123-abc` and `web` are valid, but `123_abc` and `-web`
 > are not.
 
+# Service Type
 
+For some parts of the application (for example, frontends) we may want to expose
+a Service onto an external IP address, one that is accessible from outisde of
+the cluster. 
+
+Kubernetes Service types allow us to specify what kind of Service we want. The
+available `type` values and their behaviors are:
+
+##### `ClusterIP`
+
+Exposes the Service on a cluster-internal IP. Choosing this value makes the
+Service only reachable from within the cluster. This is the default that is used
+if we do not explicitly specify a `type` for a service. We can expose the
+service to the public using an Ingress or Gateway.
+
+##### `NodePort`
+
+Exposes the Services on each Node's IP at a static port. To make the node port
+available, Kubernetes sets up a cluster IP address, the same as if we had
+requested the Service of `type: ClusterIP`.
+
+##### `LoadBalancer`
+
+Exposes the Service externally using an external load balancer. Kubernetes does
+not directly offer a load balancing component; we must provide one, or we can
+integrate the Kubernetes cluster with a cloud provider.
+
+##### `ExternalName`
+
+Maps the Service to the contents of the `externalName` field (for example, to
+the hostname `api.foo.bar.example`). The mapping configures the cluster's DNS
+server to return a CNAME record with that external hostname value. No proxying
+of any kind is set up.
