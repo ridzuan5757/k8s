@@ -277,4 +277,30 @@ If there are so many endpoint for a Service that a threshold is reached, then
 Kubernetes addres another empty EndpointSlice and stores new endpoint
 information there. By default, Kubernetes makes a new EndpointSlice once the
 existing EndpointSlices all cotnain at least 100 endpoints. Kuberentes does not
-make the new EndpointSlice until an extra endpoint needs to be added. 
+make the new EndpointSlice until an extra endpoint needs to be added.
+
+# Endpoints
+
+In the Kubernetes API, an Endpoints defines a list of network endpoints,
+typically referenced by a Service to define which Pods the traffic can be sent
+to. The EndpointSlice API is the recommended replacement for Endpoints.
+
+# Over-capacity endpoints
+
+Kubernetes limits the number of endpoints that can fit in a single Endpoints
+object. When there are over 1000 backing endpoints for a Service, Kubernetes
+truncates the data in the Endpoints object. Because a Service can be linked with
+more than one EndpointSlice, the 1000 backing endpoint limit only affects the
+legacy Endpoints API.
+
+In that case, Kuberentes selects at most 1000 possible backend endpoitns to
+store into the Endpoints object, and sets an annotation on the Endpoints:
+`endpoints.kubernetes.io/overcapacity:truncated`. The control plane also removes
+that annotation if the number of backend Pods drops below 1000.
+
+Traffic is still sent to backends, but any load balancing mechanism that relies
+on the legacy Endpoints API only sends traffic to at most 1000 of the available
+backing endpoints.
+
+The same API limit means that we cannot manually update an Endpoints to have
+more than 1000 endpoints.
