@@ -392,3 +392,31 @@ Maps the Service to the contents of the `externalName` field (for example, to
 the hostname `api.foo.bar.example`). The mapping configures the cluster's DNS
 server to return a CNAME record with that external hostname value. No proxying
 of any kind is set up.
+
+The `type` field in the Service API is designed as nested functionality. Each
+level adds to the previous. However, there is an exception to this nested
+design. We can define a `LoadBalancer` service by disabling the load balancer
+`NodePort` allocation.
+
+# `type: ClusterIP`
+
+This default Service type assigns an IP address from a pool of IP addresses that
+the default cluster has reserved for that purpose. Serveral of other types for
+Services build on the `ClusterIP` type as a foundation. If we define a Service
+that has the `.spec.clusterIP` set to `None`, then Kubernetes does not assign an
+IP address. This turn the service into a headless service.
+
+## Choosing own IP address
+
+We can specify our own IP address as part of `Service` creation request. To do
+this, set the `spec.clusterIP` field. For example, if we already have an
+existing DNS entry that we wish to resue, or legacy systems that are configured
+for a specific IP address and difficult to configure.
+
+The IP address that being chisen must be a valid IPv4 or IPv6 range  address
+from within the `service-cluster-ip-range`. CIDR range that is configured for
+the API server, If we try to create a Service with an invalid `clusterIP`
+address value, the API server will return a 422 HTTP status code to indicate
+that there is a problem.
+
+
