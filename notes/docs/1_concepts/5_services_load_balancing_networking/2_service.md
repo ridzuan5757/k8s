@@ -419,4 +419,71 @@ the API server, If we try to create a Service with an invalid `clusterIP`
 address value, the API server will return a 422 HTTP status code to indicate
 that there is a problem.
 
+# `type: NodePort`
 
+If we set the `type` field to `NodePort`, the Kubernetes control plane allocates
+a port from range specified by `--service-ndoe-port-range` flag from 30000 to
+32767. Each node proxies that port (same port number on every Node) into the Service.
+ The Service reports the allocated port in its `.spec.ports[*].nodePort` field.
+
+ Using a NodePort gives us the freedom to set up our own load balancing
+ solution, to configure environments that are not fully supported by Kubernetes,
+ or even to expose one or more nodes' IP addresses directly.
+
+ For a node port Service, Kubernetes additionally allocates a port (TCP, UDP or
+ SCTP) to match the protocol of the Service). Every node in the cluster
+ configures itself to listen on that assigned port and to forard traffic to one
+ of the ready endpoints associated with that Service. We will be able to contact
+ the `type: NodePort` service, from outside the cluster, by connecting to any
+ node using the appropriate protocol, and the appropriate port.
+
+ ## Choosing own port
+
+ If we want a specific port number, we can specify a value in the `nodePOort`
+ field. The control plane will either allocate us that port or report that the
+ API transaction failed. This means that we need to take care of possible port
+ collision ourselves. We also have to use a valid port number, one that is
+ inside the range configured for NodePort use. Here is an example manifest for a
+ service that specifies NodePort value:
+
+ ```yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: my-service
+spec:
+    type: NodePort
+    selector:
+        app.kubernetes.io/name: MyApp
+    ports:
+        - port: 80
+          targetPort: 80
+          nodePort: 30007
+ ```
+
+## Reserve NodePort ranges to avoid collisions
+
+The policy for assignning ports to NodePort services applies to both the auto
+assignment and the manual assignment scenarios. When a user wants to create a
+NodePort service that uses a specific port, the target port may conflict with
+another port that has already been assigned.
+
+To avoid this problem, the port range for NodePort services is divided into two
+bands. Dynamic port assignment uses the upper band by default, and it may use
+the lower band once the upper band has been exhausted. Users can then allocate
+from the lower band with lower risk of port collision.
+
+## Custom IP address configuration for `type: NodePort` Services
+
+We can set up nodes in the cluster to use a particular IP address for serving
+node port services. We might want to do this if each node is connected to
+multiple networks (for example: one network for application traffic, and another
+network for traffic between nodes and the control plane).
+
+If we want to specify particular IP addresses to proxy the port, we can set the
+`--nodeport-addresses` flag for kube-proxy or the equivalent `nodePortAddress`
+field of the kube-proxy configuraiton file to particular IP block(s).
+
+This flag takes a comma-delimited list of IP blocks (e.g `10.0.0.0/8`,
+`192.0.2.0/25`) to specify IP address ranges that kube-proxy should consider as
+local to this node.

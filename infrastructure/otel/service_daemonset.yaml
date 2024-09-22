@@ -17,26 +17,29 @@ spec:
     - name: otlp-http
       port: 4318
       protocol: TCP
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/instance: agent-opentelemetry-collector
-    app.kubernetes.io/name: opentelemetry-collector
-    component: agent-collector
-  name: agent-opentelemetry-collector-grpc
-  namespace: default
-spec:
-  type: ClusterIP
-  selector:
-    app.kubernetes.io/instance: agent-opentelemetry-collector
-    app.kubernetes.io/name: opentelemetry-collector
-    component: agent-collector
-  ports:
-    - appProtocol: grpc
-      name: otlp
+    - name: otlp-grpc
       port: 4317
       protocol: TCP
+
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app.kubernetes.io/instance: agent-opentelemetry-collector
+#     app.kubernetes.io/name: opentelemetry-collector
+#     component: agent-collector
+#   name: agent-opentelemetry-collector-grpc
+#   namespace: default
+# spec:
+#   type: ClusterIP
+#   selector:
+#     app.kubernetes.io/instance: agent-opentelemetry-collector
+#     app.kubernetes.io/name: opentelemetry-collector
+#     component: agent-collector
+#   ports:
+#     - appProtocol: grpc
+#       name: otlp
+#       port: 4317
+#       protocol: TCP

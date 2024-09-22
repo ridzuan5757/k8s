@@ -31,10 +31,8 @@ type Data struct {
 	Outlet      OutletData `json:"outlet"`
 }
 
-type Hub struct {
-	SIP       bool `json:"sip"`
-	CAPILLARY bool `json:"capillary"`
-	GHL       bool `json:"ghl"`
+type HubHealth struct {
+	STATUS string `json:"status"`
 }
 
 // Port we listen on.
@@ -69,15 +67,34 @@ func Station(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func randomBool() bool {
-	return rand.Intn(100) < 80
+func randomBool() string {
+	if rand.Intn(100) < 80 {
+		return "up"
+	} else {
+		return "down"
+	}
 }
 
-func HubStatus(w http.ResponseWriter, r *http.Request) {
-	response := Hub{
-		SIP:       randomBool(),
-		CAPILLARY: randomBool(),
-		GHL:       randomBool(),
+func SipStatus(w http.ResponseWriter, r *http.Request) {
+	response := HubHealth{
+		STATUS: randomBool(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func CapillaryStatus(w http.ResponseWriter, r *http.Request) {
+	response := HubHealth{
+		STATUS: randomBool(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+func GhlStatus(w http.ResponseWriter, r *http.Request) {
+	response := HubHealth{
+		STATUS: randomBool(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -88,8 +105,10 @@ func main() {
 	log.Println("Starting our simple http server.")
 
 	// Registering our handler functions, and creating paths.
-	http.HandleFunc("/station", Station)
-	http.HandleFunc("/hub", HubStatus)
+	http.HandleFunc("/", Station)
+	http.HandleFunc("/internal/health/shell_sip", SipStatus)
+	http.HandleFunc("/internal/health/shell_capillary", CapillaryStatus)
+	http.HandleFunc("/internal/health/shell_ghl", GhlStatus)
 
 	log.Println("Started on port", portNum)
 	fmt.Println("To close connection CTRL+C :-)")

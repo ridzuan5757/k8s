@@ -22,8 +22,6 @@ spec:
       containers:
       - args:
         - --config=/conf/relay.yaml
-        # command:
-        # - /otelcontribcol
         env:
         - name: MY_POD_IP
           valueFrom:
@@ -35,7 +33,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.nodeName
-        image: otel/opentelemetry-collector-contrib:0.107.0
+        image: otel/opentelemetry-collector-contrib:0.109.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -48,29 +46,13 @@ spec:
           timeoutSeconds: 1
         name: opentelemetry-collector
         ports:
-        - containerPort: 6831
-          hostPort: 6831
-          name: jaeger-compact
-          protocol: UDP
-        - containerPort: 14250
-          hostPort: 14250
-          name: jaeger-grpc
-          protocol: TCP
-        - containerPort: 14268
-          hostPort: 14268
-          name: jaeger-thrift
-          protocol: TCP
         - containerPort: 4317
           hostPort: 4317
-          name: otlp
+          name: otlp-grpc
           protocol: TCP
         - containerPort: 4318
           hostPort: 4318
           name: otlp-http
-          protocol: TCP
-        - containerPort: 9411
-          hostPort: 9411
-          name: zipkin
           protocol: TCP
         - containerPort: 21890
           hostPort: 21890

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: istio-ingressgateway-certs
+  namespace: istio-system
+spec:
+  secretName: istio-ingressgateway-certs
+  dnsNames:
+  - monitoring.staging.ronpos.com
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

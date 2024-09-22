@@ -3,7 +3,7 @@ create:
 staging
 
 ```bash
-kops create cluster --name shell.ronpos.com --state=s3://monitoring-state-store --node-count 5 --control-plane-count 3 --control-plane-size t2.medium --node-size t2.medium --control-plane-zones ap-southeast-1a,ap-southeast-1b,ap-southeast-1c --zones ap-southeast-1a,ap-southeast-1b,ap-southeast-1c --ssh-public-key ./proactive-monitoring.pub --cloud-labels "silentmode:owner=engineering, silentmode:environment=shell-production, silentmode:service=cluster-default" --network-id vpc-06aeb8d9751af25ce --topology private --subnets subnet-05210b7fd982a905b,subnet-0f1e84404c2c72470,subnet-06e8534ee6afc7c17 --utility-subnets subnet-07d9682ff52eb7371,subnet-053773833538d9aca,subnet-080800dd77492ca92 --bastion --dns private --dns-zone Z08353583QWN5RFKKJD4
+kops create cluster --name monitoring.staging.ronpos.com --state=s3://monitoring-state-store --node-count 3 --control-plane-count 3 --control-plane-size t3.medium --node-size c7i.xlarge	--control-plane-zones ap-southeast-1a,ap-southeast-1b,ap-southeast-1c --zones ap-southeast-1a,ap-southeast-1b,ap-southeast-1c --ssh-public-key ./proactive-monitoring.pub --cloud-labels "silentmode:owner=engineering, silentmode:environment=ronpos-staging, silentmode:service=cluster-default" --network-id vpc-04d79ee4ad78189d5 --topology private --subnets subnet-098fa6f36930e1444,subnet-044b686495b3e8b54,subnet-0fef5199d3ae5f0ae --utility-subnets subnet-0fa644f0c5e8250c2,subnet-0ba0dc08b27ad8ac5,subnet-0f20762800bf2feb0 --bastion --dns-zone Z029400221WKTP44KDW6I
 ```
 
 ```bash

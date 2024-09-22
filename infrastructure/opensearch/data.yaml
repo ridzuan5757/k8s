@@ -16,7 +16,7 @@ extraEnvs:
 persistence:
   enabled: false
 
-majorVersion: 2.16.0
+majorVersion: 2.17.0
 
 config:
   opensearch.yml: |
@@ -26,5 +26,5 @@ config:
           encryption:
             masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
 
-nodeSelector:
-  node: cluster-opensearch
+# nodeSelector:
+#   node: cluster-opensearch
