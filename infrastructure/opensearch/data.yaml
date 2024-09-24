@@ -11,20 +11,40 @@ replicas: 3
 
 extraEnvs:
   - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-    value: zmgf/a-262PD-p
+    valueFrom:
+      secretKeyRef:
+        name: opensearch-admin-password
+        key: password
 
 persistence:
   enabled: false
 
 majorVersion: 2.17.0
 
-config:
-  opensearch.yml: |
-    plugins:
-      query:
-        datasources:
-          encryption:
-            masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
+# config:
+#   opensearch.yml: |
+#     plugins:
+#       query:
+#         datasources:
+#           encryption:
+#             masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
+
+#     plugins.security.ssl.transport.pemcert_filepath: node.pem
+#     plugins.security.ssl.transport.pemkey_filepath: node-key.pem
+#     plugins.security.ssl.transport.pemtrustedcas_filepath: root-ca.pem
+#     plugins.security.ssl.transport.enforce_hostname_verification: false
+#     plugins.security.ssl.http.enabled: true
+#     plugins.security.ssl.http.pemcert_filepath: node.pem
+#     plugins.security.ssl.http.pemkey_filepath: node-key.pem
+#     plugins.security.ssl.http.pemtrustedcas_filepath: root-ca.pem
+#     plugins.security.authcz.admin_dn:
+#       - 'subject=emailAddress=ridzuan.yazid@silentmode.my,CN=monitoring.staging.ronpos.com,OU=DEVELOPMENT,O=SILENTMODE,L=SELANGOR,ST=BANGI,C=MY'
+#     plugins.security.nodes_dn:
+#       - 'subject=emailAddress=ridzuan.yazid@silentmode.my,CN=monitoring.staging.ronpos.com,OU=DEVELOPMENT,O=SILENTMODE,L=BANGI,ST=SELANGOR,C=MY'
 
 # nodeSelector:
 #   node: cluster-opensearch
+
+envFrom:
+  - secretRef:
+      name: opensearch-admin-password

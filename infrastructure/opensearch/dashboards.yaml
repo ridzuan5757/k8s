@@ -19,3 +19,7 @@ config:
     opensearch_security.readonly_mode.roles: [kibana_read_only, support_role]
     opensearch_security.cookie.secure: false
     server.host: '0.0.0.0'
+
+envFrom:
+  - secretRef:
+      name: opensearch-admin-password

@@ -11,12 +11,17 @@ replicas: 3
 
 extraEnvs:
   - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-    value: zmgf/a-262PD-p
+    valueFrom:
+      secretKeyRef:
+        name: opensearch-admin-password
+        key: password
 
 persistence:
   enabled: false
 
 majorVersion: 2.17.0
+
+opensearchHome: /usr/share/opensearch
 
 config:
   opensearch.yml: |
@@ -25,32 +30,76 @@ config:
         datasources:
           encryption:
             masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
-    
-    # http.host:0.0.0.0
-    # http.port:9200
-    # http.cors.allow-origin:"*"
-    # http.cors.enabled:true
-    # http.cors.allow-headers:X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
-    # http.cors.allow-credentials:true
-    # http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+    http:
+      host: 0.0.0.0
+      port: 9200
+      cors:
+        allow-origin: "*"
+        enabled: true
+        allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+        allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length
 
+    plugins.security.ssl.transport.pemcert_filepath: node1.pem
+    plugins.security.ssl.transport.pemkey_filepath: node1-key.pem
+    plugins.security.ssl.transport.pemtrustedcas_filepath: root-ca.pem
+    plugins.security.ssl.transport.enforce_hostname_verification: false
+    plugins.security.ssl.http.enabled: true
+    plugins.security.ssl.http.pemcert_filepath: node1.pem
+    plugins.security.ssl.http.pemkey_filepath: node1-key.pem
+    plugins.security.ssl.http.pemtrustedcas_filepath: root-ca.pem
+    plugins.security.authcz.admin_dn:
+      - 'CN=A,OU=UNIT,O=ORG,L=TORONTO,ST=ONTARIO,C=CA'
+    plugins.security.nodes_dn:
+      - 'CN=node1.dns.a-record,OU=UNIT,O=ORG,L=TORONTO,ST=ONTARIO,C=CA'
+    plugins.security.allow_unsafe_democertificates: true
+    plugins.security.allow_default_init_securityindex: true
+    plugins.security.audit.type: internal_opensearch
+    plugins.security.enable_snapshot_restore_privilege: true
+    plugins.security.check_snapshot_restore_write_privileges: true
+    plugins.security.restapi.roles_enabled: [all_access, security_rest_api_access]
+    plugins.security.system_indices.enabled: true
+    plugins.security.system_indices.indices: [.plugins-ml-agent, .plugins-ml-config, .plugins-ml-connector,
+      .plugins-ml-controller, .plugins-ml-model-group, .plugins-ml-model, .plugins-ml-task,
+      .plugins-ml-conversation-meta, .plugins-ml-conversation-interactions, .plugins-ml-memory-meta,
+      .plugins-ml-memory-message, .plugins-ml-stop-words, .opendistro-alerting-config,
+      .opendistro-alerting-alert*, .opendistro-anomaly-results*, .opendistro-anomaly-detector*,
+      .opendistro-anomaly-checkpoints, .opendistro-anomaly-detection-state, .opendistro-reports-*,
+      .opensearch-notifications-*, .opensearch-notebooks, .opensearch-observability, .ql-datasources,
+      .opendistro-asynchronous-search-response*, .replication-metadata-store, .opensearch-knn-models,
+      .geospatial-ip2geo-data*, .plugins-flow-framework-config, .plugins-flow-framework-templates,
+      .plugins-flow-framework-state]
+    node.max_local_storage_nodes: 3
+
+# this is for placing the cluster on specific nodes
 # nodeSelector:
-#   node: cluster-default
+#   node: cluster-opensearch
 
-extraObjects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: notifications-core-email
-    data:
-      opensearch.notifications.core.email.monitoring.username: bW9uaXRvcmluZ0Bub3RpZmljYXRpb25zLmhvcy5zdGFnaW5nLnJvbnBvcy5jb20=
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: notifications-core-password
-    data:
-      opensearch.notifications.core.email.monitoring.password: ZjA2N2FiNjc3ODAwNWIzMzk0MThlY2FlMmNhZTJjMWMtMmI3NTVkZjgtNzcxMjA3YTk=
+envFrom:
+  - secretRef:
+      name: opensearch-admin-password
 
 keystore:
-  - secretName: notifications-core-email
-  - secretName: notifications-core-password
+  - secretName: opensearch-smtp-email
+  - secretName: opensearch-smtp-password
+
+secretMounts:
+  - name: opensearch-certs-node
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/node1.pem
+    subPath: node1.pem
+  - name: opensearch-certs-node-key
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/node1-key.pem
+    subPath: node1-key.pem
+  - name: opensearch-certs-root-ca
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/root-ca.pem
+    subPath: root-ca.pem
+  - name: opensearch-certs-admin-crt
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/admin-crt.pem
+    subPath: admin-crt.pem
+  - name: opensearch-certs-admin-key
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/admin-key.pem
+    subPath: admin-key.pem

@@ -1,11 +1,11 @@
 clusterName: opensearch-cluster
 
-nodeGroup: client
+nodeGroup: ingest
 
 masterService: opensearch-cluster-master
 
 roles:
-  - remote_cluster_client
+  - ingest
 
 replicas: 1
 
