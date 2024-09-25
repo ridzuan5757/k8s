@@ -1,2 +1,5 @@
 secret_smtp.yaml
 secret_admin.yaml
+*.pem
+*.csr
+*.ext

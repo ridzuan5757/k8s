@@ -6,6 +6,7 @@ masterService: opensearch-cluster-master
 
 roles:
   - master
+  - data
 
 replicas: 3
 
@@ -48,9 +49,9 @@ config:
     plugins.security.ssl.http.pemkey_filepath: node1-key.pem
     plugins.security.ssl.http.pemtrustedcas_filepath: root-ca.pem
     plugins.security.authcz.admin_dn:
-      - 'CN=A,OU=UNIT,O=ORG,L=TORONTO,ST=ONTARIO,C=CA'
+      - 'CN=A,OU=ENGINEERING,O=SILENTMODE,L=BANGI,ST=SELANGOR,C=MY'
     plugins.security.nodes_dn:
-      - 'CN=node1.dns.a-record,OU=UNIT,O=ORG,L=TORONTO,ST=ONTARIO,C=CA'
+      - 'CN=opensearch-cluster-master.default.svc.cluster.local,OU=ENGINEERING,O=SELANGOR,L=BANGI,ST=SELANGOR,C=MY'
     plugins.security.allow_unsafe_democertificates: true
     plugins.security.allow_default_init_securityindex: true
     plugins.security.audit.type: internal_opensearch
@@ -97,9 +98,13 @@ secretMounts:
     subPath: root-ca.pem
   - name: opensearch-certs-admin-crt
     secretName: opensearch-certs
-    path: /usr/share/opensearch/config/admin-crt.pem
-    subPath: admin-crt.pem
-  - name: opensearch-certs-admin-key
+    path: /usr/share/opensearch/config/admin.pem
+    subPath: admin.pem
+  - name: opensearch-certs-client
     secretName: opensearch-certs
-    path: /usr/share/opensearch/config/admin-key.pem
-    subPath: admin-key.pem
+    path: /usr/share/opensearch/config/client.pem
+    subPath: client.pem
+  - name: opensearch-certs-client-key
+    secretName: opensearch-certs
+    path: /usr/share/opensearch/config/client-key.pem
+    subPath: client-key.pem
