@@ -170,38 +170,116 @@ data:
           - node
           - volume
         metrics:
+          container.cpu.utilization:
+            enabled: false
+          container.filesystem.available:
+            enabled: true
+          container.filesystem.capacity:
+            enabled: true
+          container.filesystem.usage:
+            enabled: true
+          container.memory.available:
+            enabled: true
+          container.memory.major_page_faults:
+            enabled: true
+          container.memory.page_faults:
+            enabled: true
+          container.memory.rss:
+            enabled: true
+          container.memory.usage:
+            enabled: true
+          container.memory.working_set:
+            enabled: true
+          k8s.node.cpu.time:
+            enabled: false
+          k8s.node.cpu.utilization:
+            enabled: false
+          k8s.node.filesystem.available:
+            enabled: true
+          k8s.node.filesystem.capacity:
+            enabled: true
+          k8s.node.filesystem.usage:
+            enabled: true
+          k8s.node.memory.available:
+            enabled: true
+          k8s.node.memory.major_page_faults:
+            enabled: true
+          k8s.node.memory.usage:
+            enabled: true
+          k8s.node.memory.working_set:
+            enabled: true
+          k8s.node.network.errors:
+            enabled: true
+          k8s.node.network.io:
+            enabled: true
+          k8s.pod.cpu.time:
+            enabled: false
+          k8s.pod.cpu.utilization:
+            enabled: false
+          k8s.pod.filesystem.available:
+            enabled: true
+          k8s.pod.filesystem.capacity:
+            enabled: true
+          k8s.pod.filesystem.usage:
+            enabled: true
+          k8s.pod.memory.available:
+            enabled: true
+          k8s.pod.memory.page_faults:
+            enabled: true
+          k8s.pod.memory.rss:
+            enabled: true
+          k8s.pod.memory.usage:
+            enabled: true
+          k8s.pod.network.errors:
+            enabled: true
+          k8s.pod.network.io:
+            enabled: true
+          k8s.volume.available:
+            enabled: true
+          k8s.volume.capacity:
+            enabled: true
+          k8s.volume.inodes:
+            enabled: false
+          k8s.volume.inodes.free:
+            enabled: false
+          k8s.volume.inodes.used:
+            enabled: false
           container.cpu.usage:
             enabled: true
           container.uptime:
-            enabled: true
+            enabled: false
           k8s.container.cpu.node.utilization:
-            enabled: true
+            enabled: false
           k8s.container.cpu_limit_utilization:
-            enabled: true
+            enabled: false
           k8s.container.cpu_request_utilization:
-            enabled: true
+            enabled: false
+          k8s.container.memory.node.utilization:
+            enabled: false
           k8s.container.memory_limit_utilization:
-            enabled: true
+            enabled: false
           k8s.container.memory_request_utilization:
-            enabled: true
+            enabled: false
           k8s.node.cpu.usage:
             enabled: true
           k8s.node.uptime:
-            enabled: true
+            enabled: false
           k8s.pod.cpu.node.utilization:
             enabled: false
           k8s.pod.cpu.usage:
-            enabled: true
+            enabled: false
           k8s.pod.cpu_limit_utilization:
-            enabled: true
+            enabled: false
           k8s.pod.cpu_request_utilization:
-            enabled: true
+            enabled: false
+          k8s.pod.memory.node.utilization:
+            enabled: false
           k8s.pod.memory_limit_utilization:
-            enabled: true
+            enabled: false
           k8s.pod.memory_request_utilization:
-            enabled: true
+            enabled: false
           k8s.pod.uptime:
-            enabled: true
+            enabled: false
       otlp:
         protocols:
           grpc:
@@ -241,11 +319,12 @@ data:
           - k8sattributes
           - memory_limiter
           receivers:
-          - kubeletstats
+          # - kubeletstats
           - hostmetrics
           - otlp
         traces:
           exporters:
+          - debug
           - otlp/dataprepper-traces
           processors:
           - resource

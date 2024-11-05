@@ -232,6 +232,7 @@ data:
         logs:
           exporters:
           - otlp/dataprepper-logs
+          - debug
           processors:
           - memory_limiter
           - k8sattributes
@@ -251,6 +252,7 @@ data:
         traces:
           exporters:
           - otlp/dataprepper-traces
+          - debug
           processors:
           - memory_limiter
           - k8sattributes

@@ -3,8 +3,8 @@ otlp-policy
 ```json
 {
     "policy": {
-        "policy_id": "hot_warm_policy",
-        "description": "Demonstrate a hot-warm-cold-delete workflow.",
+        "policy_id": "otlp-policy",
+        "description": "OTLP policy for hot-warm-cold-delete workflow.",
         "last_updated_time": 1725270084128,
         "schema_version": 21,
         "error_notification": null,
@@ -28,7 +28,7 @@ otlp-policy
                     {
                         "state_name": "warm",
                         "conditions": {
-                            "min_index_age": "5m"
+                            "min_size": "100gb"
                         }
                     }
                 ]
@@ -54,7 +54,7 @@ otlp-policy
                         },
                         "rollover": {
                             "min_doc_count": 5,
-                            "min_index_age": "5m",
+                            "min_size": "100gb",
                             "copy_alias": false
                         }
                     }
@@ -63,7 +63,7 @@ otlp-policy
                     {
                         "state_name": "cold",
                         "conditions": {
-                            "min_index_age": "5m"
+                            "min_index_age": "1d"
                         }
                     }
                 ]
@@ -84,7 +84,7 @@ otlp-policy
                     {
                         "state_name": "delete",
                         "conditions": {
-                            "min_index_age": "5m"
+                            "min_index_age": "1h"
                         }
                     }
                 ]

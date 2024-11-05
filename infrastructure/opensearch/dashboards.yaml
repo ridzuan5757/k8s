@@ -9,58 +9,54 @@ image:
 
 config:
   opensearch_dashboards.yml:
-    server.host: '0.0.0.0'
-    server.ssl.enabled: true
-    server.ssl.certificate: /usr/share/opensearch-dashboards/config/node1.pem
-    server.ssl.key: /usr/share/opensearch-dashboards/config/node1-key.pem
-    opensearch.hosts: ["https://localhost:9200"]
-    opensearch.ssl.verificationMode: full
-    opensearch.ssl.certificateAuthorities: [ "/usr/share/opensearch-dashboards/config/root-ca.pem" ]
-    opensearch.username: "kibanaserver"
-    opensearch.password: "kibanaserver"
-    opensearch.requestHeadersAllowlist: [ authorization, securitytenant ]
+    opensearch.hosts: [https://localhost:9200]
+    opensearch.ssl.verificationMode: none
+    opensearch.username: kibanaserver
+    opensearch.password: kibanaserver
+    opensearch.requestHeadersWhitelist: [authorization, securitytenant]
     opensearch_security.multitenancy.enabled: false
-    opensearch_security.multitenancy.tenants.preferred: ["Private", "Global"]
-    opensearch_security.readonly_mode.roles: ["kibana_read_only", "support_role"]
-    opensearch_security.cookie.secure: true
+    opensearch_security.multitenancy.tenants.preferred: [Private, Global]
+    opensearch_security.readonly_mode.roles: [kibana_read_only, support_role]
+    opensearch_security.cookie.secure: false
+    server.host: '0.0.0.0'
 
 
 envFrom:
   - secretRef:
       name: opensearch-admin-password
 
-secretMounts:
-  - name: opensearch-certs-node
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/node1.pem
-    subPath: node1.pem
-  - name: opensearch-certs-node-key
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/node1-key.pem
-    subPath: node1-key.pem
-  - name: opensearch-certs-root-ca
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/root-ca.pem
-    subPath: root-ca.pem
-  - name: opensearch-certs-admin-crt
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/admin-crt.pem
-    subPath: admin-crt.pem
-  - name: opensearch-certs-admin-key
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/admin-key.pem
-    subPath: admin-key.pem
-  - name: opensearch-certs-client
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/client.pem
-    subPath: client.pem
-  - name: opensearch-certs-client-key
-    secretName: opensearch-certs
-    path: /usr/share/opensearch-dashboards/config/client-key.pem
-    subPath: client-key.pem
+# secretMounts:
+#   - name: opensearch-certs-node
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/node1.pem
+#     subPath: node1.pem
+#   - name: opensearch-certs-node-key
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/node1-key.pem
+#     subPath: node1-key.pem
+#   - name: opensearch-certs-root-ca
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/root-ca.pem
+#     subPath: root-ca.pem
+#   - name: opensearch-certs-admin-crt
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/admin-crt.pem
+#     subPath: admin-crt.pem
+#   - name: opensearch-certs-admin-key
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/admin-key.pem
+#     subPath: admin-key.pem
+#   - name: opensearch-certs-client
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/client.pem
+#     subPath: client.pem
+#   - name: opensearch-certs-client-key
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch-dashboards/config/client-key.pem
+#     subPath: client-key.pem
 
 
-# opensearch.hosts: [https://localhost:9200]
+    # opensearch.hosts: [https://localhost:9200]
     # opensearch.ssl.verificationMode: none
     # opensearch.username: kibanaserver
     # opensearch.password: kibanaserver

@@ -7,6 +7,8 @@ masterService: opensearch-cluster-master
 roles:
   - master
   - data
+  - ingest
+  - remote_cluster_client
 
 replicas: 3
 
@@ -18,11 +20,9 @@ extraEnvs:
         key: password
 
 persistence:
-  enabled: false
-
+  enabled: true
+  
 majorVersion: 2.17.0
-
-opensearchHome: /usr/share/opensearch
 
 config:
   opensearch.yml: |
@@ -31,6 +31,7 @@ config:
         datasources:
           encryption:
             masterkey: wKLP9vHwPsNx7SI3NX5JEhmg
+     
     http:
       host: 0.0.0.0
       port: 9200
@@ -39,38 +40,7 @@ config:
         enabled: true
         allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
         allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length
-
-    plugins.security.ssl.transport.pemcert_filepath: node1.pem
-    plugins.security.ssl.transport.pemkey_filepath: node1-key.pem
-    plugins.security.ssl.transport.pemtrustedcas_filepath: root-ca.pem
-    plugins.security.ssl.transport.enforce_hostname_verification: false
-    plugins.security.ssl.http.enabled: true
-    plugins.security.ssl.http.pemcert_filepath: node1.pem
-    plugins.security.ssl.http.pemkey_filepath: node1-key.pem
-    plugins.security.ssl.http.pemtrustedcas_filepath: root-ca.pem
-    plugins.security.authcz.admin_dn:
-      - 'CN=A,OU=ENGINEERING,O=SILENTMODE,L=BANGI,ST=SELANGOR,C=MY'
-    plugins.security.nodes_dn:
-      - 'CN=opensearch-cluster-master.default.svc.cluster.local,OU=ENGINEERING,O=SELANGOR,L=BANGI,ST=SELANGOR,C=MY'
-    plugins.security.allow_unsafe_democertificates: true
-    plugins.security.allow_default_init_securityindex: true
-    plugins.security.audit.type: internal_opensearch
-    plugins.security.enable_snapshot_restore_privilege: true
-    plugins.security.check_snapshot_restore_write_privileges: true
-    plugins.security.restapi.roles_enabled: [all_access, security_rest_api_access]
-    plugins.security.system_indices.enabled: true
-    plugins.security.system_indices.indices: [.plugins-ml-agent, .plugins-ml-config, .plugins-ml-connector,
-      .plugins-ml-controller, .plugins-ml-model-group, .plugins-ml-model, .plugins-ml-task,
-      .plugins-ml-conversation-meta, .plugins-ml-conversation-interactions, .plugins-ml-memory-meta,
-      .plugins-ml-memory-message, .plugins-ml-stop-words, .opendistro-alerting-config,
-      .opendistro-alerting-alert*, .opendistro-anomaly-results*, .opendistro-anomaly-detector*,
-      .opendistro-anomaly-checkpoints, .opendistro-anomaly-detection-state, .opendistro-reports-*,
-      .opensearch-notifications-*, .opensearch-notebooks, .opensearch-observability, .ql-datasources,
-      .opendistro-asynchronous-search-response*, .replication-metadata-store, .opensearch-knn-models,
-      .geospatial-ip2geo-data*, .plugins-flow-framework-config, .plugins-flow-framework-templates,
-      .plugins-flow-framework-state]
-    node.max_local_storage_nodes: 3
-
+ 
 # this is for placing the cluster on specific nodes
 # nodeSelector:
 #   node: cluster-opensearch
@@ -83,28 +53,39 @@ keystore:
   - secretName: opensearch-smtp-email
   - secretName: opensearch-smtp-password
 
-secretMounts:
-  - name: opensearch-certs-node
-    secretName: opensearch-certs
-    path: /usr/share/opensearch/config/node1.pem
-    subPath: node1.pem
-  - name: opensearch-certs-node-key
-    secretName: opensearch-certs
-    path: /usr/share/opensearch/config/node1-key.pem
-    subPath: node1-key.pem
-  - name: opensearch-certs-root-ca
-    secretName: opensearch-certs
-    path: /usr/share/opensearch/config/root-ca.pem
-    subPath: root-ca.pem
-  - name: opensearch-certs-admin-crt
-    secretName: opensearch-certs
-    path: /usr/share/opensearch/config/admin.pem
-    subPath: admin.pem
-  - name: opensearch-certs-client
-    secretName: opensearch-certs
-    path: /usr/share/opensearch/config/client.pem
-    subPath: client.pem
-  - name: opensearch-certs-client-key
-    secretName: opensearch-certs
-    path: /usr/share/opensearch/config/client-key.pem
-    subPath: client-key.pem
+# secretMounts:
+#   - name: opensearch-certs-node
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch/config/node1.pem
+#     subPath: node1.pem
+#   - name: opensearch-certs-node-key
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch/config/node1-key.pem
+#     subPath: node1-key.pem
+#   - name: opensearch-certs-root-ca
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch/config/root-ca.pem
+#     subPath: root-ca.pem
+#   - name: opensearch-certs-admin-crt
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch/config/admin.pem
+#     subPath: admin.pem
+#   - name: opensearch-certs-client
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch/config/client.pem
+#     subPath: client.pem
+#   - name: opensearch-certs-client-key
+#     secretName: opensearch-certs
+#     path: /usr/share/opensearch/config/client-key.pem
+#     subPath: client-key.pem
+
+opensearchJavaOpts: "-Xmx8g -Xms8g"
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "8Gi"
+
+persistence:
+  enabled: true
+  size: 600Gi

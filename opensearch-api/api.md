@@ -9,7 +9,7 @@ PUT /_index_template/otlp-metrics-template
     "template":{
         "settings": {
             "number_of_shards": 3,
-            "number_of_replicas": 1,
+            "number_of_replicas": 2,
             "codec": "best_compression",
             "plugins.index_state_management.rollover_alias": "otlp-metrics"
         },
@@ -33,7 +33,7 @@ PUT /_index_template/otlp-logs-template
     "template":{
         "settings": {
             "number_of_shards": 3,
-            "number_of_replicas": 1,
+            "number_of_replicas": 2,
             "codec": "best_compression",
             "plugins.index_state_management.rollover_alias": "otlp-logs"
         }

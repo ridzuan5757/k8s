@@ -3,13 +3,11 @@ kind: Certificate
 metadata:
   name: certificate
 spec:
-  commonName: proactivemonitoring.staging.ronpos.com
   secretName: proactivemonitoring
   dnsNames:
-    - proactivemonitoring.opensearch.staging.ronpos.com
-    - proactivemonitoring.prometheus.staging.ronpos.com
-    - proactivemonitoring.grpc.staging.ronpos.com
-    - proactivemonitoring.staging.ronpos.com
+    - dashboard.monitoring.staging.ronpos.com
+    - prometheus.monitoring.staging.ronpos.com
+    - otlpv2.monitoring.staging.ronpos.com
   issuerRef:
-    kind: Issuer
+    kind: ClusterIssuer
     name: letsencrypt-prod
